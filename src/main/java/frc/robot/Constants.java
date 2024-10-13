@@ -15,6 +15,8 @@ import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstantsFactory;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.ClosedLoopOutputType;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants.SteerFeedbackType;
 
+
+
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
  * constants. This class should not be used for any other purpose. All constants should be declared
@@ -84,7 +86,7 @@ public final class Constants {
     static TalonFXConfiguration driveInitialConfigs = new TalonFXConfiguration()
       .withCurrentLimits(
         new CurrentLimitsConfigs()
-          .withStatorCurrentLimit(60)
+          .withStatorCurrentLimit(80)
           .withStatorCurrentLimitEnable(true)
       );
     static boolean kSteerMotorReversed = false;
@@ -110,5 +112,9 @@ public final class Constants {
       .withDriveMotorInitialConfigs(driveInitialConfigs)
       .withSteerMotorInitialConfigs(steerInitialConfigs)
       .withCANcoderInitialConfigs(cancoderInitialConfigs);
+
+    //public static final SwerveDriveSubsystem kSwerveDrivetrain = new SwerveDriveSubsystem(drivetrainConstants, fl, fr, bl, br);
+      //TODO:Mechanical Finish this damn drivebase
+      //THIS REQUIRES MECHANICAL TO FINISH THE ROBOT
   }
 }
