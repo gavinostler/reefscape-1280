@@ -40,6 +40,18 @@ public final class Constants {
     static final Pigeon2Configuration config = null; // idk what it do
   }
 
+  public static class Music {
+    //ditto: Configurating the "Instruments"
+    public final int mID1 = 1;
+    public final int mID2 = 2;
+    public final int mID3 = 3; 
+    public final int mID4 = 4;
+    public final int mID5 = 5;
+    public final int mID6 = 6;
+    public final int mID7 = 7;
+    public final int mID8 = 8;
+  }
+
   public static class Lights {
     public final int id = 27; // CAN ID for RGB
     public final double brightnessScalar = 0.8; //Brightness for Color
