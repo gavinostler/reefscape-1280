@@ -9,12 +9,14 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstantsFactory;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.ClosedLoopOutputType;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants.SteerFeedbackType;
 
+import frc.robot.subsystems.SwerveDriveSubsystem;
 
 
 /**
@@ -26,6 +28,7 @@ import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants.SteerFeedbackTy
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+  
   public static String kCANbusName = "rio";
 
   public static class Operator {
@@ -33,25 +36,30 @@ public final class Constants {
   }
 
   public static class Pigeon2 {
-    static final int id = 0xdeadbeef; // TODO: set can id
+    static final int id = 26; // TODO: set can id
     static final Pigeon2Configuration config = null; // idk what it do
+  }
+
+  public static class Lights {
+    public final int id = 27; // CAN ID for RGB
+    public final double brightnessScalar = 0.8; //Brightness for Color
   }
 
   // This should really be auto generated after the motors are connected but, alas, i did not read the documentation.
   public static class Drivetrain {
     static double arvind = Math.PI / 2;
 
-    private record Module (
+    public record Module (
       int driveID, int steerID, int encoderID,
       double encoderOffset, // rotations
       double xPos, double yPos // inches
     ) {}
 
     // TODO: set everything
-    static final Module fl = new Module(0xdeadbeef, 0xdeadbeef, 0xdeadbeef, arvind, 0xdeadbeef, 0xdeadbeef);
-    static final Module fr = new Module(0xdeadbeef, 0xdeadbeef, 0xdeadbeef, arvind, 0xdeadbeef, 0xdeadbeef);
-    static final Module bl = new Module(0xdeadbeef, 0xdeadbeef, 0xdeadbeef, arvind, 0xdeadbeef, 0xdeadbeef); // yaoi
-    static final Module br = new Module(0xdeadbeef, 0xdeadbeef, 0xdeadbeef, arvind, 0xdeadbeef, 0xdeadbeef);
+    static final Module fl = new Module(1, 5, 63, arvind, 0, 1);
+    static final Module fr = new Module(2, 6, 62, arvind, 1, 2);
+    static final Module bl = new Module(3, 7, 61, arvind, 2, 3); // yaoi
+    static final Module br = new Module(4, 8, 60, arvind, 3, 4);
 
     private static final SwerveDrivetrainConstants drivetrainConstants = new SwerveDrivetrainConstants()
       .withCANbusName(kCANbusName)
@@ -112,7 +120,9 @@ public final class Constants {
       .withDriveMotorInitialConfigs(driveInitialConfigs)
       .withSteerMotorInitialConfigs(steerInitialConfigs)
       .withCANcoderInitialConfigs(cancoderInitialConfigs);
+    
 
+      
     //public static final SwerveDriveSubsystem kSwerveDrivetrain = new SwerveDriveSubsystem(drivetrainConstants, fl, fr, bl, br);
       //TODO:Mechanical Finish this damn drivebase
       //THIS REQUIRES MECHANICAL TO FINISH THE ROBOT
