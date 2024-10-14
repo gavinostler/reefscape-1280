@@ -31,7 +31,7 @@ public class colors {
 			case "FLOW": ColorFlowAnimation flow = new ColorFlowAnimation(255,255,255);rgb.animate(flow); break;
 			case "CHROMA": RainbowAnimation chroma = new RainbowAnimation();rgb.animate(chroma); break;
 			case "BREATHE": SingleFadeAnimation breathe = new SingleFadeAnimation(235, 209, 39);rgb.animate(breathe); break;
-			case "REN_SPECIAL": TwinkleAnimation ren = new TwinkleAnimation(235, 209, 39); break;
+			case "REN_SPECIAL": TwinkleAnimation ren = new TwinkleAnimation(235, 209, 39); rgb.animate(ren); break;
 			default: rgb.setLEDs(235, 209, 39);	
 		}
 	}	
