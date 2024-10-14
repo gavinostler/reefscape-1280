@@ -1,11 +1,11 @@
 package frc.robot.subsystems.aesthetic;
 
-import frc.robot.Constants;
-import frc.robot.Constants;
+import com.ctre.phoenix.music.Orchestra;
 
+import frc.robot.Constants.MidiID;
 
 class Music {
-    Constants mid = new Constants(); 
+    MidiID mid = new MidiID(); 
     Orchestra bach = new Orchestra();
     public Music(){
        

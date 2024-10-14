@@ -40,7 +40,7 @@ public final class Constants {
     static final Pigeon2Configuration config = null; // idk what it do
   }
 
-  public static class Music {
+  public static class MidiID {
     //ditto: Configurating the "Instruments"
     public final int mID1 = 1;
     public final int mID2 = 2;
