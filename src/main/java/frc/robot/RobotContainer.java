@@ -9,7 +9,6 @@ import frc.robot.Constants.Operator;
 import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.ExampleSubsystem;
-import frc.robot.subsystems.aesthetic.colors;
 
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
@@ -38,8 +37,6 @@ public class RobotContainer {
   public RobotContainer() {
     // Configure the trigger bindings
     configureBindings();
-    colors();
-    
   }
 
   /**
@@ -60,10 +57,7 @@ public class RobotContainer {
     // cancelling on release.
     m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
   }
-  private void colors(){
-    colors rgb = new colors(); 
-    rgb.startRGB("LARSON");  
-  }
+
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
