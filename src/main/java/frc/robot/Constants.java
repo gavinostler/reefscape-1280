@@ -62,9 +62,9 @@ public final class Constants {
     static double arvind = Math.PI * 2;
 
     public record Module (
-      int driveID, int steerID, int encoderID,
-      double encoderOffset, // rotations
-      double xPos, double yPos // inches
+      int steerId, int driveId, int cancoderId,
+      double cancoderOffset, // rotations
+      double locationX, double locationY // inches
     ) {}
 
     // TODO: set everything
@@ -132,11 +132,15 @@ public final class Constants {
       .withDriveMotorInitialConfigs(driveInitialConfigs)
       .withSteerMotorInitialConfigs(steerInitialConfigs)
       .withCANcoderInitialConfigs(cancoderInitialConfigs);
-    
 
-      
-    //public static final SwerveDriveSubsystem kSwerveDrivetrain = new SwerveDriveSubsystem(drivetrainConstants, fl, fr, bl, br);
-      //TODO:Mechanical Finish this damn drivebase
-      //THIS REQUIRES MECHANICAL TO FINISH THE ROBOT
+    public static final SwerveDrivetrain swerveDrivetrain = new SwerveDrivetrain(
+      drivetrainConstants,
+      CONSTANTS_CREATOR.createModuleConstants(fl.steerId, fl.driveId, fl.cancoderId, fl.cancoderOffset, fl.locationX, fl.locationY, kSteerMotorReversed),
+      CONSTANTS_CREATOR.createModuleConstants(fr.steerId, fr.driveId, fr.cancoderId, fr.cancoderOffset, fr.locationX, fr.locationY, kSteerMotorReversed),
+      CONSTANTS_CREATOR.createModuleConstants(bl.steerId, bl.driveId, bl.cancoderId, bl.cancoderOffset, bl.locationX, bl.locationY, kSteerMotorReversed),
+      CONSTANTS_CREATOR.createModuleConstants(br.steerId, br.driveId, br.cancoderId, br.cancoderOffset, br.locationX, br.locationY, kSteerMotorReversed)
+    );
+
   }
+
 }
