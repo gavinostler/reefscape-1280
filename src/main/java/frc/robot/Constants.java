@@ -9,6 +9,7 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule;
@@ -42,14 +43,14 @@ public final class Constants {
 
   public static class MidiID {
     //ditto: Configurating the "Instruments"
-    public final int mID1 = 1;
-    public final int mID2 = 2;
-    public final int mID3 = 3; 
-    public final int mID4 = 4;
-    public final int mID5 = 5;
-    public final int mID6 = 6;
-    public final int mID7 = 7;
-    public final int mID8 = 8;
+    public final ParentDevice mID1 = 1;
+    public final ParentDevice mID2 = 2;
+    public final ParentDevice mID3 = 3; 
+    public final ParentDevice mID4 = 4;
+    public final ParentDevice mID5 = 5;
+    public final ParentDevice mID6 = 6;
+    public final ParentDevice mID7 = 7;
+    public final ParentDevice mID8 = 8;
   }
 
   public static class Lights {

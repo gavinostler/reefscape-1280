@@ -1,6 +1,7 @@
 package frc.robot.subsystems.aesthetic;
 
-import frc.robot.Constants.MidiID;
+import com.ctre.phoenix6.Orchestra;
+
 import frc.robot.Constants.MidiID;
 
 
