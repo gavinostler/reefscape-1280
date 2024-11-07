@@ -4,12 +4,12 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.Orchestra;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule;
@@ -43,14 +43,14 @@ public final class Constants {
 
   public static class MidiID {
     //ditto: Configurating the "Instruments"
-    public final ParentDevice mID1 = 1;
-    public final ParentDevice mID2 = 2;
-    public final ParentDevice mID3 = 3; 
-    public final ParentDevice mID4 = 4;
-    public final ParentDevice mID5 = 5;
-    public final ParentDevice mID6 = 6;
-    public final ParentDevice mID7 = 7;
-    public final ParentDevice mID8 = 8;
+    public final int mID1 = 1;
+    public final int mID2 = 2;
+    public final int mID3 = 3; 
+    public final int mID4 = 4;
+    public final int mID5 = 5;
+    public final int mID6 = 6;
+    public final int mID7 = 7;
+    public final int mID8 = 8;
   }
 
   public static class Lights {
@@ -60,12 +60,12 @@ public final class Constants {
 
   // This should really be auto generated after the motors are connected but, alas, i did not read the documentation.
   public static class Drivetrain {
-    static double arvind = Math.PI / 2;
+    static double arvind = Math.PI * 2;
 
     public record Module (
-      int driveID, int steerID, int encoderID,
-      double encoderOffset, // rotations
-      double xPos, double yPos // inches
+      int steerId, int driveId, int cancoderId,
+      double cancoderOffset, // rotations
+      double locationX, double locationY // inches
     ) {}
 
     // TODO: set everything
@@ -133,11 +133,15 @@ public final class Constants {
       .withDriveMotorInitialConfigs(driveInitialConfigs)
       .withSteerMotorInitialConfigs(steerInitialConfigs)
       .withCANcoderInitialConfigs(cancoderInitialConfigs);
-    
 
-      
-    //public static final SwerveDriveSubsystem kSwerveDrivetrain = new SwerveDriveSubsystem(drivetrainConstants, fl, fr, bl, br);
-      //TODO:Mechanical Finish this damn drivebase
-      //THIS REQUIRES MECHANICAL TO FINISH THE ROBOT
+    public static final SwerveDrivetrain swerveDrivetrain = new SwerveDrivetrain(
+      drivetrainConstants,
+      CONSTANTS_CREATOR.createModuleConstants(fl.steerId, fl.driveId, fl.cancoderId, fl.cancoderOffset, fl.locationX, fl.locationY, kSteerMotorReversed),
+      CONSTANTS_CREATOR.createModuleConstants(fr.steerId, fr.driveId, fr.cancoderId, fr.cancoderOffset, fr.locationX, fr.locationY, kSteerMotorReversed),
+      CONSTANTS_CREATOR.createModuleConstants(bl.steerId, bl.driveId, bl.cancoderId, bl.cancoderOffset, bl.locationX, bl.locationY, kSteerMotorReversed),
+      CONSTANTS_CREATOR.createModuleConstants(br.steerId, br.driveId, br.cancoderId, br.cancoderOffset, br.locationX, br.locationY, kSteerMotorReversed)
+    );
+
   }
+
 }
