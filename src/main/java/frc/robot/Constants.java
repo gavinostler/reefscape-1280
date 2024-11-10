@@ -13,12 +13,12 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstantsFactory;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.ClosedLoopOutputType;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants.SteerFeedbackType;
 
 import frc.robot.subsystems.SwerveDriveSubsystem;
-
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -60,6 +60,9 @@ public final class Constants {
 
   // This should really be auto generated after the motors are connected but, alas, i did not read the documentation.
   public static class Drivetrain {
+    public static final double MAX_VELOCITY = 4.0; // m/s (Conservative estimates)
+    public static final double MAX_TURN_RATE = 1.5 * Math.PI; // radians/s (Conservative estimate)
+
     static double arvind = Math.PI * 2;
 
     public record Module (
@@ -74,7 +77,7 @@ public final class Constants {
     static final Module bl = new Module(3, 7, 61, arvind, 2, 3); // yaoi
     static final Module br = new Module(4, 8, 60, arvind, 3, 4);
 
-    private static final SwerveDrivetrainConstants drivetrainConstants = new SwerveDrivetrainConstants()
+    public static final SwerveDrivetrainConstants drivetrainConstants = new SwerveDrivetrainConstants()
       .withCANbusName(kCANbusName)
       .withPigeon2Id(Pigeon2.id)
       .withPigeon2Configs(Pigeon2.config);
@@ -134,14 +137,12 @@ public final class Constants {
       .withSteerMotorInitialConfigs(steerInitialConfigs)
       .withCANcoderInitialConfigs(cancoderInitialConfigs);
 
-    public static final SwerveDrivetrain swerveDrivetrain = new SwerveDrivetrain(
-      drivetrainConstants,
+    public static final SwerveModuleConstants[] moduleConstants = {
       CONSTANTS_CREATOR.createModuleConstants(fl.steerId, fl.driveId, fl.cancoderId, fl.cancoderOffset, fl.locationX, fl.locationY, kSteerMotorReversed),
       CONSTANTS_CREATOR.createModuleConstants(fr.steerId, fr.driveId, fr.cancoderId, fr.cancoderOffset, fr.locationX, fr.locationY, kSteerMotorReversed),
       CONSTANTS_CREATOR.createModuleConstants(bl.steerId, bl.driveId, bl.cancoderId, bl.cancoderOffset, bl.locationX, bl.locationY, kSteerMotorReversed),
       CONSTANTS_CREATOR.createModuleConstants(br.steerId, br.driveId, br.cancoderId, br.cancoderOffset, br.locationX, br.locationY, kSteerMotorReversed)
-    );
-
+    };
   }
 
 }

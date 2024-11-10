@@ -5,16 +5,11 @@
 package frc.robot;
 
 import frc.robot.Constants.Operator;
-import frc.robot.commands.Autos;
-import frc.robot.commands.ExampleCommand;
-import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.commands.SwerveMovementCommand;
 import frc.robot.subsystems.SwerveDriveSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-
-
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -26,10 +21,8 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final SwerveDriveSubsystem m_swerveDriveSubsystem = new SwerveDriveSubsystem();
 
-  private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
-
   // Replace with CommandPS4Controller or CommandJoystick if needed
-  private final CommandXboxController m_driverController =
+  private final CommandXboxController m_controller =
       new CommandXboxController(Operator.kDriverControllerPort);
   
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -48,14 +41,16 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
-    new Trigger(m_exampleSubsystem::exampleCondition)
-        .onTrue(new ExampleCommand(m_exampleSubsystem));
+    m_swerveDriveSubsystem.setDefaultCommand(
+      new SwerveMovementCommand(
+        m_swerveDriveSubsystem,
+        () -> -m_controller.getLeftY(),
+        () -> -m_controller.getLeftX(),
+        () -> -m_controller.getRightX()
+      )
+    );
 
-    // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
-    // cancelling on release.
-    m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
-
+    m_controller.leftBumper().onTrue(m_swerveDriveSubsystem.runOnce(() -> m_swerveDriveSubsystem.seedFieldRelative()));
   }
 
   /**
@@ -65,6 +60,6 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return Autos.exampleAuto(m_exampleSubsystem);
+    return null;
   }
 }
