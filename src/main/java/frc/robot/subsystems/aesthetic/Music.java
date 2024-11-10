@@ -1,8 +1,8 @@
 package frc.robot.subsystems.aesthetic;
 
-import com.ctre.phoenix6.Orchestra;
-
 import frc.robot.Constants.MidiID;
+import frc.robot.Constants.MidiID;
+
 
 
 class Music {
@@ -17,10 +17,15 @@ class Music {
         bach.addInstrument(mid.mID6,6);
         bach.addInstrument(mid.mID7,7);
         bach.addInstrument(mid.mID8,8);
-
     }
     public void myWay(){
         var exist = bach.loadMusic("myway.chrp");
+        if(!exist.isOK()){
+            bach.play();
+        }
+    }
+    public void starSprangledBanner(){
+        var exist = bach.loadMusic("us.chrp");
         if(!exist.isOK()){
             bach.play();
         }
