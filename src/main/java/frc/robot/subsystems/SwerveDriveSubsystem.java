@@ -14,7 +14,7 @@ import frc.robot.Constants.Drivetrain;
 public class SwerveDriveSubsystem extends SwerveDrivetrain implements Subsystem {
   public SwerveDriveSubsystem() {
     super(
-      Drivetrain.drivetrainConstants, 
+      Drivetrain.DrivetrainConstants, 
       Drivetrain.moduleConstants
     );
   }

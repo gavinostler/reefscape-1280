@@ -4,13 +4,14 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
+
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.Operator;
-import frc.robot.commands.SwerveMovementCommand;
 import frc.robot.subsystems.SwerveDriveSubsystem;
 import frc.robot.subsystems.aesthetic.Colors;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-
+import frc.robot.subsystems.aesthetic.Music;
+import frc.robot.subsystems.aesthetic.Colors.Effect;
 
 
 /**
@@ -45,12 +46,12 @@ public class RobotContainer {
    * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
    * joysticks}.
    */
-  private void colorSubsystem(){
+  public void colorSubsystem(){
     a_coluor.startRGB(Effect.CHROMA);
   }
 
   private void configureBindings() {
-    m_swerveDriveSubsystem.setDefaultCommand(
+    m_swerveDriveSubsystem.setControl(
       new SwerveMovementCommand(
         m_swerveDriveSubsystem,
         () -> -m_controller.getLeftY(),
@@ -58,7 +59,6 @@ public class RobotContainer {
         () -> -m_controller.getRightX()
       )
     );
-    m_controller.a().onTrue(a_music.myWay());
     m_controller.leftStick().onTrue(m_swerveDriveSubsystem.runOnce(() -> m_swerveDriveSubsystem.seedFieldRelative()));
   }
 
@@ -67,8 +67,8 @@ public class RobotContainer {
    *
    * @return the command to run in autonomous
    */
-  public Command getAutonomousCommand() {
+  //public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return null;
-  }
+    //return null;
+  //}
 }

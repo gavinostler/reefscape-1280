@@ -27,12 +27,7 @@ public class SwerveMovementCommand extends Command {
     private double speedMultiplier = 0.5;
     private double angularSpeedMultiplier = 0.5;
 
-    public SwerveMovementCommand(
-        SwerveDriveSubsystem swerve,
-        DoubleSupplier x_velocity_supplier,
-        DoubleSupplier y_velocity_supplier,
-        DoubleSupplier rot_supplier
-    ) {
+    public SwerveMovementCommand(SwerveDriveSubsystem swerve,DoubleSupplier x_velocity_supplier,DoubleSupplier y_velocity_supplier,DoubleSupplier rot_supplier) {
         this.addRequirements(swerve);
 
         this.m_swerve = swerve;
