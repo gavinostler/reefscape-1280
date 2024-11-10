@@ -35,6 +35,7 @@ public class RobotContainer {
   public RobotContainer() {
     // Configure the trigger bindings
     configureBindings();
+    colorSubsystem();
   }
 
   /**
@@ -50,8 +51,8 @@ public class RobotContainer {
     a_coluor.startRGB(Effect.CHROMA);
   }
 
-  private void configureBindings() {
-    m_swerveDriveSubsystem.setControl(
+  public void configureBindings() {
+     m_swerveDriveSubsystem.setDefaultCommand(
       new SwerveMovementCommand(
         m_swerveDriveSubsystem,
         () -> -m_controller.getLeftY(),
