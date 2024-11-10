@@ -4,10 +4,9 @@
 
 package frc.robot;
 
-import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
-
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.Operator;
+import frc.robot.commands.SwerveMovementCommand;
 import frc.robot.subsystems.SwerveDriveSubsystem;
 import frc.robot.subsystems.aesthetic.Colors;
 import frc.robot.subsystems.aesthetic.Music;
