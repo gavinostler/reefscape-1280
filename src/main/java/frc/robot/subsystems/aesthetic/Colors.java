@@ -1,10 +1,10 @@
 package frc.robot.subsystems.aesthetic;
 
+import com.ctre.phoenix.led.*;
 import com.ctre.phoenix.led.CANdle;
+import com.ctre.phoenix.led.CANdle.LEDStripType;
 import com.ctre.phoenix.led.CANdleConfiguration;
 import com.ctre.phoenix.led.ColorFlowAnimation;
-import com.ctre.phoenix.led.*;
-import com.ctre.phoenix.led.CANdle.LEDStripType;
 
 import frc.robot.Constants.Lights;
 

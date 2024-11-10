@@ -4,21 +4,19 @@
 
 package frc.robot;
 
-import com.ctre.phoenix6.Orchestra;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain;
+import com.ctre.phoenix6.hardware.ParentDevice;
+import com.ctre.phoenix6.hardware.core.CoreTalonFX;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstantsFactory;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.ClosedLoopOutputType;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants.SteerFeedbackType;
-
-import frc.robot.subsystems.SwerveDriveSubsystem;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -43,14 +41,14 @@ public final class Constants {
 
   public static class MidiID {
     //ditto: Configurating the "Instruments"
-    public final int mID1 = 1;
-    public final int mID2 = 2;
-    public final int mID3 = 3; 
-    public final int mID4 = 4;
-    public final int mID5 = 5;
-    public final int mID6 = 6;
-    public final int mID7 = 7;
-    public final int mID8 = 8;
+    public final ParentDevice mID1 = new CoreTalonFX(1, "*");
+    public final ParentDevice mID2 = new CoreTalonFX(2, "*");
+    public final ParentDevice mID3 = new CoreTalonFX(3, "*");
+    public final ParentDevice mID4 = new CoreTalonFX(4, "*");
+    public final ParentDevice mID5 = new CoreTalonFX(5, "*");
+    public final ParentDevice mID6 = new CoreTalonFX(6, "*");
+    public final ParentDevice mID7 = new CoreTalonFX(7, "*");
+    public final ParentDevice mID8 = new CoreTalonFX(8, "*");
   }
 
   public static class Lights {
