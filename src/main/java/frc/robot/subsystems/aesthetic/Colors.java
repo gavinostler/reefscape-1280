@@ -1,10 +1,16 @@
 package frc.robot.subsystems.aesthetic;
 
 import com.ctre.phoenix.led.*;
+import com.ctre.phoenix.led.Animation;
+import com.ctre.phoenix.led.LarsonAnimation.BounceMode;
+
+import edu.wpi.first.hal.util.BoundaryException;
+
 import com.ctre.phoenix.led.CANdle;
 import com.ctre.phoenix.led.CANdle.LEDStripType;
 import com.ctre.phoenix.led.CANdleConfiguration;
 import com.ctre.phoenix.led.ColorFlowAnimation;
+
 
 import frc.robot.Constants.Lights;
 
@@ -20,7 +26,7 @@ public class Colors {
 
 	Lights light = new Lights();
 	CANdle rgb = new CANdle(light.id);
-
+	int numLED = light.leds;
 	public Colors() {
 		CANdleConfiguration config = new CANdleConfiguration();
 		config.stripType = LEDStripType.RGB;
@@ -33,7 +39,7 @@ public class Colors {
 		Animation animation = switch (effects) {
 			case LARSON -> new LarsonAnimation(255, 255, 255);
 			case FLOW -> new ColorFlowAnimation(255, 255, 255);
-			case CHROMA -> new RainbowAnimation();
+			case CHROMA -> new RainbowAnimation(0.2,0.2,numLED);
 			case BREATHE -> new SingleFadeAnimation(235, 209, 39);
 			case REN_SPECIAL -> new TwinkleAnimation(235, 209, 39);
 		};

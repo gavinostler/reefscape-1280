@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveModule;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -12,6 +14,7 @@ import frc.robot.subsystems.SwerveDriveSubsystem;
 import frc.robot.subsystems.aesthetic.Colors;
 import frc.robot.subsystems.aesthetic.Music;
 import frc.robot.subsystems.aesthetic.Colors.Effect;
+import frc.robot.commands.SwerveMovementCommand; 
 
 
 /**
@@ -36,6 +39,8 @@ public class RobotContainer {
     // Configure the trigger bindings
     configureBindings();
     colorSubsystem();
+    troubleMotors();
+    a_music.myWay(
   }
 
   /**
@@ -47,6 +52,12 @@ public class RobotContainer {
    * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
    * joysticks}.
    */
+  public void troubleMotors(){
+    TalonFX motor1 = new TalonFX(1);
+    TalonFX motor5 = new TalonFX(5);
+    motor1.setInverted(true);
+    motor5.setInverted(false);
+  }
   public void colorSubsystem(){
     a_coluor.startRGB(Effect.CHROMA);
   }
@@ -57,10 +68,11 @@ public class RobotContainer {
         m_swerveDriveSubsystem,
         () -> -m_controller.getLeftY(),
         () -> -m_controller.getLeftX(),
-        () -> -m_controller.getRightX()
+        () -> m_controller.getRightX()
       )
     );
     m_controller.leftStick().onTrue(m_swerveDriveSubsystem.runOnce(() -> m_swerveDriveSubsystem.seedFieldRelative()));
+    
   }
 
   /**

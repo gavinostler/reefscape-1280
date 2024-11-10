@@ -11,8 +11,8 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.core.CoreTalonFX;
+import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
-import com.ctre.phoenix6.mechanisms.swerve.SwerveModule;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstantsFactory;
 
@@ -56,12 +56,13 @@ public final class Constants {
 
   public static class Lights {
     public final int id = 27; // CAN ID for RGB
-    public final double brightnessScalar = 0.8; //Brightness for Color
-  }
+    public final double brightnessScalar = 0.2; //Brightness for Color
+    public final int leds = 124;
+ }
 
   // This should really be auto generated after the motors are connected but, alas, i did not read the documentation.
   public static class Drivetrain {
-    public static final double MAX_VELOCITY = 4.0; // m/s (Conservative estimates)
+    public static final double MAX_VELOCITY = 10.0; // m/s (Conservative estimates)
     public static final double MAX_TURN_RATE = 1.5 * Math.PI; // radians/s (Conservative estimate)
 
        // Both sets of gains need to be tuned to your individual robot.
