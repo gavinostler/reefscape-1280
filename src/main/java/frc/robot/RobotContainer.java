@@ -5,8 +5,6 @@
 package frc.robot;
 
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.mechanisms.swerve.SwerveModule;
-import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.Operator;
@@ -15,8 +13,6 @@ import frc.robot.subsystems.SwerveDriveSubsystem;
 import frc.robot.subsystems.aesthetic.Colors;
 import frc.robot.subsystems.aesthetic.Music;
 import frc.robot.subsystems.aesthetic.Colors.Effect;
-import frc.robot.commands.SwerveMovementCommand; 
-
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -28,8 +24,8 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final SwerveDriveSubsystem m_swerveDriveSubsystem = new SwerveDriveSubsystem();
   // REN CODE!!!
-  private final Colors a_coluor = new Colors();
-  private final Music a_music = new Music();
+  private final Colors m_color = new Colors();
+  private final Music m_music = new Music();
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_controller =
@@ -39,9 +35,7 @@ public class RobotContainer {
   public RobotContainer() {
     // Configure the trigger bindings
     configureBindings();
-    colorSubsystem();
-    troubleMotors();
-    a_music.myWay();
+    m_color.startRGB(Effect.CHROMA);
   }
 
   /**
@@ -53,23 +47,13 @@ public class RobotContainer {
    * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
    * joysticks}.
    */
-  public void troubleMotors(){
-    TalonFX motor1 = new TalonFX(1);
-    TalonFX motor5 = new TalonFX(5);
-    motor1.setInverted(true);
-    motor5.setInverted(false);
-  }
-  public void colorSubsystem(){
-    a_coluor.startRGB(Effect.CHROMA);
-  }
-
   public void configureBindings() {
      m_swerveDriveSubsystem.setDefaultCommand(
       new SwerveMovementCommand(
         m_swerveDriveSubsystem,
         () -> -m_controller.getLeftY(),
         () -> -m_controller.getLeftX(),
-        () -> -m_controller.getRightX()
+        () -> m_controller.getRightX()
       )
     );
     m_controller.leftStick().onTrue(m_swerveDriveSubsystem.runOnce(() -> m_swerveDriveSubsystem.seedFieldRelative()));

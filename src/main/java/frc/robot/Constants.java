@@ -160,6 +160,7 @@ public final class Constants {
     private static final int kFrontLeftSteerMotorId = 2;
     private static final int kFrontLeftEncoderId = 53;
     private static final double kFrontLeftEncoderOffset = 0.192138671875;
+    private static final boolean kFrontLeftDriveInvert = true;
     private static final boolean kFrontLeftSteerInvert = true;
 
     private static final double kFrontLeftXPosInches = 11.375;
@@ -190,6 +191,7 @@ public final class Constants {
     private static final int kBackRightSteerMotorId = 6;
     private static final int kBackRightEncoderId = 51;
     private static final double kBackRightEncoderOffset = 0.42626953125;
+    private static final boolean kBackRightDriveInvert = false;
     private static final boolean kBackRightSteerInvert = true;
 
     private static final double kBackRightXPosInches = -11.375;
@@ -197,7 +199,7 @@ public final class Constants {
 
     private static final SwerveModuleConstants frontLeft = ConstantCreator.createModuleConstants(
             kFrontLeftSteerMotorId, kFrontLeftDriveMotorId, kFrontLeftEncoderId, kFrontLeftEncoderOffset, Units.inchesToMeters(kFrontLeftXPosInches), Units.inchesToMeters(kFrontLeftYPosInches), kInvertLeftSide)
-            .withSteerMotorInverted(kFrontLeftSteerInvert);
+            .withSteerMotorInverted(kFrontLeftSteerInvert).withDriveMotorInverted(kFrontLeftDriveInvert);
     private static final SwerveModuleConstants backLeft = ConstantCreator.createModuleConstants(
             kBackLeftSteerMotorId, kBackLeftDriveMotorId, kBackLeftEncoderId, kBackLeftEncoderOffset, Units.inchesToMeters(kBackLeftXPosInches), Units.inchesToMeters(kBackLeftYPosInches), kInvertLeftSide)
             .withSteerMotorInverted(kBackLeftSteerInvert);
@@ -206,7 +208,7 @@ public final class Constants {
             .withSteerMotorInverted(kFrontRightSteerInvert);
     private static final SwerveModuleConstants backRight = ConstantCreator.createModuleConstants(
             kBackRightSteerMotorId, kBackRightDriveMotorId, kBackRightEncoderId, kBackRightEncoderOffset, Units.inchesToMeters(kBackRightXPosInches), Units.inchesToMeters(kBackRightYPosInches), kInvertRightSide)
-            .withSteerMotorInverted(kBackRightSteerInvert);
+            .withSteerMotorInverted(kBackRightSteerInvert).withDriveMotorInverted(kBackRightDriveInvert);
     public static final SwerveModuleConstants[] moduleConstants = {
       frontLeft,
       frontRight,

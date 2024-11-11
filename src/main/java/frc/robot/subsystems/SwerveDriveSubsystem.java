@@ -37,7 +37,7 @@ public class SwerveDriveSubsystem extends SwerveDrivetrain implements Subsystem 
     this.setControl(drive.withSpeeds(speeds));
   }
 
-  public Command applyRequestCommand(Supplier<SwerveRequest> requestSupplier) {
+  public Command applyRequest(Supplier<SwerveRequest> requestSupplier) {
     return this.run(() -> this.setControl(requestSupplier.get()));
   }
 }

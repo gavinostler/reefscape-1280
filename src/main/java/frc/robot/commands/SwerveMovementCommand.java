@@ -20,7 +20,7 @@ public class SwerveMovementCommand extends Command {
     private final DoubleSupplier rot_supplier;
 
     private double x_velocity, y_velocity, rot;
-    private SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric().withDriveRequestType(DriveRequestType.OpenLoopVoltage);
+    private SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric().withDriveRequestType(DriveRequestType.Velocity);
     private SwerveRequest.FieldCentricFacingAngle driveAngle = new SwerveRequest.FieldCentricFacingAngle();
     private SwerveRequest request;
 
@@ -55,5 +55,10 @@ public class SwerveMovementCommand extends Command {
             .withRotationalRate(this.rot * Drivetrain.MAX_TURN_RATE);
 
         this.m_swerve.setControl(request);
+    }
+
+    @Override
+    public boolean isFinished() {
+        return false;
     }
 }
