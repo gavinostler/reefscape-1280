@@ -4,13 +4,10 @@
 
 package frc.robot;
 
-<<<<<<< HEAD
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 
-=======
->>>>>>> refs/remotes/origin/main
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.Operator;
 import frc.robot.commands.SwerveMovementCommand;
@@ -44,7 +41,7 @@ public class RobotContainer {
     configureBindings();
     colorSubsystem();
     troubleMotors();
-    a_music.myWay(
+    a_music.myWay();
   }
 
   /**
@@ -72,7 +69,7 @@ public class RobotContainer {
         m_swerveDriveSubsystem,
         () -> -m_controller.getLeftY(),
         () -> -m_controller.getLeftX(),
-        () -> m_controller.getRightX()
+        () -> -m_controller.getRightX()
       )
     );
     m_controller.leftStick().onTrue(m_swerveDriveSubsystem.runOnce(() -> m_swerveDriveSubsystem.seedFieldRelative()));
