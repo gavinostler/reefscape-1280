@@ -4,8 +4,6 @@
 
 package frc.robot;
 
-import com.ctre.phoenix6.hardware.TalonFX;
-
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.Operator;
 import frc.robot.commands.SwerveMovementCommand;
@@ -56,8 +54,7 @@ public class RobotContainer {
         () -> m_controller.getRightX()
       )
     );
-    m_controller.leftStick().onTrue(m_swerveDriveSubsystem.runOnce(() -> m_swerveDriveSubsystem.seedFieldRelative()));
-    
+    m_controller.leftBumper().onTrue(m_swerveDriveSubsystem.runOnce(() -> m_swerveDriveSubsystem.seedFieldRelative()));
   }
 
   /**
