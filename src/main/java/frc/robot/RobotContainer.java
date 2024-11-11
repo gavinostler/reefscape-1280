@@ -11,6 +11,7 @@ import frc.robot.subsystems.SwerveDriveSubsystem;
 import frc.robot.subsystems.aesthetic.Colors;
 import frc.robot.subsystems.aesthetic.Music;
 import frc.robot.subsystems.aesthetic.Colors.Effect;
+import frc.robot.util.AgnosticController;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -25,9 +26,7 @@ public class RobotContainer {
   private final Colors m_color = new Colors();
   private final Music m_music = new Music();
 
-  // Replace with CommandPS4Controller or CommandJoystick if needed
-  private final CommandXboxController m_controller =
-      new CommandXboxController(Operator.kDriverControllerPort);
+  private final AgnosticController m_controller = new AgnosticController();
   
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -54,7 +53,7 @@ public class RobotContainer {
         () -> m_controller.getRightX()
       )
     );
-    m_controller.leftBumper().onTrue(m_swerveDriveSubsystem.runOnce(() -> m_swerveDriveSubsystem.seedFieldRelative()));
+    m_controller.resetHeading().onTrue(m_swerveDriveSubsystem.runOnce(() -> m_swerveDriveSubsystem.seedFieldRelative()));
   }
 
   /**
