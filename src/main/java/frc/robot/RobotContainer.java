@@ -24,7 +24,7 @@ public class RobotContainer {
   private final SwerveDriveSubsystem m_swerveDriveSubsystem = new SwerveDriveSubsystem();
   // REN CODE!!!
   private final Colors m_color = new Colors();
-  private final Music m_music = new Music();
+  // private final Music m_music = new Music();
 
   private final AgnosticController m_controller = new AgnosticController();
   
@@ -50,7 +50,7 @@ public class RobotContainer {
         m_swerveDriveSubsystem,
         () -> -m_controller.getLeftY(),
         () -> -m_controller.getLeftX(),
-        () -> m_controller.getRightX()
+        () -> -m_controller.getRightX()
       )
     );
     m_controller.resetHeading().onTrue(m_swerveDriveSubsystem.runOnce(() -> m_swerveDriveSubsystem.seedFieldRelative()));

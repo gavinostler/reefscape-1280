@@ -41,18 +41,6 @@ public final class Constants {
     static final Pigeon2Configuration config = null; // idk what it do
   }
 
-  public static class MidiID {
-    //ditto: Configurating the "Instruments"
-    public final ParentDevice mID1 = new CoreTalonFX(1, "*");
-    public final ParentDevice mID2 = new CoreTalonFX(2, "*");
-    public final ParentDevice mID3 = new CoreTalonFX(3, "*");
-    public final ParentDevice mID4 = new CoreTalonFX(4, "*");
-    public final ParentDevice mID5 = new CoreTalonFX(5, "*");
-    public final ParentDevice mID6 = new CoreTalonFX(6, "*");
-    public final ParentDevice mID7 = new CoreTalonFX(7, "*");
-    public final ParentDevice mID8 = new CoreTalonFX(8, "*");
-  }
-
   public static class Lights {
     public final int id = 27; // CAN ID for RGB
     public final double brightnessScalar = 0.2; //Brightness for Color
@@ -61,15 +49,15 @@ public final class Constants {
 
   // This should really be auto generated after the motors are connected but, alas, i did not read the documentation.
   public static class Drivetrain {
-    public static final double MAX_VELOCITY = 10.0; // m/s (Conservative estimates)
-    public static final double MAX_TURN_RATE = 1.5 * Math.PI; // radians/s (Conservative estimate)
+    public static final double MAX_VELOCITY = 4.0; // m/s (Conservative estimates)
+    public static final double MAX_TURN_RATE = 0.5 * Math.PI; // radians/s (Conservative estimate)
 
        // Both sets of gains need to be tuned to your individual robot.
 
     // The steer motor uses any SwerveModule.SteerRequestType control request with the
     // output type specified by SwerveModuleConstants.SteerMotorClosedLoopOutput
     private static final Slot0Configs steerGains = new Slot0Configs()
-        .withKP(100).withKI(0).withKD(0.2)
+        .withKP(3).withKI(0).withKD(0.2)
         .withKS(0).withKV(1.5).withKA(0);
     // When using closed-loop control, the drive motor uses the control
     // output type specified by SwerveModuleConstants.DriveMotorClosedLoopOutput
@@ -153,13 +141,12 @@ public final class Constants {
             .withSteerMotorInitialConfigs(steerInitialConfigs)
             .withCANcoderInitialConfigs(cancoderInitialConfigs);
 
-
     // Front Left
     private static final int kFrontLeftDriveMotorId = 1;
     private static final int kFrontLeftSteerMotorId = 2;
     private static final int kFrontLeftEncoderId = 53;
+    // private static final double kFrontLeftEncoderOffset = 0.191650390625;
     private static final double kFrontLeftEncoderOffset = -0.053466796875;
-    // private static final boolean kFrontLeftDriveInvert = true;
     private static final boolean kFrontLeftSteerInvert = true;
 
     private static final double kFrontLeftXPosInches = 11.375;
@@ -169,7 +156,8 @@ public final class Constants {
     private static final int kFrontRightDriveMotorId = 3;
     private static final int kFrontRightSteerMotorId = 4;
     private static final int kFrontRightEncoderId = 50;
-    private static final double kFrontRightEncoderOffset = -0.1953125;
+    // private static final double kFrontRightEncoderOffset = -0.439453125;
+    private static final double kFrontRightEncoderOffset = -0.1953215;
     private static final boolean kFrontRightSteerInvert = true;
 
     private static final double kFrontRightXPosInches = 11.375;
@@ -179,6 +167,7 @@ public final class Constants {
     private static final int kBackLeftDriveMotorId = 7;
     private static final int kBackLeftSteerMotorId = 8;
     private static final int kBackLeftEncoderId = 52;
+    // private static final double kBackLeftEncoderOffset = -0.0205078125;
     private static final double kBackLeftEncoderOffset = 0.2294921875;
     private static final boolean kBackLeftSteerInvert = true;
 
@@ -189,8 +178,8 @@ public final class Constants {
     private static final int kBackRightDriveMotorId = 5;
     private static final int kBackRightSteerMotorId = 6;
     private static final int kBackRightEncoderId = 51;
-    private static final double kBackRightEncoderOffset = 0.181396484375;
-    // private static final boolean kBackRightDriveInvert = false;
+    // private static final double kBackRightEncoderOffset = 0.42919921875;
+    private static final double kBackRightEncoderOffset = 0.1813964884375;
     private static final boolean kBackRightSteerInvert = true;
 
     private static final double kBackRightXPosInches = -11.375;
