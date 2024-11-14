@@ -9,16 +9,13 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.hardware.ParentDevice;
-import com.ctre.phoenix6.hardware.core.CoreTalonFX;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.ClosedLoopOutputType;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants.SteerFeedbackType;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstantsFactory;
 
 import edu.wpi.first.math.util.Units;
-
-import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.ClosedLoopOutputType;
-import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants.SteerFeedbackType;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -49,16 +46,16 @@ public final class Constants {
 
   // This should really be auto generated after the motors are connected but, alas, i did not read the documentation.
   public static class Drivetrain {
-    public static final double MAX_VELOCITY = 4.0; // m/s (Conservative estimates)
-    public static final double MAX_TURN_RATE = 0.5 * Math.PI; // radians/s (Conservative estimate)
+    public static final double MAX_VELOCITY = 6.0; // m/s (Conservative estimates)
+    public static final double MAX_TURN_RATE = 1.5 * Math.PI; // radians/s (Conservative estimate)
 
        // Both sets of gains need to be tuned to your individual robot.
 
     // The steer motor uses any SwerveModule.SteerRequestType control request with the
     // output type specified by SwerveModuleConstants.SteerMotorClosedLoopOutput
     private static final Slot0Configs steerGains = new Slot0Configs()
-        .withKP(3).withKI(0).withKD(0.2)
-        .withKS(0).withKV(1.5).withKA(0);
+        .withKP(25).withKI(0).withKD(1)
+        .withKS(0).withKV(0).withKA(0);
     // When using closed-loop control, the drive motor uses the control
     // output type specified by SwerveModuleConstants.DriveMotorClosedLoopOutput
     private static final Slot0Configs driveGains = new Slot0Configs()
@@ -145,8 +142,8 @@ public final class Constants {
     private static final int kFrontLeftDriveMotorId = 1;
     private static final int kFrontLeftSteerMotorId = 2;
     private static final int kFrontLeftEncoderId = 53;
-    // private static final double kFrontLeftEncoderOffset = 0.191650390625;
-    private static final double kFrontLeftEncoderOffset = -0.053466796875;
+    // private static final double kFrontLeftEncoderOffset = -0.178711;
+    private static final double kFrontLeftEncoderOffset = -0.053466796875 - 0.010254;
     private static final boolean kFrontLeftSteerInvert = true;
 
     private static final double kFrontLeftXPosInches = 11.375;
@@ -156,8 +153,8 @@ public final class Constants {
     private static final int kFrontRightDriveMotorId = 3;
     private static final int kFrontRightSteerMotorId = 4;
     private static final int kFrontRightEncoderId = 50;
-    // private static final double kFrontRightEncoderOffset = -0.439453125;
-    private static final double kFrontRightEncoderOffset = -0.1953215;
+    // private static final double kFrontRightEncoderOffset = -0.121582;
+    private static final double kFrontRightEncoderOffset = -0.1953215 + -0.0003345;
     private static final boolean kFrontRightSteerInvert = true;
 
     private static final double kFrontRightXPosInches = 11.375;
@@ -167,8 +164,8 @@ public final class Constants {
     private static final int kBackLeftDriveMotorId = 7;
     private static final int kBackLeftSteerMotorId = 8;
     private static final int kBackLeftEncoderId = 52;
-    // private static final double kBackLeftEncoderOffset = -0.0205078125;
-    private static final double kBackLeftEncoderOffset = 0.2294921875;
+    // private static final double kBackLeftEncoderOffset = -0.173096;
+    private static final double kBackLeftEncoderOffset = 0.2294921875 + -0.005371;
     private static final boolean kBackLeftSteerInvert = true;
 
     private static final double kBackLeftXPosInches = -11.375;
@@ -178,8 +175,8 @@ public final class Constants {
     private static final int kBackRightDriveMotorId = 5;
     private static final int kBackRightSteerMotorId = 6;
     private static final int kBackRightEncoderId = 51;
-    // private static final double kBackRightEncoderOffset = 0.42919921875;
-    private static final double kBackRightEncoderOffset = 0.1813964884375;
+   // private static final double kBackRightEncoderOffset = -0.403564;
+    private static final double kBackRightEncoderOffset = 0.1813964884375 - 0.00878901;
     private static final boolean kBackRightSteerInvert = true;
 
     private static final double kBackRightXPosInches = -11.375;

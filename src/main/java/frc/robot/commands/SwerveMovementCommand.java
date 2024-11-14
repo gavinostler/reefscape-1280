@@ -26,7 +26,7 @@ public class SwerveMovementCommand extends Command {
     private SwerveRequest request;
 
     private double speedMultiplier = 0.5;
-    private double angularSpeedMultiplier = 0.5;
+    private double angularSpeedMultiplier = 0.8;
 
     public SwerveMovementCommand(SwerveDriveSubsystem swerve,
         DoubleSupplier x_velocity_supplier,

@@ -24,4 +24,20 @@ public interface Controller {
     default Trigger resetHeading() {
         return no_op;
     }
+
+    default Trigger povDown() {
+        return no_op;
+    }
+    
+    default Trigger povUp() {
+        return no_op;
+    }
+    
+    default Trigger povLeft() {
+        return no_op;
+    }
+    
+    default Trigger povRight() {
+        return no_op;
+    }
 }

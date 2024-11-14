@@ -60,4 +60,24 @@ public class AgnosticController implements Controller {
     public Trigger resetHeading() {
         return this.controller.resetHeading();
     }
+
+    @Override
+    public Trigger povDown() {
+        return this.controller.povDown();
+    }
+
+    @Override
+    public Trigger povLeft() {
+        return this.controller.povLeft();
+    }
+
+    @Override
+    public Trigger povRight() {
+        return this.controller.povRight();
+    }
+
+    @Override
+    public Trigger povUp() {
+        return this.controller.povUp();
+    }
 }
