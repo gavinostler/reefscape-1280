@@ -32,7 +32,7 @@ public class XboxController implements Controller {
 
     @Override
     public Trigger resetHeading() {
-        return this.controller.leftBumper();
+        return this.controller.leftStick();
     }
 
     @Override

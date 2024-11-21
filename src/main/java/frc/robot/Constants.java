@@ -28,7 +28,7 @@ import edu.wpi.first.math.util.Units;
 public final class Constants {
   
   public static String kCANbusName = "rio";
-
+  // public static String kCANivore = "RENivore";
   public static class Operator {
     public static final int kDriverControllerPort = 0;
   }
@@ -46,8 +46,8 @@ public final class Constants {
 
   // This should really be auto generated after the motors are connected but, alas, i did not read the documentation.
   public static class Drivetrain {
-    public static final double MAX_VELOCITY = 6.0; // m/s (Conservative estimates)
-    public static final double MAX_TURN_RATE = 1.5 * Math.PI; // radians/s (Conservative estimate)
+    public static final double MAX_DRIVE_VOLTAGE = 12.0;
+    public static final double MAX_TURN_VOLTAGE = 12.0;
 
        // Both sets of gains need to be tuned to your individual robot.
 
@@ -176,7 +176,7 @@ public final class Constants {
     private static final int kBackRightSteerMotorId = 6;
     private static final int kBackRightEncoderId = 51;
    // private static final double kBackRightEncoderOffset = -0.403564;
-    private static final double kBackRightEncoderOffset = 0.1813964884375 - 0.00878901;
+    private static final double kBackRightEncoderOffset = 0.1813964884375 - 0.00898901;//- 0.0017090
     private static final boolean kBackRightSteerInvert = true;
 
     private static final double kBackRightXPosInches = -11.375;

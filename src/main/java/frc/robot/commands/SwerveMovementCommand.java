@@ -59,9 +59,9 @@ public class SwerveMovementCommand extends Command {
         SmartDashboard.putNumber("rot", rot);
 
         this.request = drive
-            .withVelocityX(this.x_velocity * Drivetrain.MAX_VELOCITY)
-            .withVelocityY(this.y_velocity * Drivetrain.MAX_VELOCITY)
-            .withRotationalRate(this.rot * Drivetrain.MAX_TURN_RATE);
+            .withVelocityX(this.x_velocity * Drivetrain.MAX_DRIVE_VOLTAGE)
+            .withVelocityY(this.y_velocity * Drivetrain.MAX_DRIVE_VOLTAGE)
+            .withRotationalRate(this.rot * Drivetrain.MAX_TURN_VOLTAGE);
 
         this.m_swerve.setControl(request);
     }

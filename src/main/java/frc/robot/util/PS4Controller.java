@@ -31,11 +31,6 @@ public class PS4Controller implements Controller {
     }
 
     @Override
-    public Trigger resetHeading() {
-        return this.controller.L1();
-    }
-
-    @Override
     public Trigger povDown() {
         return this.controller.povDown();
     }

@@ -5,11 +5,10 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.Constants.Operator;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.SwerveMovementCommand;
 import frc.robot.subsystems.SwerveDriveSubsystem;
 import frc.robot.subsystems.aesthetic.Colors;
-import frc.robot.subsystems.aesthetic.Music;
 import frc.robot.subsystems.aesthetic.Colors.Effect;
 import frc.robot.util.AgnosticController;
 
@@ -27,7 +26,6 @@ public class RobotContainer {
   // private final Music m_music = new Music();
 
   private final AgnosticController m_controller = new AgnosticController();
-  
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the trigger bindings
