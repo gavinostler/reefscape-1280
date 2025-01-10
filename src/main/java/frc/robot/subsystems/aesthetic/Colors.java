@@ -21,7 +21,7 @@ public class Colors {
 		FLOW,
 		CHROMA,
 		BREATHE,
-		REN_SPECIAL
+		REN_SPECIAL, 
 	}
 
 	Lights light = new Lights();
@@ -46,4 +46,7 @@ public class Colors {
 
 		rgb.animate(animation);
 	}	
+	public void colorStatic(int red, int green, int blue){
+		rgb.setLEDs(red, green, blue);
+	}
 }

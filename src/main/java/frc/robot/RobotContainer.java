@@ -30,7 +30,7 @@ public class RobotContainer {
   public RobotContainer() {
     // Configure the trigger bindings
     configureBindings();
-    m_color.startRGB(Effect.CHROMA);
+    m_color.colorStatic(199, 21, 133);
   }
 
   /**
