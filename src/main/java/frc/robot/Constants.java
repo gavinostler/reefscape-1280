@@ -40,8 +40,8 @@ public final class Constants {
 
   public static class Lights {
     public final int id = 27; // CAN ID for RGB
-    public final double brightnessScalar = 0.2; //Brightness for Color
-    public final int leds = 124;
+    public final double brightnessScalar = 1.0; //Brightness for Color
+    public final int leds = 150;
  }
 
   // This should really be auto generated after the motors are connected but, alas, i did not read the documentation.
