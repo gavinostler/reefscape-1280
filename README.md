@@ -1,1 +1,0 @@
-# SEKAIII YI DESU

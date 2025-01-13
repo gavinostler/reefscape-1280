@@ -26,7 +26,7 @@ import edu.wpi.first.math.util.Units;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-  
+
   public static String kCANbusName = "rio";
   // public static String kCANivore = "RENivore";
   public static class Operator {
@@ -34,8 +34,13 @@ public final class Constants {
   }
 
   public static class Pigeon2 {
-    static final int id = 26; // TODO: set can id
+    static final int id = 26; 
     static final Pigeon2Configuration config = null; // idk what it do
+  }
+
+  public static class ServoConst{
+    static final int port = 0;
+    static final double Velocity = 0.5;
   }
 
   public static class Lights {
