@@ -25,6 +25,7 @@
       }
     },
   ],
+<<<<<<< HEAD
   "java.test.defaultConfig": "WPIlibUnitTests",
   "java.import.gradle.annotationProcessing.enabled": false,
   "java.completion.favoriteStaticMembers": [
@@ -57,4 +58,7 @@
     "edu.wpi.first.math.**.proto.*",
     "edu.wpi.first.math.**.struct.*",
   ]
+=======
+  "java.test.defaultConfig": "WPIlibUnitTests"
+>>>>>>> develop-2024-t
 }
