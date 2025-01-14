@@ -1,1 +1,3 @@
-# SEKAIII YI DESU
+<h2> <img src="https://www.firstinspires.org/sites/default/files/2024-banner/frc_reefscape.gif" width=70 style="vertical-align: middle; margin-right: 20px" alt="">2025 Robot<img src="https://raw.githubusercontent.com/Team-1280/identity/refs/heads/main/assets/img/unsorted/Team_1280_Robotics_Logo_WIP_Master_Final.png" width=100 style="vertical-align: middle" alt=""> </h2>
+
+pretend there is important text here
