@@ -8,4 +8,4 @@ Refer to the [documentation for gradle](https://docs.gradle.org/current/userguid
 
 To build this project, simply run `gradlew.bat build` in the home directory of this project.
 
-To build and deply to the active roborio on the network, use `gradlew.bat deploy`
+To build and deploy to the active roborio on the network, use `gradlew.bat deploy`
