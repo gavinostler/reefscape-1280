@@ -1,0 +1,13 @@
+# This is the auto-linter because people do not know how to set up their own developer enviorment. Thus this is necessary to perserve the dignity of this codebase.
+
+name: Enforce style
+on: [pull_request, workflow_dispatch]
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+      - uses: axel-op/googlejavaformat-action@v3.6.0
