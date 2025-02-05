@@ -16,6 +16,7 @@ import com.ctre.phoenix6.configs.Pigeon2Configuration;
  */
 public final class Constants {
     public static String kCANbusName = "rio";
+    public static final boolean kEnableSysId = true;
     // public static String kCANivore = "RENivore";
     public static class Operator {
         public static final int kDriverControllerPort = 0;

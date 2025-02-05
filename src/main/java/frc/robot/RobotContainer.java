@@ -7,8 +7,12 @@ package frc.robot;
 import static edu.wpi.first.units.Units.*;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import com.pathplanner.lib.auto.AutoBuilder;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
@@ -23,6 +27,7 @@ import frc.robot.util.AgnosticController;
  * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
  * subsystems, commands, and trigger mappings) should be declared here.
  */
+@SuppressWarnings("unused") // Blah blah
 public class RobotContainer {
   private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
   private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
@@ -38,16 +43,20 @@ public class RobotContainer {
 
   // The robot's subsystems and commands are defined here...
   private final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
-  // REN CODE!!!
   private final Colors m_color = new Colors();
   // private final Music m_music = new Music();
-
   private final AgnosticController controller = new AgnosticController();
+  private final Telemetry logger = new Telemetry(MaxSpeed);
+  private final SendableChooser<Command> autoChooser;
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the trigger bindings
-    configureBindings();
     m_color.colorStatic(199, 21, 133);
+    autoChooser = AutoBuilder.buildAutoChooser("Auto");
+    SmartDashboard.putData(autoChooser);
+
+    configureBindings();
   }
 
   /**
@@ -68,22 +77,23 @@ public class RobotContainer {
           .withRotationalRate(-controller.getRightX() * MaxAngularRate)
       )
     );
+    
+    // Run forward, then reverse procedure to effectively "zero" characterization
+    if (Constants.kEnableSysId) {
+      controller.back().and(controller.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
+      controller.back().and(controller.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
+      controller.start().and(controller.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
+      controller.start().and(controller.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
-    controller.back().and(controller.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-    controller.back().and(controller.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-    controller.start().and(controller.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-    controller.start().and(controller.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+      controller.start().and(controller.povDown()).onTrue(drivetrain.runOnce(drivetrain::sysIdCycleRoutine));
+    }
 
-    controller.resetHeading().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+    controller.resetHeading().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
+
+    drivetrain.registerTelemetry(logger::telemeterize);
   }
 
-  /**
-   * Use this to pass the autonomous command to the main {@link Robot} class.
-   *
-   * @return the command to run in autonomous
-   */
-  //public Command getAutonomousCommand() {
-    // An example command will be run in autonomous
-    //return null;
-  //}
+  public Command getAutonomousCommand() {
+    return autoChooser.getSelected();
+  }
 }
