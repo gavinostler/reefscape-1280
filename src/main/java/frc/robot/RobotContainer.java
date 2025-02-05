@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.SwerveMovementCommand;
 import frc.robot.subsystems.SwerveDriveSubsystem;
 import frc.robot.subsystems.aesthetic.Colors;
-import frc.robot.subsystems.aesthetic.Colors.Effect;
 import frc.robot.util.AgnosticController;
 
 /**
@@ -51,7 +50,7 @@ public class RobotContainer {
         () -> -m_controller.getRightX()
       )
     );
-    m_controller.resetHeading().onTrue(m_swerveDriveSubsystem.runOnce(() -> m_swerveDriveSubsystem.seedFieldRelative()));
+    m_controller.resetHeading().onTrue(m_swerveDriveSubsystem.runOnce(() -> m_swerveDriveSubsystem.seedFieldCentric()));
   }
 
   /**

@@ -3,36 +3,33 @@ package frc.robot.subsystems;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.hardware.CANcoder;
-import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain;
-import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.swerve.SwerveDrivetrain;
+import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.Constants.Drivetrain;
 
-public class SwerveDriveSubsystem extends SwerveDrivetrain implements Subsystem {
+public class SwerveDriveSubsystem extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder> implements Subsystem {
   public SwerveDriveSubsystem() {
     super(
+      TalonFX::new, TalonFX::new, CANcoder::new,
       Drivetrain.DrivetrainConstants, 
       Drivetrain.moduleConstants
     );
   }
 
-  private SwerveRequest.ApplyChassisSpeeds drive = new SwerveRequest.ApplyChassisSpeeds();
+  private SwerveRequest.ApplyRobotSpeeds drive = new SwerveRequest.ApplyRobotSpeeds();
 
   public Pose2d getPose(){
     return this.getState().Pose;
   }
 
-  public void resetPose(Pose2d newPose){
-    this.seedFieldRelative(newPose);
-  }
-
   public ChassisSpeeds getRobotRelativeSpeeds() {
-    return this.m_kinematics.toChassisSpeeds(this.getState().ModuleStates);       
+    return this.getKinematics().toChassisSpeeds(this.getState().ModuleStates);       
   }
 
   public void driveRobotRelative(ChassisSpeeds speeds) {
@@ -41,11 +38,5 @@ public class SwerveDriveSubsystem extends SwerveDrivetrain implements Subsystem 
 
   public Command applyRequest(Supplier<SwerveRequest> requestSupplier) {
     return this.run(() -> this.setControl(requestSupplier.get()));
-  }
-
-  public void periodic() {
-    for(int i=0; i<4; i++) {
-      SmartDashboard.putData("encoders ("+i+")", this.getModule(i).getCANcoder());
-    }
   }
 }
