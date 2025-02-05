@@ -4,10 +4,16 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.*;
+
+import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import com.ctre.phoenix6.swerve.SwerveRequest;
+
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.commands.SwerveMovementCommand;
-import frc.robot.subsystems.SwerveDriveSubsystem;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.aesthetic.Colors;
 import frc.robot.util.AgnosticController;
 
@@ -18,13 +24,25 @@ import frc.robot.util.AgnosticController;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
+  private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
+  private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
+
+  /* Setting up bindings for necessary control of the swerve drive platform */
+  private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
+      .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
+      .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
+  private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
+  private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
+  private final SwerveRequest.RobotCentric forwardStraight = new SwerveRequest.RobotCentric()
+      .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
+
   // The robot's subsystems and commands are defined here...
-  private final SwerveDriveSubsystem m_swerveDriveSubsystem = new SwerveDriveSubsystem();
+  private final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
   // REN CODE!!!
   private final Colors m_color = new Colors();
   // private final Music m_music = new Music();
 
-  private final AgnosticController m_controller = new AgnosticController();
+  private final AgnosticController controller = new AgnosticController();
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the trigger bindings
@@ -38,19 +56,25 @@ public class RobotContainer {
    * predicate, or via the named factories in {@link
    * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for {@link
    * CommandXboxController Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller
-   * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
-   * joysticks}.
+   * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.Commandcontroller Flight
+   * controllers}.
    */
   public void configureBindings() {
-     m_swerveDriveSubsystem.setDefaultCommand(
-      new SwerveMovementCommand(
-        m_swerveDriveSubsystem,
-        () -> -m_controller.getLeftY(),
-        () -> -m_controller.getLeftX(),
-        () -> -m_controller.getRightX()
+    drivetrain.setDefaultCommand(
+      drivetrain.applyRequest(() ->
+        drive
+          .withVelocityX(-controller.getLeftY() * MaxSpeed)
+          .withVelocityY(-controller.getLeftX() * MaxSpeed)
+          .withRotationalRate(-controller.getRightX() * MaxAngularRate)
       )
     );
-    m_controller.resetHeading().onTrue(m_swerveDriveSubsystem.runOnce(() -> m_swerveDriveSubsystem.seedFieldCentric()));
+
+    controller.back().and(controller.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
+    controller.back().and(controller.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
+    controller.start().and(controller.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
+    controller.start().and(controller.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+
+    controller.resetHeading().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
   }
 
   /**

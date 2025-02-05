@@ -49,4 +49,45 @@ public class PS4Controller implements Controller {
     public Trigger povUp() {
         return this.controller.povUp();
     }
+    
+    @Override
+    public Trigger a() {
+        return this.controller.triangle();
+    }
+
+    @Override
+    public Trigger b() {
+        return this.controller.circle();
+    }
+
+    @Override
+    public Trigger back() {
+        return this.controller.share();
+    }
+
+    @Override
+    public Trigger leftBumper() {
+        return this.controller.L1().or(this.controller.L2());
+    }
+
+    @Override
+    public Trigger rightBumper() {
+        return this.controller.R1().or(this.controller.R2());
+    }
+
+    @Override
+    public Trigger start() {
+        return this.controller.PS();
+    }
+
+    @Override
+    public Trigger x() {
+        return this.controller.square();
+    }
+
+    @Override
+    public Trigger y() {
+        return this.controller.cross(); // bruh
+    }
+
 }

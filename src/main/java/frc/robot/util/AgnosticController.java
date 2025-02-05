@@ -80,4 +80,44 @@ public class AgnosticController implements Controller {
     public Trigger povUp() {
         return this.controller.povUp();
     }
+    
+    @Override
+    public Trigger a() {
+        return this.controller.a();
+    }
+
+    @Override
+    public Trigger b() {
+        return this.controller.b();
+    }
+
+    @Override
+    public Trigger back() {
+        return this.controller.back();
+    }
+
+    @Override
+    public Trigger leftBumper() {
+        return this.controller.leftBumper();
+    }
+
+    @Override
+    public Trigger rightBumper() {
+        return this.controller.rightBumper();
+    }
+
+    @Override
+    public Trigger start() {
+        return this.controller.start();
+    }
+
+    @Override
+    public Trigger x() {
+        return this.controller.x();
+    }
+
+    @Override
+    public Trigger y() {
+        return this.controller.y();
+    }
 }
