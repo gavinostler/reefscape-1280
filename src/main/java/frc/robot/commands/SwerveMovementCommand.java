@@ -2,9 +2,9 @@ package frc.robot.commands;
 
 import java.util.function.DoubleSupplier;
 
-import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
-import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
-import com.ctre.phoenix6.mechanisms.swerve.utility.PhoenixPIDController;
+import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModule.DriveRequestType;
+import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveRequest;
+import com.ctre.phoenix6.mechanisms.swerve.utility.LegacyPhoenixPIDController;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -14,16 +14,16 @@ import frc.robot.subsystems.SwerveDriveSubsystem;
 
 public class SwerveMovementCommand extends Command {
     private final SwerveDriveSubsystem m_swerve; 
-    private PhoenixPIDController m_thetaController;
+    private LegacyPhoenixPIDController m_thetaController;
 
     private final DoubleSupplier x_supplier;
     private final DoubleSupplier y_supplier;
     private final DoubleSupplier rot_supplier;
 
     private double x_val, y_val, rot_val;
-    private SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric().withDriveRequestType(DriveRequestType.OpenLoopVoltage);
-    private SwerveRequest.FieldCentricFacingAngle driveAngle = new SwerveRequest.FieldCentricFacingAngle();
-    private SwerveRequest request;
+    private LegacySwerveRequest.FieldCentric drive = new LegacySwerveRequest.FieldCentric().withDriveRequestType(DriveRequestType.OpenLoopVoltage);
+    private LegacySwerveRequest.FieldCentricFacingAngle driveAngle = new LegacySwerveRequest.FieldCentricFacingAngle();
+    private LegacySwerveRequest request;
 
     private double speedMultiplier = 0.5;
     private double angularSpeedMultiplier = 0.8;
@@ -36,7 +36,7 @@ public class SwerveMovementCommand extends Command {
     ) {
         this.addRequirements(swerve);
 
-        this.m_swerve = swerve;
+        this.m_swerve = swerveated 
         this.x_supplier = x_supplier;
         this.y_supplier = y_supplier;
         this.rot_supplier = rot_supplier;
@@ -44,7 +44,7 @@ public class SwerveMovementCommand extends Command {
 
     @Override
     public void initialize() {
-        m_thetaController = new PhoenixPIDController(3.2, 0, 0);
+        m_thetaController = new LegacyPhoenixPIDController(3.2, 0, 0);
         m_thetaController.enableContinuousInput(-Math.PI, Math.PI);
         driveAngle.HeadingController = m_thetaController;
     }

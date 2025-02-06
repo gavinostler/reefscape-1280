@@ -9,11 +9,11 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
-import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.ClosedLoopOutputType;
-import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants;
-import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants.SteerFeedbackType;
-import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstantsFactory;
+import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveDrivetrainConstants;
+import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModule.ClosedLoopOutputType;
+import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModuleConstants;
+import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModuleConstants.SteerFeedbackType;
+import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModuleConstantsFactory;
 
 import edu.wpi.first.math.util.Units;
 
@@ -113,12 +113,12 @@ public final class Constants {
     private static final double kSteerFrictionVoltage = 0.25;
     private static final double kDriveFrictionVoltage = 0.25;
 
-    public static final SwerveDrivetrainConstants DrivetrainConstants = new SwerveDrivetrainConstants()
+    public static final LegacySwerveDrivetrainConstants DrivetrainConstants = new LegacySwerveDrivetrainConstants()
             .withCANbusName(kCANbusName)
             .withPigeon2Id(kPigeonId)
             .withPigeon2Configs(pigeonConfigs);
 
-    private static final SwerveModuleConstantsFactory ConstantCreator = new SwerveModuleConstantsFactory()
+    private static final LegacySwerveModuleConstantsFactory ConstantCreator = new LegacySwerveModuleConstantsFactory()
             .withDriveMotorGearRatio(kDriveGearRatio)
             .withSteerMotorGearRatio(kSteerGearRatio)
             .withWheelRadius(kWheelRadiusInches)
@@ -182,21 +182,21 @@ public final class Constants {
     private static final double kBackRightXPosInches = -11.375;
     private static final double kBackRightYPosInches = -11.375;
 
-    private static final SwerveModuleConstants frontLeft = ConstantCreator.createModuleConstants(
+    private static final LegacySwerveModuleConstants frontLeft = ConstantCreator.createModuleConstants(
             kFrontLeftSteerMotorId, kFrontLeftDriveMotorId, kFrontLeftEncoderId, kFrontLeftEncoderOffset, Units.inchesToMeters(kFrontLeftXPosInches), Units.inchesToMeters(kFrontLeftYPosInches), kInvertLeftSide)
             .withSteerMotorInverted(kFrontLeftSteerInvert);
             // .withDriveMotorInverted(kFrontLeftDriveInvert);
-    private static final SwerveModuleConstants backLeft = ConstantCreator.createModuleConstants(
+    private static final LegacySwerveModuleConstants backLeft = ConstantCreator.createModuleConstants(
             kBackLeftSteerMotorId, kBackLeftDriveMotorId, kBackLeftEncoderId, kBackLeftEncoderOffset, Units.inchesToMeters(kBackLeftXPosInches), Units.inchesToMeters(kBackLeftYPosInches), kInvertLeftSide)
             .withSteerMotorInverted(kBackLeftSteerInvert);
-    private static final SwerveModuleConstants frontRight = ConstantCreator.createModuleConstants(
+    private static final LegacySwerveModuleConstants frontRight = ConstantCreator.createModuleConstants(
             kFrontRightSteerMotorId, kFrontRightDriveMotorId, kFrontRightEncoderId, kFrontRightEncoderOffset, Units.inchesToMeters(kFrontRightXPosInches), Units.inchesToMeters(kFrontRightYPosInches), kInvertRightSide)
             .withSteerMotorInverted(kFrontRightSteerInvert);
-    private static final SwerveModuleConstants backRight = ConstantCreator.createModuleConstants(
+    private static final LegacySwerveModuleConstants backRight = ConstantCreator.createModuleConstants(
             kBackRightSteerMotorId, kBackRightDriveMotorId, kBackRightEncoderId, kBackRightEncoderOffset, Units.inchesToMeters(kBackRightXPosInches), Units.inchesToMeters(kBackRightYPosInches), kInvertRightSide)
             .withSteerMotorInverted(kBackRightSteerInvert);
             // .withDriveMotorInverted(kBackRightDriveInvert);
-    public static final SwerveModuleConstants[] moduleConstants = {
+    public static final LegacySwerveModuleConstants[] moduleConstants = {
       frontLeft,
       frontRight,
       backLeft,

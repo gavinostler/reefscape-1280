@@ -3,8 +3,8 @@ package frc.robot.subsystems;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.hardware.CANcoder;
-import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain;
-import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
+import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveDrivetrain;
+import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveRequest;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.Constants.Drivetrain;
 
-public class SwerveDriveSubsystem extends SwerveDrivetrain implements Subsystem {
+public class SwerveDriveSubsystem extends LegacySwerveDrivetrain implements Subsystem {
   public SwerveDriveSubsystem() {
     super(
       Drivetrain.DrivetrainConstants, 
@@ -21,7 +21,7 @@ public class SwerveDriveSubsystem extends SwerveDrivetrain implements Subsystem 
     );
   }
 
-  private SwerveRequest.ApplyChassisSpeeds drive = new SwerveRequest.ApplyChassisSpeeds();
+  private LegacySwerveRequest.ApplyChassisSpeeds drive = new LegacySwerveRequest.ApplyChassisSpeeds();
 
   public Pose2d getPose(){
     return this.getState().Pose;
@@ -39,7 +39,7 @@ public class SwerveDriveSubsystem extends SwerveDrivetrain implements Subsystem 
     this.setControl(drive.withSpeeds(speeds));
   }
 
-  public Command applyRequest(Supplier<SwerveRequest> requestSupplier) {
+  public Command applyRequest(Supplier<LegacySwerveRequest> requestSupplier) {
     return this.run(() -> this.setControl(requestSupplier.get()));
   }
 
