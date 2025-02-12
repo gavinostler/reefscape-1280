@@ -9,5 +9,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
+          args: "--aosp --replace"
           ref: ${{ github.event.pull_request.head.ref }}
       - uses: axel-op/googlejavaformat-action@v3.6.0
