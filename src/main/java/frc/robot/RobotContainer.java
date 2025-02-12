@@ -53,7 +53,6 @@ public class RobotContainer {
   // private final Music m_music = new Music();
   private final AgnosticController controller = new AgnosticController();
   private final Telemetry logger = new Telemetry(MaxSpeed);
-  private final SendableChooser<Command> autoChooser;
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -61,8 +60,6 @@ public class RobotContainer {
   public RobotContainer() {
     // Configure the trigger bindings
     m_color.colorStatic(199, 21, 133);
-    autoChooser = AutoBuilder.buildAutoChooser("Auto");
-    SmartDashboard.putData(autoChooser);
 
     configureBindings();
   }
@@ -106,6 +103,6 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    return autoChooser.getSelected();
+    return null;
   }
 }
