@@ -8,13 +8,14 @@ import frc.robot.Constants.Climber;
 
 public class ClimberSubsystem implements Subsystem {
   private final TalonFX m_motor = new TalonFX(Climber.id);
-  private final CANcoder m_canCoder = new CANcoder(Climber.id);
+  private final CANcoder e_cancoder = new CANcoder(Climber.encoderId);
 
   private double encoderOffset = 0.0;
 
   private boolean enabled = false;
 
-  public ClimberSubsystem() {}
+  public ClimberSubsystem() {
+  }
 
   public Command runCommand() {
     return this.run(
@@ -24,17 +25,10 @@ public class ClimberSubsystem implements Subsystem {
   }
 
   public void rotate() {
-    if (!enabled) {
-      m_motor.set(0.0);
-      return;
+    if (e_cancoder.getPosition().getValueAsDouble() + encoderOffset > Climber.maxValue) {
+      disable();
     }
-    double speed;
-    if (m_canCoder.getPosition().getValueAsDouble() + encoderOffset > Climber.maxValue) {
-      speed = 0.0;
-      enabled = false;
-    } else {
-      speed = Climber.kRotateSpeed;
-    }
+    double speed = enabled ? Climber.kRotateSpeed : 0.0;
     m_motor.set(speed);
   }
 
