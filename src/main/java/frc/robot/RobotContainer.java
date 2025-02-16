@@ -8,6 +8,8 @@ import static edu.wpi.first.units.Units.*;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -29,7 +31,7 @@ public class RobotContainer {
   private double MaxSpeed =
       TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
   private double MaxAngularRate =
-      RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max
+      RotationsPerSecond.of(1.5).in(RadiansPerSecond); // 3/4 of a rotation per second max
   // angular velocity
 
   /* Setting up bindings for necessary control of the swerve drive platform */
@@ -97,7 +99,7 @@ public class RobotContainer {
           .onTrue(drivetrain.runOnce(drivetrain::sysIdCycleRoutine));
     }
 
-    controller.resetHeading().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
+    controller.resetHeading().onTrue(drivetrain.runOnce(() -> drivetrain.resetRotation(Rotation2d.kZero)));
 
     drivetrain.registerTelemetry(logger::telemeterize);
     climber.setDefaultCommand(climber.runCommand());
