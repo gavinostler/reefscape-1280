@@ -14,8 +14,7 @@ public class ClimberSubsystem implements Subsystem {
 
   private boolean enabled = false;
 
-  public ClimberSubsystem() {
-  }
+  public ClimberSubsystem() {}
 
   public Command runCommand() {
     return this.run(
