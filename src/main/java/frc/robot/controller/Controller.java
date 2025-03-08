@@ -1,4 +1,4 @@
-package frc.robot.util;
+package frc.robot.controller;
 
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -6,19 +6,19 @@ public interface Controller {
   static Trigger no_op = new Trigger(() -> false);
 
   default double getLeftX() {
-    return 0;
+    return 0.0;
   }
 
   default double getLeftY() {
-    return 0;
+    return 0.0;
   }
 
   default double getRightX() {
-    return 0;
+    return 0.0;
   }
 
   default double getRightY() {
-    return 0;
+    return 0.0;
   }
 
   default Trigger resetHeading() {
@@ -70,6 +70,18 @@ public interface Controller {
   }
 
   default Trigger b() {
+    return no_op;
+  }
+
+  default Trigger rightTrigger() {
+    return no_op;
+  }
+
+  default Trigger leftTrigger() {
+    return no_op;
+  }
+
+  default Trigger rightStick() {
     return no_op;
   }
 }

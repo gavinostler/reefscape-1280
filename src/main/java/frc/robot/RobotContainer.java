@@ -4,20 +4,30 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.*;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import frc.robot.Constants.Driver;
+// import frc.robot.aesthetic.Colors;
+import frc.robot.controller.AgnosticController;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.subsystems.aesthetic.Colors;
-import frc.robot.util.AgnosticController;
+import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.GroundIntakeSubsystem;
+import frc.robot.subsystems.ShooterSubsystem;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -39,75 +49,182 @@ public class RobotContainer {
           .withDeadband(MaxSpeed * 0.1)
           .withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
           .withDriveRequestType(
-              DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
-  private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
-  private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
-  private final SwerveRequest.RobotCentric forwardStraight =
-      new SwerveRequest.RobotCentric().withDriveRequestType(DriveRequestType.OpenLoopVoltage);
+              DriveRequestType.Velocity); // Use open-loop control for drive motors
 
   // The robot's subsystems and commands are defined here...
-  private final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
-  private final ClimberSubsystem climber = new ClimberSubsystem();
-  private final Colors m_color = new Colors();
-  // private final Music m_music = new Music();
-  private final AgnosticController controller = new AgnosticController();
+  private final CommandSwerveDrivetrain drivetrain; // declared later due to NamedCommands
+  public final ElevatorSubsystem elevator = new ElevatorSubsystem();
+  private final GroundIntakeSubsystem groundIntake = new GroundIntakeSubsystem();
+  private final ShooterSubsystem shooter = new ShooterSubsystem();
+  //   private final ClimberSubsystem climber = new ClimberSubsystem();
+  private final AgnosticController driverController =
+      new AgnosticController(Driver.kDriverControllerPort);
+  private final AgnosticController operatorController =
+      driverController; // Aliased to main controller for now, TODO
   private final Telemetry logger = new Telemetry(MaxSpeed);
+  //   private final Colors colors = new Colors();
+
+  private final SendableChooser<Command> autoChooser;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the trigger bindings
-    m_color.colorStatic(199, 21, 133);
-
+    // colors.animateCandle(Colors.Effect.CHROMA);
+    registerNamedCommands();
+    drivetrain = TunerConstants.createDrivetrain(); // AFTER NamedCommands are registered
     configureBindings();
+    autoChooser = AutoBuilder.buildAutoChooser("ventura_auto");
+    SmartDashboard.putData("Auto Mode", autoChooser);
+  }
+
+  /** Register named commands, for use in autonomous */
+  public void registerNamedCommands() {
+    NamedCommands.registerCommand(
+        "groundIntakeDown",
+        groundIntake.runOnce(() -> groundIntake.setMode(GroundIntakeSubsystem.Mode.DOWN)));
+    NamedCommands.registerCommand(
+        "groundIntakeUp",
+        groundIntake.runOnce(() -> groundIntake.setMode(GroundIntakeSubsystem.Mode.UP)));
+    NamedCommands.registerCommand(
+        "groundIntakeOff", groundIntake.runOnce(() -> groundIntake.off()));
+
+    NamedCommands.registerCommand(
+        "enableShooterOut", shooter.runOnce(() -> shooter.enableShooter(false)));
+    NamedCommands.registerCommand(
+        "enableShooterIn", shooter.runOnce(() -> shooter.enableShooter(true)));
+    NamedCommands.registerCommand(
+        "disableShooter", shooter.runOnce(() -> shooter.disableShooter()));
+    NamedCommands.registerCommand(
+        "enableFeedOut", shooter.runOnce(() -> shooter.enableFeed(false)));
+    NamedCommands.registerCommand("enableFeedIn", shooter.runOnce(() -> shooter.enableFeed(true)));
+    NamedCommands.registerCommand("disableFeed", shooter.runOnce(() -> shooter.disableFeed()));
+    NamedCommands.registerCommand("runIntakeAlgae", shooter.runOnce(shooter::intakeAlgae));
+    NamedCommands.registerCommand("runShootAlgae", shooter.runShootAlgae());
+    NamedCommands.registerCommand("shootProcessor", shooter.runShootProcessor());
+
+    NamedCommands.registerCommand("moveElevatorL1", elevator.runOnce(elevator::moveToL1));
+    NamedCommands.registerCommand("moveElevatorL2", elevator.runOnce(elevator::moveToL2));
   }
 
   /**
    * Use this method to define your trigger->command mappings. Triggers can be created via the
    * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with an arbitrary
-   * predicate, or via the named factories in {@link
-   * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for {@link
-   * CommandXboxController Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller
-   * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.Commandcontroller Flight
-   * controllers}.
+   * predicate, or via agnostic controllers for {@link AgnosticController Xbox/PS4}
    */
   public void configureBindings() {
+    if (Constants.kEnableSysId) {
+      bindSysId();
+    }
+
+    // Driver Controls
     drivetrain.setDefaultCommand(
         drivetrain.applyRequest(
             () ->
                 drive
-                    .withVelocityX(controller.getLeftY() * MaxSpeed)
-                    .withVelocityY(controller.getLeftX() * MaxSpeed)
-                    .withRotationalRate(-controller.getRightX() * MaxAngularRate)));
+                    .withVelocityX(driverController.getLeftY() * MaxSpeed)
+                    .withVelocityY(driverController.getLeftX() * MaxSpeed)
+                    .withRotationalRate(-driverController.getRightX() * MaxAngularRate)));
 
-    // Run forward, then reverse procedure to effectively "zero" characterization
-    if (Constants.kEnableSysId) {
-      controller.back().and(controller.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-      controller.back().and(controller.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-      controller
-          .start()
-          .and(controller.y())
-          .whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-      controller
-          .start()
-          .and(controller.x())
-          .whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
-
-      controller
-          .start()
-          .and(controller.povDown())
-          .onTrue(drivetrain.runOnce(drivetrain::sysIdCycleRoutine));
-    }
-
-    controller
+    driverController
         .resetHeading()
         .onTrue(drivetrain.runOnce(() -> drivetrain.resetRotation(Rotation2d.kZero)));
 
     drivetrain.registerTelemetry(logger::telemeterize);
-    climber.setDefaultCommand(climber.runCommand());
-    controller.povUp().whileTrue(climber.runOnce(climber::enable));
+
+    // Operator Controls
+    // operatorController.povUp().and(() ->
+    // !climber.climberAtMax()).onTrue(climber.runOnce(climber::enable));
+    // TODO: control to disable climber
+
+    operatorController.b().onTrue(elevator.runOnce(elevator::moveToL1));
+    operatorController.y().onTrue(elevator.runOnce(elevator::moveToL2));
+    operatorController
+        .povUp()
+        .whileTrue(elevator.runOnce(() -> elevator.moveElevator(false)))
+        .onFalse(elevator.runOnce(elevator::holdHeight));
+    operatorController
+        .povDown()
+        .whileTrue(elevator.runOnce(() -> elevator.moveElevator(true)))
+        .onFalse(elevator.runOnce(elevator::holdHeight));
+
+    operatorController
+        .a()
+        .onTrue(groundIntake.runOnce(groundIntake::toggleMode))
+        .onFalse(groundIntake.runOnce(groundIntake::off));
+
+    operatorController
+        .povRight()
+        .whileTrue(shooter.runOnce(() -> shooter.moveArm(false)))
+        .onFalse(shooter.runOnce(shooter::holdArmAngle));
+    operatorController
+        .povLeft()
+        .whileTrue(shooter.runOnce(() -> shooter.moveArm(true)))
+        .onFalse(shooter.runOnce(shooter::holdArmAngle));
+
+    operatorController
+        .leftTrigger()
+        .onTrue(
+            shooter.runOnce(
+                () -> {
+                  shooter.intakeAlgae();
+                  groundIntake.enablePulley();
+                }))
+        .onFalse(
+            shooter.runOnce(
+                () -> {
+                  shooter.disableShooter();
+                  shooter.brakeFeed();
+                  groundIntake.disablePulley();
+                }));
+    operatorController.rightTrigger().onTrue(shooter.runShootAlgae());
+    operatorController.x().onTrue(shooter.runShootProcessor());
+
+    operatorController
+        .resetHeading()
+        .onTrue(
+            drivetrain.runOnce(
+                () -> {
+                  Pose2d x = drivetrain.getState().Pose;
+                  x = x.rotateBy(new Rotation2d(Math.PI));
+                  drivetrain.resetPose(x);
+                }));
+    operatorController
+        .rightStick()
+        .onTrue(
+            shooter.runOnce(
+                () -> {
+                  shooter.stowArm();
+                  elevator.stowElevator();
+                  new WaitCommand(1.2);
+                  groundIntake.setMode(GroundIntakeSubsystem.Mode.UP);
+                }));
+  }
+
+  void bindSysId() {
+    driverController //
+        .back()
+        .and(driverController.y())
+        .whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
+    driverController //
+        .back()
+        .and(driverController.x())
+        .whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
+    driverController //
+        .start()
+        .and(driverController.y())
+        .whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
+    driverController //
+        .start()
+        .and(driverController.x())
+        .whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+
+    driverController //
+        .start()
+        .and(driverController.povDown())
+        .onTrue(drivetrain.runOnce(drivetrain::sysIdCycleRoutine));
   }
 
   public Command getAutonomousCommand() {
-    return null;
+    return autoChooser.getSelected();
   }
 }

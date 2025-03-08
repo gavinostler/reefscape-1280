@@ -1,93 +1,102 @@
-package frc.robot.util;
+package frc.robot.controller;
 
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Constants;
 
 public class PS4Controller implements Controller {
   private final CommandPS4Controller controller;
 
-  public PS4Controller() {
-    this.controller = new CommandPS4Controller(Constants.Operator.kDriverControllerPort);
+  public PS4Controller(int port) {
+    controller = new CommandPS4Controller(port);
   }
 
   @Override
   public double getLeftX() {
-    return this.controller.getLeftX();
+    return controller.getLeftX();
   }
 
   @Override
   public double getLeftY() {
-    return this.controller.getLeftY();
+    return controller.getLeftY();
   }
 
   @Override
   public double getRightX() {
-    return this.controller.getRightX();
+    return controller.getRightX();
   }
 
   @Override
   public double getRightY() {
-    return this.controller.getRightY();
+    return controller.getRightY();
   }
 
   @Override
   public Trigger povDown() {
-    return this.controller.povDown();
+    return controller.povDown();
   }
 
   @Override
   public Trigger povLeft() {
-    return this.controller.povLeft();
+    return controller.povLeft();
   }
 
   @Override
   public Trigger povRight() {
-    return this.controller.povRight();
+    return controller.povRight();
   }
 
   @Override
   public Trigger povUp() {
-    return this.controller.povUp();
+    return controller.povUp();
   }
 
   @Override
   public Trigger a() {
-    return this.controller.triangle();
+    return controller.triangle();
   }
 
   @Override
   public Trigger b() {
-    return this.controller.circle();
+    return controller.circle();
   }
 
   @Override
   public Trigger back() {
-    return this.controller.share();
+    return controller.share();
   }
 
   @Override
   public Trigger leftBumper() {
-    return this.controller.L1().or(this.controller.L2());
+    return controller.L1().or(controller.L2());
   }
 
   @Override
   public Trigger rightBumper() {
-    return this.controller.R1().or(this.controller.R2());
+    return controller.R1().or(controller.R2());
   }
 
   @Override
   public Trigger start() {
-    return this.controller.PS();
+    return controller.PS();
   }
 
   @Override
   public Trigger x() {
-    return this.controller.square();
+    return controller.square();
   }
 
   @Override
   public Trigger y() {
-    return this.controller.cross(); // bruh
+    return controller.cross(); // bruh
+  }
+
+  @Override
+  public Trigger leftTrigger() {
+    return controller.L1();
+  }
+
+  @Override
+  public Trigger rightTrigger() {
+    return controller.R1();
   }
 }
