@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants.Shooter;
 
 public class ShooterSubsystem implements Subsystem, Sendable {
+  // Motors and encoders
   // private final CANdi beamBreak = new CANdi(Shooter.beamBreakId);
   private final TalonFX leaderShooterMotor = new TalonFX(Shooter.rightShooterId);
   private final TalonFX followerShooterMotor = new TalonFX(Shooter.leftShooterId);

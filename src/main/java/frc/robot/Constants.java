@@ -68,10 +68,10 @@ public final class Constants {
         0.5; // Volts to add as feedforward to account for gravity etc
     public static final double TOLERANCE = 0.01;
 
-    public static final double HEIGHT_IN_ROTATIONS =
-        5.5; // Rotations (max is actually 6 rotations or 60 inches)
+    public static final double HEIGHT_IN_ROTATIONS = 6; // Rotations (max is actually 6 rotations or 60 inches)
     public static final double L1_HEIGHT_FRACTION = 0.0; // TODO set height fraction
     public static final double L2_HEIGHT_FRACTION = 0.0; //
+    public static final double ELEVATOR_HEIGHT = 10322;
     public static final double STOW_HEIGHT_FRACTION = 0.0;
 
     public static final TalonFXConfiguration elevatorConfigs = new TalonFXConfiguration();

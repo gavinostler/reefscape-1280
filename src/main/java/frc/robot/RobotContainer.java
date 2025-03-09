@@ -8,6 +8,7 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
+import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -64,6 +65,7 @@ public class RobotContainer {
   private final Telemetry logger = new Telemetry(MaxSpeed);
   //   private final Colors colors = new Colors();
 
+  // sendable for choosing autos
   private final SendableChooser<Command> autoChooser;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -79,6 +81,7 @@ public class RobotContainer {
 
   /** Register named commands, for use in autonomous */
   public void registerNamedCommands() {
+    // GroundIntake commands
     NamedCommands.registerCommand(
         "groundIntakeDown",
         groundIntake.runOnce(() -> groundIntake.setMode(GroundIntakeSubsystem.Mode.DOWN)));
@@ -88,6 +91,7 @@ public class RobotContainer {
     NamedCommands.registerCommand(
         "groundIntakeOff", groundIntake.runOnce(() -> groundIntake.off()));
 
+    // All shooter commands
     NamedCommands.registerCommand(
         "enableShooterOut", shooter.runOnce(() -> shooter.enableShooter(false)));
     NamedCommands.registerCommand(
@@ -102,8 +106,11 @@ public class RobotContainer {
     NamedCommands.registerCommand("runShootAlgae", shooter.runShootAlgae());
     NamedCommands.registerCommand("shootProcessor", shooter.runShootProcessor());
 
-    NamedCommands.registerCommand("moveElevatorL1", elevator.runOnce(elevator::moveToL1));
-    NamedCommands.registerCommand("moveElevatorL2", elevator.runOnce(elevator::moveToL2));
+    // Elevator commands
+    NamedCommands.registerCommand(
+        "moveElevatorL1", elevator.runOnce(elevator::moveToL1));
+    NamedCommands.registerCommand(
+        "moveElevatorL2", elevator.runOnce(elevator::moveToL2));
   }
 
   /**
@@ -136,6 +143,7 @@ public class RobotContainer {
     // !climber.climberAtMax()).onTrue(climber.runOnce(climber::enable));
     // TODO: control to disable climber
 
+    // Elevator controls
     operatorController.b().onTrue(elevator.runOnce(elevator::moveToL1));
     operatorController.y().onTrue(elevator.runOnce(elevator::moveToL2));
     operatorController
@@ -147,13 +155,13 @@ public class RobotContainer {
         .whileTrue(elevator.runOnce(() -> elevator.moveElevator(true)))
         .onFalse(elevator.runOnce(elevator::holdHeight));
 
-    operatorController
-        .a()
+    // GroundIntake controls
+    operatorController.a()
         .onTrue(groundIntake.runOnce(groundIntake::toggleMode))
         .onFalse(groundIntake.runOnce(groundIntake::off));
 
-    operatorController
-        .povRight()
+    // Shooter pivot controls
+    operatorController.povRight()
         .whileTrue(shooter.runOnce(() -> shooter.moveArm(false)))
         .onFalse(shooter.runOnce(shooter::holdArmAngle));
     operatorController
@@ -161,43 +169,23 @@ public class RobotContainer {
         .whileTrue(shooter.runOnce(() -> shooter.moveArm(true)))
         .onFalse(shooter.runOnce(shooter::holdArmAngle));
 
-    operatorController
-        .leftTrigger()
-        .onTrue(
-            shooter.runOnce(
-                () -> {
-                  shooter.intakeAlgae();
-                  groundIntake.enablePulley();
-                }))
-        .onFalse(
-            shooter.runOnce(
-                () -> {
-                  shooter.disableShooter();
-                  shooter.brakeFeed();
-                  groundIntake.disablePulley();
-                }));
+    // Shooter motor controls
+    operatorController.leftTrigger()
+        .onTrue(shooter.runOnce(() -> { shooter.intakeAlgae(); groundIntake.enablePulley(); }))
+        .onFalse(shooter.runOnce(() -> { shooter.disableShooter(); shooter.brakeFeed(); groundIntake.disablePulley(); }));
     operatorController.rightTrigger().onTrue(shooter.runShootAlgae());
     operatorController.x().onTrue(shooter.runShootProcessor());
 
-    operatorController
-        .resetHeading()
-        .onTrue(
-            drivetrain.runOnce(
-                () -> {
-                  Pose2d x = drivetrain.getState().Pose;
-                  x = x.rotateBy(new Rotation2d(Math.PI));
-                  drivetrain.resetPose(x);
-                }));
-    operatorController
-        .rightStick()
-        .onTrue(
-            shooter.runOnce(
-                () -> {
-                  shooter.stowArm();
-                  elevator.stowElevator();
-                  new WaitCommand(1.2);
-                  groundIntake.setMode(GroundIntakeSubsystem.Mode.UP);
-                }));
+    // Reset odometry
+    operatorController.resetHeading().onTrue(drivetrain.runOnce(() -> {
+        Pose2d x = drivetrain.getState().Pose;
+        x = x.rotateBy(new Rotation2d(Math.PI));
+        drivetrain.resetPose(x);
+    }));
+
+    // Stow all subsystems
+    operatorController.rightStick()
+    .onTrue(shooter.runOnce(() -> { shooter.stowArm(); elevator.stowElevator(); new WaitCommand(1.2); groundIntake.setMode(GroundIntakeSubsystem.Mode.UP); }));
   }
 
   void bindSysId() {
