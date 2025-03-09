@@ -20,7 +20,9 @@ import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import frc.robot.Constants.Elevator;
 import frc.robot.Constants.Shooter;
+import frc.robot.subsystems.GroundIntakeSubsystem.Mode;
 
 public class ShooterSubsystem implements Subsystem, Sendable {
   // Motors and encoders
@@ -37,9 +39,15 @@ public class ShooterSubsystem implements Subsystem, Sendable {
       new VelocityVoltage(0.0).withSlot(0).withFeedForward(Shooter.SHOOTER_FF_TERM);
   private final MotionMagicVoltage armAngleRequest =
       new MotionMagicVoltage(0.0).withFeedForward(Shooter.ARM_FF_TERM);
+  private final VelocityVoltage armVelocityRequest =
+      new VelocityVoltage(0.0).withSlot(1).withFeedForward(Shooter.ARM_FF_TERM);
   private final VoltageOut armMovementRequest = new VoltageOut(0.0);
 
   private double targetAngle;
+
+  private int currentPreset = Shooter.ARM_POSITIONS.length - 1;
+  private ElevatorSubsystem elevator;
+  private GroundIntakeSubsystem intake;
 
   public ShooterSubsystem() {
     leaderShooterMotor.getConfigurator().apply(Shooter.shooterConfigs);
@@ -54,9 +62,26 @@ public class ShooterSubsystem implements Subsystem, Sendable {
     armMotor.getConfigurator().apply(Shooter.armConfigs);
   }
 
+  public void setSubsystems(ElevatorSubsystem elevator, GroundIntakeSubsystem intake) {
+    this.elevator = elevator;
+    this.intake = intake;
+  }
+
   // public boolean algaeInFeed() {
   //   return beamBreak.getS1State().getValue() == com.ctre.phoenix6.signals.S1StateValue.High;
   // }
+
+  public void changePresetAngle(boolean inward) {
+    // terrible way of changing dpad position because im too lazy to make it look nice
+    if((inward && currentPreset == 0) || (!inward && currentPreset == Shooter.ARM_POSITIONS.length - 1)) {
+      return;
+    }
+    int lastPreset = currentPreset;
+    currentPreset = inward ? currentPreset - 1 : currentPreset + 1;
+    if (!setArmAngle(Shooter.ARM_POSITIONS[currentPreset])) {
+      currentPreset = lastPreset;
+    };
+  }
 
   /**
    * @param inward Sets the shooter direction for intake/shooting. (it sucks)
@@ -112,16 +137,29 @@ public class ShooterSubsystem implements Subsystem, Sendable {
     return armEncoder.getPosition().getValueAsDouble();
   }
 
+  public boolean safeToMove(double proposedAngle) {
+    if (elevator ==  null) return false;
+
+    if (elevator.getHeight() < Elevator.SAFETY_GENERAL_HEIGHT && proposedAngle < 0.02 && intake.getMode() == Mode.DOWN) return false;
+    if (elevator.getHeight() < Elevator.SAFETY_ZERO_HEIGHT && intake.getMode() == Mode.UP) return false;
+
+    return  true;
+  }
+
   /**
    * Zero is horizontal
    *
    * @param angle Rotations
+   * @return boolean if successful
    */
-  public void setArmAngle(double angle) {
+  public boolean setArmAngle(double angle) {
     angle = Math.min(angle, Shooter.ARM_MAX_ROTATION);
     angle = Math.max(angle, Shooter.ARM_MIN_ROTATION);
+
+    if (!safeToMove(angle)) return false;
     armMotor.setControl(armAngleRequest.withPosition(angle));
     targetAngle = angle;
+    return true;
   }
 
   /** Set arm target angle to current arm angle */
@@ -129,12 +167,17 @@ public class ShooterSubsystem implements Subsystem, Sendable {
     setArmAngle(getArmAngle());
   }
 
+  
+  public void holdTargetArmAngle() {
+    setArmAngle(targetAngle);
+  }
+
   /**
    * @param downward false for up, true for down
    */
   public void moveArm(boolean downward) {
-    double voltage = downward ? -Shooter.ARM_VOLTAGE_DOWN : Shooter.ARM_VOLTAGE_UP;
-    armMotor.setControl(armMovementRequest.withOutput(voltage));
+    double velocity = downward ? -Shooter.ARM_VELOCITY_DOWN : Shooter.ARM_VELOCITY_UP;
+    armMotor.setControl(armVelocityRequest.withVelocity(velocity));
   }
 
   // Method to stow arm at set angle

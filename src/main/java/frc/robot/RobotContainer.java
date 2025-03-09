@@ -54,9 +54,9 @@ public class RobotContainer {
 
   // The robot's subsystems and commands are defined here...
   private final CommandSwerveDrivetrain drivetrain; // declared later due to NamedCommands
-  public final ElevatorSubsystem elevator = new ElevatorSubsystem();
   private final GroundIntakeSubsystem groundIntake = new GroundIntakeSubsystem();
   private final ShooterSubsystem shooter = new ShooterSubsystem();
+  public final ElevatorSubsystem elevator = new ElevatorSubsystem();
   //   private final ClimberSubsystem climber = new ClimberSubsystem();
   private final AgnosticController driverController =
       new AgnosticController(Driver.kDriverControllerPort);
@@ -77,6 +77,10 @@ public class RobotContainer {
     configureBindings();
     autoChooser = AutoBuilder.buildAutoChooser("ventura_auto");
     SmartDashboard.putData("Auto Mode", autoChooser);
+    SmartDashboard.putData("shooter", shooter);
+    SmartDashboard.putData("elevator", elevator);
+    elevator.setSubsystems(shooter, groundIntake);
+    shooter.setSubsystems(elevator, groundIntake);
   }
 
   /** Register named commands, for use in autonomous */
@@ -128,9 +132,9 @@ public class RobotContainer {
         drivetrain.applyRequest(
             () ->
                 drive
-                    .withVelocityX(driverController.getLeftY() * MaxSpeed)
-                    .withVelocityY(driverController.getLeftX() * MaxSpeed)
-                    .withRotationalRate(-driverController.getRightX() * MaxAngularRate)));
+                    .withVelocityX(driverController.getLeftY() * MaxSpeed * (1 - elevator.getHeight()))
+                    .withVelocityY(driverController.getLeftX() * MaxSpeed * (1 - elevator.getHeight()))
+                    .withRotationalRate(-driverController.getRightX() * MaxAngularRate * (1 - elevator.getHeight()))));
 
     driverController
         .resetHeading()
@@ -149,10 +153,12 @@ public class RobotContainer {
     operatorController
         .povUp()
         .whileTrue(elevator.runOnce(() -> elevator.moveElevator(false)))
+        .whileTrue(elevator.run(elevator::elevatorMovement))
         .onFalse(elevator.runOnce(elevator::holdHeight));
     operatorController
         .povDown()
         .whileTrue(elevator.runOnce(() -> elevator.moveElevator(true)))
+        .whileTrue(elevator.run(elevator::elevatorMovement))
         .onFalse(elevator.runOnce(elevator::holdHeight));
 
     // GroundIntake controls
@@ -162,12 +168,12 @@ public class RobotContainer {
 
     // Shooter pivot controls
     operatorController.povRight()
-        .whileTrue(shooter.runOnce(() -> shooter.moveArm(false)))
-        .onFalse(shooter.runOnce(shooter::holdArmAngle));
+        .onTrue(shooter.runOnce(() -> shooter.changePresetAngle(false)))
+        .onFalse(shooter.runOnce(shooter::holdTargetArmAngle));
     operatorController
         .povLeft()
-        .whileTrue(shooter.runOnce(() -> shooter.moveArm(true)))
-        .onFalse(shooter.runOnce(shooter::holdArmAngle));
+        .whileTrue(shooter.runOnce(() -> shooter.changePresetAngle(true)))
+        .onFalse(shooter.runOnce(shooter::holdTargetArmAngle));
 
     // Shooter motor controls
     operatorController.leftTrigger()

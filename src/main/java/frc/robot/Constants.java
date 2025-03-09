@@ -74,6 +74,11 @@ public final class Constants {
     public static final double ELEVATOR_HEIGHT = 10322;
     public static final double STOW_HEIGHT_FRACTION = 0.0;
 
+    public static final double SAFETY_ZERO_HEIGHT = 0.45; 
+    public static final double SAFETY_ANGLE_HEIGHT = 0.6;
+    public static final double SAFETY_GENERAL_HEIGHT = 0.1;
+    public static final double SAFETY_INTAKE_HEIGHT = 0.3;
+
     public static final TalonFXConfiguration elevatorConfigs = new TalonFXConfiguration();
 
     static {
@@ -145,14 +150,15 @@ public final class Constants {
 
     public static final int armId = 16;
     public static final int armEncoderId = 57;
-    public static final double ARM_VOLTAGE_UP = 2.5;
-    public static final double ARM_VOLTAGE_DOWN = 0.5;
+    public static final double ARM_VELOCITY_UP = 0.4;
+    public static final double ARM_VELOCITY_DOWN = 0.4;
     public static final double ARM_CURRENT_LIMIT = 80.0;
     public static final double ARM_FF_TERM =
         1.0; // Volts to add as feedforward to account for gravity etc
     public static final double ARM_MIN_ROTATION = -0.15;
     public static final double ARM_MAX_ROTATION = 0.24;
     public static final double ARM_STOW_ROTATION = 0.24; // TODO set stow rotation
+    public static final double[] ARM_POSITIONS = {-0.15, 0, 0.15};
 
     // TODO: tune gains
     public static final TalonFXConfiguration shooterConfigs = new TalonFXConfiguration();
@@ -165,7 +171,7 @@ public final class Constants {
           InvertedValue.CounterClockwise_Positive; // right is primary, positive is
       // out
       shooterConfigs.Slot0.kS = 0.25; // Add kS V output to overcome static friction
-      shooterConfigs.Slot0.kV = 0.12; // A velocity target of 1 rps results in kV V output
+      shooterConfigs.Slot0.kV = 0.01; // A velocity target of 1 rps results in kV V output
       shooterConfigs.Slot0.kA = 0.01; // An acceleration of 1 rps/s requires kA V output
       shooterConfigs.Slot0.kP = 0.11; // An error of 1 rps results in kP V output
       shooterConfigs.Slot0.kI = 0.0; // integrated error (0: no output for error)
@@ -213,8 +219,8 @@ public final class Constants {
       armConfigs.Slot0.StaticFeedforwardSign = StaticFeedforwardSignValue.UseVelocitySign;
       // https://www.chiefdelphi.com/t/motion-magic-help-ctre/483319/2
       armConfigs.MotionMagic.MotionMagicCruiseVelocity = 1.0; // Target cruise velocity in rps
-      armConfigs.MotionMagic.MotionMagicAcceleration = 2.0; // Target acceleration in rps/s
-      armConfigs.MotionMagic.MotionMagicJerk = 20.0; // Target jerk in rps/(s^2)
+      armConfigs.MotionMagic.MotionMagicAcceleration = 1.0; // Target acceleration in rps/s
+      armConfigs.MotionMagic.MotionMagicJerk = 15.0; // Target jerk in rps/(s^2)
       armConfigs.Feedback.FeedbackRemoteSensorID = armEncoderId;
       armConfigs.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
       armConfigs.Feedback.SensorToMechanismRatio = 1.0;

@@ -7,12 +7,14 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.wpilibj.Encoder;
-
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.Constants.Elevator;
+import frc.robot.Constants.Shooter;
+import frc.robot.subsystems.GroundIntakeSubsystem.Mode;
 
 public class ElevatorSubsystem implements Subsystem, Sendable {
     private final TalonFX motor = new TalonFX(Elevator.motorId);
@@ -22,10 +24,31 @@ public class ElevatorSubsystem implements Subsystem, Sendable {
         new MotionMagicVoltage(0.0).withFeedForward(Elevator.FF_TERM);
     private final VoltageOut movementRequest = new VoltageOut(0.0);
     private double goal = 0.0;
+    private ShooterSubsystem shooter;
+    private GroundIntakeSubsystem intake;
+    private boolean blocked = false;
 
     public ElevatorSubsystem() {
         motor.getConfigurator().apply(Elevator.elevatorConfigs);
         encoder.reset(); // assuming elevator starts at bottom
+    }
+
+    public void elevatorMovement() {
+      if (safeToMove(getHeight())) {
+        blocked = false;
+      }
+
+      SmartDashboard.putBoolean("SAFE: ", safeToMove(  getHeight() + 0.01  * (encoder.getDirection() ? 1 : -1)));
+      SmartDashboard.putBoolean("BLOCKED: ", blocked);
+      if (!safeToMove(  getHeight() + 0.01  * (encoder.getDirection() ? 1 : -1)) && !blocked) {
+        blocked=true;
+        moveToHeight(getHeight() + 0.01 * (encoder.getDirection() ? -1 : 1));
+      }
+    }
+
+    public void setSubsystems(ShooterSubsystem shooter, GroundIntakeSubsystem intake) {
+      this.shooter = shooter;
+      this.intake = intake;
     }
 
   public void moveToHeight(double fraction) {
@@ -45,8 +68,26 @@ public class ElevatorSubsystem implements Subsystem, Sendable {
     moveToHeight(Elevator.STOW_HEIGHT_FRACTION);
   }
 
+  public boolean safeToMove(double proposedHeight) {
+
+    if (shooter == null || intake == null) {
+      return false;
+    }
+
+    if (shooter.getArmAngle() <= 0.05 && (getHeight() <= Elevator.SAFETY_ANGLE_HEIGHT || proposedHeight <= Elevator.SAFETY_ANGLE_HEIGHT) && intake.getMode() == Mode.UP) {
+      return false;
+    }
+
+    if (shooter.getArmAngle() <= 0.05 && (getHeight() <= Elevator.SAFETY_GENERAL_HEIGHT || proposedHeight <= Elevator.SAFETY_GENERAL_HEIGHT)) {
+      return false;
+    }
+
+
+    return true;
+  }
+
     public void moveElevator(boolean downward) {
-        getHeight();
+        if (!safeToMove(  getHeight() - 0.05) && downward) return;
         motor.setControl(movementRequest.withOutput(Elevator.MOVEMENT_VOLTAGE * (downward ? -1 : 1)));
     }
 
@@ -79,7 +120,7 @@ public class ElevatorSubsystem implements Subsystem, Sendable {
      */
     public double getHeight() {
         double height = (encoder.get() /  Elevator.ELEVATOR_HEIGHT);
-        System.out.println("HEIGHT FRACTION: " + height);
+        //System.out.println("HEIGHT FRACTION: " + height);
         return height;
     }
 
