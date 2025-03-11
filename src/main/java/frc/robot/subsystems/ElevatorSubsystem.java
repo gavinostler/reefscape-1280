@@ -91,10 +91,6 @@ public class ElevatorSubsystem implements Subsystem, Sendable {
         motor.setControl(movementRequest.withOutput(Elevator.MOVEMENT_VOLTAGE * (downward ? -1 : 1)));
     }
 
-    public void keepHeight() {
-        motor.setControl(new NeutralOut());
-    }
-
     public void holdHeight() {
         moveToHeight(getHeight());
     }
