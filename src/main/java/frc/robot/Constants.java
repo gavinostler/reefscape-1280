@@ -125,8 +125,6 @@ public final class Constants {
   }
 
   public static class Shooter {
-    public static final int beamBreakId = 27;
-
     public static final int rightShooterId = 12;
     public static final int leftShooterId = 14;
     public static final double SHOOTER_SHOOT_TARGET_RPS = 100.0;
