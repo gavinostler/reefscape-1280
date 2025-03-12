@@ -52,13 +52,6 @@ public final class Constants {
     public static final Color8Bit initialColor = new Color8Bit(199, 21, 133);
   }
 
-  public static class Climber {
-    public static final int motorId = 0xDEADBEEF;
-    public static final int encoderId = 0xDEADBEEF;
-    public static final double MAX_ANGLE = 1.0;
-    public static final double SPEED = 0.2;
-  }
-
   public static class Elevator {
     public static final int motorId = 18;
     public static final int encoderId = 56;
