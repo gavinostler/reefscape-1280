@@ -26,7 +26,6 @@ import frc.robot.subsystems.GroundIntakeSubsystem.Mode;
 
 public class ShooterSubsystem implements Subsystem, Sendable {
   // Motors and encoders
-  // private final CANdi beamBreak = new CANdi(Shooter.beamBreakId);
   private final TalonFX leaderShooterMotor = new TalonFX(Shooter.rightShooterId);
   private final TalonFX followerShooterMotor = new TalonFX(Shooter.leftShooterId);
   private final SparkMax leaderFeedMotor = new SparkMax(Shooter.rightFeedId, MotorType.kBrushless);
@@ -41,7 +40,6 @@ public class ShooterSubsystem implements Subsystem, Sendable {
       new MotionMagicVoltage(0.0).withFeedForward(Shooter.ARM_FF_TERM);
   private final VelocityVoltage armVelocityRequest =
       new VelocityVoltage(0.0).withSlot(1).withFeedForward(Shooter.ARM_FF_TERM);
-  private final VoltageOut armMovementRequest = new VoltageOut(0.0);
 
   private double targetAngle;
 
@@ -66,10 +64,6 @@ public class ShooterSubsystem implements Subsystem, Sendable {
     this.elevator = elevator;
     this.intake = intake;
   }
-
-  // public boolean algaeInFeed() {
-  //   return beamBreak.getS1State().getValue() == com.ctre.phoenix6.signals.S1StateValue.High;
-  // }
 
   public void changePresetAngle(boolean inward) {
     // terrible way of changing dpad position because im too lazy to make it look nice
@@ -168,7 +162,6 @@ public class ShooterSubsystem implements Subsystem, Sendable {
     setArmAngle(getArmAngle());
   }
 
-  
   public void holdTargetArmAngle() {
     setArmAngle(targetAngle);
   }
