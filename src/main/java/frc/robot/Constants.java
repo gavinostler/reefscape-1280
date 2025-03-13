@@ -154,11 +154,11 @@ public final class Constants {
     public static final double ARM_VELOCITY_DOWN = 0.4;
     public static final double ARM_CURRENT_LIMIT = 80.0;
     public static final double ARM_FF_TERM =
-        1.0; // Volts to add as feedforward to account for gravity etc
+      0.0; // Volts to add as feedforward to account for gravity etc
     public static final double ARM_MIN_ROTATION = -0.15;
     public static final double ARM_MAX_ROTATION = 0.24;
     public static final double ARM_STOW_ROTATION = 0.24; // TODO set stow rotation
-    public static final double[] ARM_POSITIONS = {-0.15, 0, 0.15};
+    public static final double[] ARM_POSITIONS = {-0.05, 0, 0.15};
 
     // TODO: tune gains
     public static final TalonFXConfiguration shooterConfigs = new TalonFXConfiguration();

@@ -121,6 +121,7 @@ public class ShooterSubsystem implements Subsystem, Sendable {
   /** Disables the feed motor */
   public void disableFeed() {
     leaderFeedMotor.set(0.0);
+    leaderFeedMotor.getEncoder().getPosition();
   }
 
   public void disableShooterAndFeed() {
