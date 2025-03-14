@@ -108,7 +108,8 @@ public final class Constants {
   public static class GroundIntake {
     public static final int intakeId = 19;
     public static final int INTAKE_CURRENT_LIMIT = 40;
-    public static final double INTAKE_VOLTAGE = 9.0; //
+    public static final double INTAKE_UP_VOLTAGE = 5.0;
+    public static final double INTAKE_DOWN_VOLTAGE = -1.0;
 
     public static final SparkMaxConfig intakeConfig = new SparkMaxConfig();
 
@@ -147,7 +148,7 @@ public final class Constants {
     public static final double ARM_FF_TERM =
       0.0; // Volts to add as feedforward to account for gravity etc
     public static final double ARM_MIN_ROTATION = -0.15;
-    public static final double ARM_MAX_ROTATION = 0.24;
+    public static final double ARM_MAX_ROTATION = 0.225;
     public static final double ARM_STOW_ROTATION = 0.24; // TODO set stow rotation
     public static final double[] ARM_POSITIONS = {-0.05, 0, 0.15};
 
