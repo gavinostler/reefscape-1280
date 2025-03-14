@@ -52,13 +52,6 @@ public final class Constants {
     public static final Color8Bit initialColor = new Color8Bit(199, 21, 133);
   }
 
-  public static class Climber {
-    public static final int motorId = 0xDEADBEEF;
-    public static final int encoderId = 0xDEADBEEF;
-    public static final double MAX_ANGLE = 1.0;
-    public static final double SPEED = 0.2;
-  }
-
   public static class Elevator {
     public static final int motorId = 18;
     public static final int encoderId = 56;
@@ -115,7 +108,8 @@ public final class Constants {
   public static class GroundIntake {
     public static final int intakeId = 19;
     public static final int INTAKE_CURRENT_LIMIT = 40;
-    public static final double INTAKE_VOLTAGE = 9.0; //
+    public static final double INTAKE_UP_VOLTAGE = 5.0;
+    public static final double INTAKE_DOWN_VOLTAGE = -1.0;
 
     public static final SparkMaxConfig intakeConfig = new SparkMaxConfig();
 
@@ -132,8 +126,6 @@ public final class Constants {
   }
 
   public static class Shooter {
-    public static final int beamBreakId = 27;
-
     public static final int rightShooterId = 12;
     public static final int leftShooterId = 14;
     public static final double SHOOTER_SHOOT_TARGET_RPS = 100.0;
@@ -154,11 +146,11 @@ public final class Constants {
     public static final double ARM_VELOCITY_DOWN = 0.4;
     public static final double ARM_CURRENT_LIMIT = 80.0;
     public static final double ARM_FF_TERM =
-        1.0; // Volts to add as feedforward to account for gravity etc
+      0.0; // Volts to add as feedforward to account for gravity etc
     public static final double ARM_MIN_ROTATION = -0.15;
-    public static final double ARM_MAX_ROTATION = 0.24;
+    public static final double ARM_MAX_ROTATION = 0.225;
     public static final double ARM_STOW_ROTATION = 0.24; // TODO set stow rotation
-    public static final double[] ARM_POSITIONS = {-0.15, 0, 0.15};
+    public static final double[] ARM_POSITIONS = {-0.05, 0, 0.15};
 
     // TODO: tune gains
     public static final TalonFXConfiguration shooterConfigs = new TalonFXConfiguration();

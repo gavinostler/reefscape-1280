@@ -26,7 +26,6 @@ import frc.robot.subsystems.GroundIntakeSubsystem.Mode;
 
 public class ShooterSubsystem implements Subsystem, Sendable {
   // Motors and encoders
-  // private final CANdi beamBreak = new CANdi(Shooter.beamBreakId);
   private final TalonFX leaderShooterMotor = new TalonFX(Shooter.rightShooterId);
   private final TalonFX followerShooterMotor = new TalonFX(Shooter.leftShooterId);
   private final SparkMax leaderFeedMotor = new SparkMax(Shooter.rightFeedId, MotorType.kBrushless);
@@ -41,7 +40,6 @@ public class ShooterSubsystem implements Subsystem, Sendable {
       new MotionMagicVoltage(0.0).withFeedForward(Shooter.ARM_FF_TERM);
   private final VelocityVoltage armVelocityRequest =
       new VelocityVoltage(0.0).withSlot(1).withFeedForward(Shooter.ARM_FF_TERM);
-  private final VoltageOut armMovementRequest = new VoltageOut(0.0);
 
   private double targetAngle;
 
@@ -67,20 +65,17 @@ public class ShooterSubsystem implements Subsystem, Sendable {
     this.intake = intake;
   }
 
-  // public boolean algaeInFeed() {
-  //   return beamBreak.getS1State().getValue() == com.ctre.phoenix6.signals.S1StateValue.High;
-  // }
-
   public void changePresetAngle(boolean inward) {
     // terrible way of changing dpad position because im too lazy to make it look nice
-    if((inward && currentPreset == 0) || (!inward && currentPreset == Shooter.ARM_POSITIONS.length - 1)) {
-      return;
-    }
-    int lastPreset = currentPreset;
-    currentPreset = inward ? currentPreset - 1 : currentPreset + 1;
-    if (!setArmAngle(Shooter.ARM_POSITIONS[currentPreset])) {
-      currentPreset = lastPreset;
-    };
+    setArmAngle(targetAngle + 0.03 * (inward ? -1 : 1));
+    // if((inward && currentPreset == 0) || (!inward && currentPreset == Shooter.ARM_POSITIONS.length - 1)) {
+    //   return;
+    // } // TODO
+    // int lastPreset = currentPreset;
+    // currentPreset = inward ? currentPreset - 1 : currentPreset + 1;
+    // if (!setArmAngle(Shooter.ARM_POSITIONS[currentPreset])) {
+    //   currentPreset = lastPreset;
+    // };
   }
 
   /**
@@ -121,6 +116,7 @@ public class ShooterSubsystem implements Subsystem, Sendable {
   /** Disables the feed motor */
   public void disableFeed() {
     leaderFeedMotor.set(0.0);
+    leaderFeedMotor.getEncoder().getPosition();
   }
 
   public void disableShooterAndFeed() {
@@ -138,12 +134,13 @@ public class ShooterSubsystem implements Subsystem, Sendable {
   }
 
   public boolean safeToMove(double proposedAngle) {
-    if (elevator ==  null) return false;
+    return true;
+    // if (elevator ==  null) return false;
 
-    if (elevator.getHeight() < Elevator.SAFETY_GENERAL_HEIGHT && proposedAngle < 0.02 && intake.getMode() == Mode.DOWN) return false;
-    if (elevator.getHeight() < Elevator.SAFETY_ZERO_HEIGHT && intake.getMode() == Mode.UP) return false;
+    // if (elevator.getHeight() < Elevator.SAFETY_GENERAL_HEIGHT && proposedAngle < 0.02 && intake.getMode() == Mode.DOWN) return false;
+    // if (elevator.getHeight() < Elevator.SAFETY_ZERO_HEIGHT && intake.getMode() == Mode.UP) return false;
 
-    return  true;
+    // return  true;
   }
 
   /**
@@ -167,7 +164,6 @@ public class ShooterSubsystem implements Subsystem, Sendable {
     setArmAngle(getArmAngle());
   }
 
-  
   public void holdTargetArmAngle() {
     setArmAngle(targetAngle);
   }

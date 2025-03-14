@@ -69,7 +69,8 @@ public class ElevatorSubsystem implements Subsystem, Sendable {
   }
 
   public boolean safeToMove(double proposedHeight) {
-
+    return true; // TODO
+    /* 
     if (shooter == null || intake == null) {
       return false;
     }
@@ -84,15 +85,12 @@ public class ElevatorSubsystem implements Subsystem, Sendable {
 
 
     return true;
+    */
   }
 
     public void moveElevator(boolean downward) {
         if (!safeToMove(  getHeight() - 0.05) && downward) return;
         motor.setControl(movementRequest.withOutput(Elevator.MOVEMENT_VOLTAGE * (downward ? -1 : 1)));
-    }
-
-    public void keepHeight() {
-        motor.setControl(new NeutralOut());
     }
 
     public void holdHeight() {
@@ -119,9 +117,9 @@ public class ElevatorSubsystem implements Subsystem, Sendable {
      * @return Height fraction, from 0.0 to 1.0
      */
     public double getHeight() {
-        double height = (encoder.get() /  Elevator.ELEVATOR_HEIGHT);
+        // double height = (encoder.getDistance() /  Elevator.ELEVATOR_HEIGHT);
         //System.out.println("HEIGHT FRACTION: " + height);
-        return height;
+        return motor.getPosition().getValueAsDouble();
     }
 
   public boolean atGoal() {

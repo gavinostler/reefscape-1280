@@ -56,7 +56,7 @@ public class GroundIntakeSubsystem implements Subsystem {
   }
 
   public void intakeUp() {
-    intakeMotor.setVoltage(GroundIntake.INTAKE_VOLTAGE);
+    intakeMotor.setVoltage(GroundIntake.INTAKE_UP_VOLTAGE);
   }
 
   public void disablePulley() {
@@ -69,7 +69,7 @@ public class GroundIntakeSubsystem implements Subsystem {
   }
 
   public void intakeDown() {
-    intakeMotor.setVoltage(-GroundIntake.INTAKE_VOLTAGE);
+    intakeMotor.setVoltage(GroundIntake.INTAKE_DOWN_VOLTAGE);
   }
 
   public void enablePulley() {

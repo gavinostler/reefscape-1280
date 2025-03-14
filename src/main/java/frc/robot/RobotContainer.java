@@ -57,7 +57,6 @@ public class RobotContainer {
   private final GroundIntakeSubsystem groundIntake = new GroundIntakeSubsystem();
   private final ShooterSubsystem shooter = new ShooterSubsystem();
   public final ElevatorSubsystem elevator = new ElevatorSubsystem();
-  //   private final ClimberSubsystem climber = new ClimberSubsystem();
   private final AgnosticController driverController =
       new AgnosticController(Driver.kDriverControllerPort);
   private final AgnosticController operatorController =
@@ -147,10 +146,6 @@ public class RobotContainer {
     drivetrain.registerTelemetry(logger::telemeterize);
 
     // Operator Controls
-    // operatorController.povUp().and(() ->
-    // !climber.climberAtMax()).onTrue(climber.runOnce(climber::enable));
-    // TODO: control to disable climber
-
     // Elevator controls
     operatorController.b().onTrue(elevator.runOnce(elevator::moveToL1));
     operatorController.y().onTrue(elevator.runOnce(elevator::moveToL2));
