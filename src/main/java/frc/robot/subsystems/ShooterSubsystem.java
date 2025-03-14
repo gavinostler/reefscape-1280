@@ -67,14 +67,15 @@ public class ShooterSubsystem implements Subsystem, Sendable {
 
   public void changePresetAngle(boolean inward) {
     // terrible way of changing dpad position because im too lazy to make it look nice
-    if((inward && currentPreset == 0) || (!inward && currentPreset == Shooter.ARM_POSITIONS.length - 1)) {
-      return;
-    }
-    int lastPreset = currentPreset;
-    currentPreset = inward ? currentPreset - 1 : currentPreset + 1;
-    if (!setArmAngle(Shooter.ARM_POSITIONS[currentPreset])) {
-      currentPreset = lastPreset;
-    };
+    setArmAngle(targetAngle + 0.03 * (inward ? -1 : 1));
+    // if((inward && currentPreset == 0) || (!inward && currentPreset == Shooter.ARM_POSITIONS.length - 1)) {
+    //   return;
+    // } // TODO
+    // int lastPreset = currentPreset;
+    // currentPreset = inward ? currentPreset - 1 : currentPreset + 1;
+    // if (!setArmAngle(Shooter.ARM_POSITIONS[currentPreset])) {
+    //   currentPreset = lastPreset;
+    // };
   }
 
   /**
@@ -133,12 +134,13 @@ public class ShooterSubsystem implements Subsystem, Sendable {
   }
 
   public boolean safeToMove(double proposedAngle) {
-    if (elevator ==  null) return false;
+    return true;
+    // if (elevator ==  null) return false;
 
-    if (elevator.getHeight() < Elevator.SAFETY_GENERAL_HEIGHT && proposedAngle < 0.02 && intake.getMode() == Mode.DOWN) return false;
-    if (elevator.getHeight() < Elevator.SAFETY_ZERO_HEIGHT && intake.getMode() == Mode.UP) return false;
+    // if (elevator.getHeight() < Elevator.SAFETY_GENERAL_HEIGHT && proposedAngle < 0.02 && intake.getMode() == Mode.DOWN) return false;
+    // if (elevator.getHeight() < Elevator.SAFETY_ZERO_HEIGHT && intake.getMode() == Mode.UP) return false;
 
-    return  true;
+    // return  true;
   }
 
   /**
