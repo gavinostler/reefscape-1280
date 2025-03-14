@@ -115,6 +115,10 @@ public class RobotContainer {
         "moveElevatorL1", elevator.runOnce(elevator::moveToL1));
     NamedCommands.registerCommand(
         "moveElevatorL2", elevator.runOnce(elevator::moveToL2));
+    
+    // Stow after auto
+    NamedCommands.registerCommand(
+        "stowSubsystems", shooter.runOnce(() -> { shooter.stowArm(); elevator.stowElevator(); new WaitCommand(1.2); groundIntake.setMode(GroundIntakeSubsystem.Mode.UP); }));
   }
 
   /**
