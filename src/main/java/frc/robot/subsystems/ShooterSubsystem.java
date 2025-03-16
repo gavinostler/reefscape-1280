@@ -199,7 +199,7 @@ public class ShooterSubsystem implements Subsystem, Sendable {
             runOnce(() -> enableShooter(true)), // pull algae back
             new WaitCommand(0.5), // time to pull back
             runOnce(() -> enableShooter(false)), // rev up the shooter
-            new WaitCommand(0.5), // give it time to come up to target speed
+            new WaitCommand(2.0), // give it time to come up to target speed
             runOnce(() -> enableFeed(false)), // hawk tuah
             new WaitCommand(1.5), // wait for shooting to finish
             runOnce(this::disableShooterAndFeed) // turn everything off

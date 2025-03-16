@@ -163,8 +163,8 @@ public final class Constants {
           InvertedValue.CounterClockwise_Positive; // right is primary, positive is
       // out
       shooterConfigs.Slot0.kS = 0.25; // Add kS V output to overcome static friction
-      shooterConfigs.Slot0.kV = 0.01; // A velocity target of 1 rps results in kV V output
-      shooterConfigs.Slot0.kA = 0.01; // An acceleration of 1 rps/s requires kA V output
+      shooterConfigs.Slot0.kV = 0.1; // A velocity target of 1 rps results in kV V output
+      shooterConfigs.Slot0.kA = 0.2; // An acceleration of 1 rps/s requires kA V output
       shooterConfigs.Slot0.kP = 0.11; // An error of 1 rps results in kP V output
       shooterConfigs.Slot0.kI = 0.0; // integrated error (0: no output for error)
       shooterConfigs.Slot0.kD = 0.0; // error derivative
