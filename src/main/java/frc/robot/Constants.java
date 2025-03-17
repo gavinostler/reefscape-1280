@@ -14,6 +14,8 @@ import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import com.revrobotics.spark.config.ClosedLoopConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import edu.wpi.first.math.controller.ArmFeedforward;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 
 /**
@@ -32,8 +34,6 @@ public final class Constants {
 
   public static class Driver {
     public static final int kDriverControllerPort = 0;
-    // public static final int kDriverJoystickPort = 1;
-    // public static final double kDriveDeadband = 0.05;
   }
 
   public static class Operator {
@@ -53,24 +53,18 @@ public final class Constants {
   }
 
   public static class Elevator {
+    public static final double TOP_HEIGHT = 1.0;
+    public static final double SHOOT_HEIGHT = 0.9; // TODO
+    public static final double L2_HEIGHT = 0.7;
+    public static final double L1_HEIGHT = 0.46;
+    public static final double GROUND_INTAKE_HEIGHT = 0.527; // TODO
+    public static final double BOTTOM_HEIGHT = 0.0;
+    public static final double HEIGHT_TOLERANCE = 0.01;
+
     public static final int motorId = 18;
-    public static final int encoderId = 56;
-    public static final double MOVEMENT_VOLTAGE = 4.0; // TODO: tune this
     public static final double CURRENT_LIMIT = 80.0;
     public static final double FF_TERM =
         0.5; // Volts to add as feedforward to account for gravity etc
-    public static final double TOLERANCE = 0.01;
-
-    public static final double HEIGHT_IN_ROTATIONS = 6; // Rotations (max is actually 6 rotations or 60 inches)
-    public static final double L1_HEIGHT_FRACTION = 0.0; // TODO set height fraction
-    public static final double L2_HEIGHT_FRACTION = 0.0; //
-    public static final double ELEVATOR_HEIGHT = 10322;
-    public static final double STOW_HEIGHT_FRACTION = 0.0;
-
-    public static final double SAFETY_ZERO_HEIGHT = 0.45; 
-    public static final double SAFETY_ANGLE_HEIGHT = 0.6;
-    public static final double SAFETY_GENERAL_HEIGHT = 0.1;
-    public static final double SAFETY_INTAKE_HEIGHT = 0.3;
 
     public static final TalonFXConfiguration elevatorConfigs = new TalonFXConfiguration();
 
@@ -80,13 +74,11 @@ public final class Constants {
       elevatorConfigs.MotorOutput.NeutralMode = NeutralModeValue.Brake;
       elevatorConfigs.MotorOutput.Inverted =
           InvertedValue.Clockwise_Positive; // positive should make it go up
-      elevatorConfigs.Slot0.GravityType =
-          GravityTypeValue.Elevator_Static; // Assuming CANcoder is after gear
-      // reduction, and encoder is zeroed at
-      // horizontal
+      // Assuming CANcoder is after gear reduction, and encoder is zeroed at horizontal
+      elevatorConfigs.Slot0.GravityType = GravityTypeValue.Elevator_Static;
 
-      // set to slot0 elevatortemporary config
-      elevatorConfigs.Slot0.kG = -0.8; // Springs are making it go up, must counteract
+      // TODO: merge kG with feedforward?
+      elevatorConfigs.Slot0.kG = -0.8; // TODO: tune
       elevatorConfigs.Slot0.kS = 0.0;
       elevatorConfigs.Slot0.kV = 7.0;
       elevatorConfigs.Slot0.kA = 0.0;
@@ -98,61 +90,84 @@ public final class Constants {
       elevatorConfigs.MotionMagic.MotionMagicCruiseVelocity = 2.0; // Target cruise velocity in rps
       elevatorConfigs.MotionMagic.MotionMagicAcceleration = 4.0; // Target acceleration in rps/s
       elevatorConfigs.MotionMagic.MotionMagicJerk = 40.0; // Target jerk in rps/(s^2)
-      elevatorConfigs.Feedback.FeedbackRemoteSensorID = encoderId;
       elevatorConfigs.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
-      elevatorConfigs.Feedback.SensorToMechanismRatio = 135;
-      elevatorConfigs.Feedback.RotorToSensorRatio = 1;
+      elevatorConfigs.Feedback.SensorToMechanismRatio = 135.0;
+      elevatorConfigs.Feedback.RotorToSensorRatio = 1.0; // note: does nothing
     }
   }
 
   public static class GroundIntake {
+    public static final double UP_ANGLE = 0.25;
+    public static final double DOWN_ANGLE = 0.084; // TODO
+
+    public static final int encoderChannelA = 3;
+    public static final int encoderChannelB = 4;
+    public static final double DISTANCE_PER_PULSE = 0.000531;
+    public static final double ENCODER_OFFSET = 0.25;
+    public static final double ANGLE_TOLERANCE = 0.02;
+    public static final boolean REVERSE_ENCODER = true;
+
     public static final int intakeId = 19;
     public static final int INTAKE_CURRENT_LIMIT = 40;
-    public static final double INTAKE_UP_VOLTAGE = 5.0;
-    public static final double INTAKE_DOWN_VOLTAGE = -1.0;
+    public static final double INTAKE_UP_VOLTAGE = 3.0; // TODO: tune
+    public static final double INTAKE_DOWN_VOLTAGE = -3.0; //
+
+    public static final double INTAKE_SETPOINT = 0.06;
 
     public static final SparkMaxConfig intakeConfig = new SparkMaxConfig();
 
     static {
-      final ClosedLoopConfig pidConfig = new ClosedLoopConfig();
-      pidConfig.pidf(0.0, 0.0, 0.0, 0.0);
-      intakeConfig.apply(pidConfig);
+      intakeConfig.idleMode(IdleMode.kBrake);
       intakeConfig.smartCurrentLimit(INTAKE_CURRENT_LIMIT);
     }
 
+    public static final PIDController intakePID = new PIDController(0.0, 0.0, 0.0);
+    public static final ArmFeedforward intakeFf = new ArmFeedforward(0, 1, 0.005);
+
+    static {
+      intakePID.setTolerance(0.005);
+    }
+
     public static final int pulleyId = 20;
-    public static final double PULLEY_CURRENT_LIMIT = 20.0;
-    public static final double PULLEY_VOLTAGE = 5.0;
+    public static final double PULLEY_CURRENT_LIMIT = 50.0;
+    public static final double PULLEY_VOLTAGE = 5.0; // TODO: tune
+
+    public static final TalonFXConfiguration pulleyConfigs = new TalonFXConfiguration();
+
+    static {
+      pulleyConfigs.CurrentLimits.StatorCurrentLimitEnable = true;
+      pulleyConfigs.CurrentLimits.StatorCurrentLimit = GroundIntake.PULLEY_CURRENT_LIMIT;
+    }
   }
 
   public static class Shooter {
+    public static final double ARM_MIN_ANGLE = -0.25;
+    public static final double ARM_MAX_ANGLE = 0.225;
+
+    public static final double STOW_ANGLE = 0.22; // TODO set stow angle
+    public static final double SHOOT_ANGLE = 0.13; // TODO
+    public static final double REEF_INTAKE_ANGLE = 0.055;
+    public static final double GROUND_INTAKE_ANGLE = -0.151; // TODO
+    public static final double ANGLE_TOLERANCE = 0.01;
+
     public static final int rightShooterId = 12;
     public static final int leftShooterId = 14;
     public static final double SHOOTER_SHOOT_TARGET_RPS = 100.0;
     public static final double SHOOTER_INTAKE_TARGET_RPS = 15.0;
     public static final double SHOOTER_PROCESSOR_TARGET_RPS = 20.0; // TODO: set processor speed
     public static final double SHOOTER_GEAR_REDUCTION = 0.5;
-    public static final double SHOOTER_CURRENT_LIMIT = 50.0;
+    public static final double SHOOTER_CURRENT_LIMIT = 80.0;
 
     public static final int rightFeedId = 13;
     public static final int leftFeedId = 15;
-    public static final double FEED_SPEED = 0.5; //
-    public static final double FEED_GEAR_REDUCTION = 3.0;
+    public static final double FEED_IN_SPEED = -0.5;
+    public static final double FEED_OUT_SPEED = 0.7;
     public static final int FEED_CURRENT_LIMIT = 15;
 
     public static final int armId = 16;
     public static final int armEncoderId = 57;
-    public static final double ARM_VELOCITY_UP = 0.4;
-    public static final double ARM_VELOCITY_DOWN = 0.4;
     public static final double ARM_CURRENT_LIMIT = 80.0;
-    public static final double ARM_FF_TERM =
-      0.0; // Volts to add as feedforward to account for gravity etc
-    public static final double ARM_MIN_ROTATION = -0.15;
-    public static final double ARM_MAX_ROTATION = 0.225;
-    public static final double ARM_STOW_ROTATION = 0.24; // TODO set stow rotation
-    public static final double[] ARM_POSITIONS = {-0.05, 0, 0.15};
 
-    // TODO: tune gains
     public static final TalonFXConfiguration shooterConfigs = new TalonFXConfiguration();
 
     static {
@@ -160,8 +175,8 @@ public final class Constants {
       shooterConfigs.CurrentLimits.StatorCurrentLimit = SHOOTER_CURRENT_LIMIT;
       shooterConfigs.MotorOutput.NeutralMode = NeutralModeValue.Brake;
       shooterConfigs.MotorOutput.Inverted =
-          InvertedValue.CounterClockwise_Positive; // right is primary, positive is
-      // out
+          InvertedValue.CounterClockwise_Positive; // right is primary, positive is out
+      // TODO: tune gains
       shooterConfigs.Slot0.kS = 0.25; // Add kS V output to overcome static friction
       shooterConfigs.Slot0.kV = 0.1; // A velocity target of 1 rps results in kV V output
       shooterConfigs.Slot0.kA = 0.2; // An acceleration of 1 rps/s requires kA V output
@@ -171,18 +186,15 @@ public final class Constants {
       shooterConfigs.Slot0.StaticFeedforwardSign = StaticFeedforwardSignValue.UseVelocitySign;
     }
 
-    public static final double SHOOTER_FF_TERM =
-        0.5; // Volts to add as feedforward to account for friction etc
-
     public static final SparkMaxConfig followerFeedConfig = new SparkMaxConfig();
     public static final SparkMaxConfig leaderFeedConfig = new SparkMaxConfig();
 
     static {
       final SparkMaxConfig feedConfig = new SparkMaxConfig();
       final ClosedLoopConfig pidConfig = new ClosedLoopConfig();
-      pidConfig.pidf(0.0, 0.0, 0.0, 0.0);
+      pidConfig.pidf(0.0, 0.0, 0.0, 0.0); // TODO: tune for braking
       feedConfig.apply(pidConfig);
-      feedConfig.idleMode(IdleMode.kCoast); // brake is not working
+      feedConfig.idleMode(IdleMode.kBrake); // note: brake isn't actually working
       feedConfig.smartCurrentLimit(FEED_CURRENT_LIMIT);
       leaderFeedConfig.apply(feedConfig).inverted(true);
       followerFeedConfig
@@ -198,23 +210,22 @@ public final class Constants {
       armConfigs.MotorOutput.NeutralMode = NeutralModeValue.Brake;
       armConfigs.MotorOutput.Inverted =
           InvertedValue.CounterClockwise_Positive; // positive should make it go up
-      armConfigs.Slot0.GravityType =
-          GravityTypeValue.Arm_Cosine; // Assuming CANcoder is after gear reduction, and
-      // encoder is zeroed at horizontal
-      armConfigs.Slot0.kG = 0.036;
-      armConfigs.Slot0.kS = 0;
-      armConfigs.Slot0.kV = 0.03;
-      armConfigs.Slot0.kA = 0;
-      armConfigs.Slot0.kP = 50.0;
-      armConfigs.Slot0.kI = 0;
-      armConfigs.Slot0.kD = 0;
+      // Assuming CANcoder is after gear reduction, and encoder is zeroed at horizontal
+      armConfigs.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
+      armConfigs.Slot0.kG = 0.046;
+      armConfigs.Slot0.kS = 0.0;
+      armConfigs.Slot0.kV = 0.0;
+      armConfigs.Slot0.kA = 0.0;
+      armConfigs.Slot0.kP = 30.0;
+      armConfigs.Slot0.kI = 0.0;
+      armConfigs.Slot0.kD = 1.0;
       armConfigs.Slot0.StaticFeedforwardSign = StaticFeedforwardSignValue.UseVelocitySign;
       // https://www.chiefdelphi.com/t/motion-magic-help-ctre/483319/2
-      armConfigs.MotionMagic.MotionMagicCruiseVelocity = 1.0; // Target cruise velocity in rps
-      armConfigs.MotionMagic.MotionMagicAcceleration = 1.0; // Target acceleration in rps/s
-      armConfigs.MotionMagic.MotionMagicJerk = 15.0; // Target jerk in rps/(s^2)
-      armConfigs.Feedback.FeedbackRemoteSensorID = armEncoderId;
+      armConfigs.MotionMagic.MotionMagicCruiseVelocity = 0.1; // Target cruise velocity in rps
+      armConfigs.MotionMagic.MotionMagicAcceleration = 0.1; // Target acceleration in rps/s
+      armConfigs.MotionMagic.MotionMagicJerk = 1.0; // Target jerk in rps/(s^2)
       armConfigs.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
+      armConfigs.Feedback.FeedbackRemoteSensorID = armEncoderId;
       armConfigs.Feedback.SensorToMechanismRatio = 1.0;
     }
   }

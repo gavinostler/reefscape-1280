@@ -7,11 +7,13 @@ import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.numbers.N1;
@@ -276,6 +278,34 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 m_hasAppliedOperatorPerspective = true;
               });
     }
+  }
+
+  final PIDController fieldPositionController = new PIDController(1, 0, 0.1);
+  final FieldCentricFacingAngle alignDriveRequest =
+      new FieldCentricFacingAngle()
+          .withDeadband(0.1)
+          .withRotationalDeadband(0.1)
+          .withHeadingPID(1, 0, 0.1);
+
+  /**
+   * Get command to align to a given field position with a certain heading
+   *
+   * @param targetPose where u want to go
+   */
+  public Command getAlignToFieldPosition(Pose2d targetPose) {
+    fieldPositionController.setSetpoint(0);
+    fieldPositionController.setTolerance(0.1);
+    return run(
+        () -> {
+          var relPose = targetPose.minus(getState().Pose);
+          double x_vel = fieldPositionController.calculate(relPose.getX());
+          double y_vel = fieldPositionController.calculate(relPose.getY());
+          setControl(
+              alignDriveRequest
+                  .withVelocityX(x_vel)
+                  .withVelocityY(y_vel)
+                  .withTargetDirection(targetPose.getRotation()));
+        });
   }
 
   private void startSimThread() {

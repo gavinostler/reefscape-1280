@@ -4,7 +4,6 @@ import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.VelocityVoltage;
-import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 // import com.ctre.phoenix6.hardware.CANdi;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -13,6 +12,7 @@ import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -20,12 +20,11 @@ import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
-import frc.robot.Constants.Elevator;
 import frc.robot.Constants.Shooter;
-import frc.robot.subsystems.GroundIntakeSubsystem.Mode;
+import frc.robot.state.State;
+import frc.robot.state.Validator;
 
 public class ShooterSubsystem implements Subsystem, Sendable {
-  // Motors and encoders
   private final TalonFX leaderShooterMotor = new TalonFX(Shooter.rightShooterId);
   private final TalonFX followerShooterMotor = new TalonFX(Shooter.leftShooterId);
   private final SparkMax leaderFeedMotor = new SparkMax(Shooter.rightFeedId, MotorType.kBrushless);
@@ -34,20 +33,17 @@ public class ShooterSubsystem implements Subsystem, Sendable {
   private final CANcoder armEncoder = new CANcoder(Shooter.armEncoderId);
 
   private final NeutralOut shooterNeutralRequest = new NeutralOut();
-  private final VelocityVoltage shooterVelocityRequest =
-      new VelocityVoltage(0.0).withSlot(0).withFeedForward(Shooter.SHOOTER_FF_TERM);
-  private final MotionMagicVoltage armAngleRequest =
-      new MotionMagicVoltage(0.0).withFeedForward(Shooter.ARM_FF_TERM);
-  private final VelocityVoltage armVelocityRequest =
-      new VelocityVoltage(0.0).withSlot(1).withFeedForward(Shooter.ARM_FF_TERM);
+  private final VelocityVoltage shooterVelocityRequest = new VelocityVoltage(0.0);
+  private final MotionMagicVoltage armAngleRequest = new MotionMagicVoltage(0.0);
 
-  private double targetAngle;
+  private double targetArmAngle = 0.0;
 
-  private int currentPreset = Shooter.ARM_POSITIONS.length - 1;
-  private ElevatorSubsystem elevator;
-  private GroundIntakeSubsystem intake;
+  private State.Shooter state = State.Shooter.STOW;
+  private final Validator validator;
 
-  public ShooterSubsystem() {
+  public ShooterSubsystem(Validator validator) {
+    this.validator = validator;
+
     leaderShooterMotor.getConfigurator().apply(Shooter.shooterConfigs);
     followerShooterMotor.getConfigurator().apply(Shooter.shooterConfigs);
     followerShooterMotor.setControl(new Follower(Shooter.rightShooterId, true));
@@ -58,24 +54,62 @@ public class ShooterSubsystem implements Subsystem, Sendable {
         Shooter.followerFeedConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     armMotor.getConfigurator().apply(Shooter.armConfigs);
+
+    setState(state);
   }
 
-  public void setSubsystems(ElevatorSubsystem elevator, GroundIntakeSubsystem intake) {
-    this.elevator = elevator;
-    this.intake = intake;
+  public State.Shooter getState() {
+    return state;
   }
 
-  public void changePresetAngle(boolean inward) {
-    // terrible way of changing dpad position because im too lazy to make it look nice
-    setArmAngle(targetAngle + 0.03 * (inward ? -1 : 1));
-    // if((inward && currentPreset == 0) || (!inward && currentPreset == Shooter.ARM_POSITIONS.length - 1)) {
-    //   return;
-    // } // TODO
-    // int lastPreset = currentPreset;
-    // currentPreset = inward ? currentPreset - 1 : currentPreset + 1;
-    // if (!setArmAngle(Shooter.ARM_POSITIONS[currentPreset])) {
-    //   currentPreset = lastPreset;
-    // };
+  /**
+   * Attempt to go to the given state If the state is currently impossible or is already the current
+   * state, do nothing
+   *
+   * @param value the state to try to set
+   */
+  public void setState(State.Shooter value) {
+    if (state == value || !validator.setStateValid(value)) return;
+    state = value;
+    moveArmAngle(state.angle);
+  }
+
+  /**
+   * Get the next state in the given direction, from the current state The state returned will be
+   * the current state when there is no next state.
+   *
+   * @param downward false for up, true for down
+   * @return the next closest state, or the current state
+   */
+  private State.Shooter nextState(boolean downward) {
+    State.Shooter next;
+    if (downward) {
+      next =
+          switch (state) {
+            case STOW -> State.Shooter.SHOOT;
+            case SHOOT -> State.Shooter.REEF_INTAKE;
+            case REEF_INTAKE -> State.Shooter.GROUND_INTAKE;
+            case GROUND_INTAKE -> State.Shooter.GROUND_INTAKE;
+          };
+    } else {
+      next =
+          switch (state) {
+            case STOW -> State.Shooter.STOW;
+            case SHOOT -> State.Shooter.STOW;
+            case REEF_INTAKE -> State.Shooter.SHOOT;
+            case GROUND_INTAKE -> State.Shooter.REEF_INTAKE;
+          };
+    }
+    return next;
+  }
+
+  /**
+   * Try to move the state in a certain direction.
+   *
+   * @param downward false for up, true for down
+   */
+  public void moveState(boolean downward) {
+    setState(nextState(downward));
   }
 
   /**
@@ -102,9 +136,8 @@ public class ShooterSubsystem implements Subsystem, Sendable {
    * @param inward Sets the feed direction for intake/shooting. (it sucks)
    */
   public void enableFeed(boolean inward) {
-    leaderFeedMotor.set(Shooter.FEED_SPEED * (inward ? -1 : 1));
-    // leaderFeedMotor.getClosedLoopController().setReference(Shooter.FEED_TARGET_RPM,
-    // ControlType.kVelocity);
+    double speed = inward ? Shooter.FEED_IN_SPEED : Shooter.FEED_OUT_SPEED;
+    leaderFeedMotor.set(speed);
   }
 
   /** Set the PID controller of feed to target current position */
@@ -116,7 +149,6 @@ public class ShooterSubsystem implements Subsystem, Sendable {
   /** Disables the feed motor */
   public void disableFeed() {
     leaderFeedMotor.set(0.0);
-    leaderFeedMotor.getEncoder().getPosition();
   }
 
   public void disableShooterAndFeed() {
@@ -133,52 +165,23 @@ public class ShooterSubsystem implements Subsystem, Sendable {
     return armEncoder.getPosition().getValueAsDouble();
   }
 
-  public boolean safeToMove(double proposedAngle) {
-    return true;
-    // if (elevator ==  null) return false;
-
-    // if (elevator.getHeight() < Elevator.SAFETY_GENERAL_HEIGHT && proposedAngle < 0.02 && intake.getMode() == Mode.DOWN) return false;
-    // if (elevator.getHeight() < Elevator.SAFETY_ZERO_HEIGHT && intake.getMode() == Mode.UP) return false;
-
-    // return  true;
+  /**
+   * @return Returns true if shooter angle is within tolerance of the state setpoint
+   */
+  public boolean atSetpoint() {
+    return MathUtil.isNear(state.angle, getArmAngle(), Shooter.ANGLE_TOLERANCE);
   }
 
   /**
-   * Zero is horizontal
+   * Zero is horizontal Will warn and not move if angle is outside arm range
    *
    * @param angle Rotations
    * @return boolean if successful
    */
-  public boolean setArmAngle(double angle) {
-    angle = Math.min(angle, Shooter.ARM_MAX_ROTATION);
-    angle = Math.max(angle, Shooter.ARM_MIN_ROTATION);
-
-    if (!safeToMove(angle)) return false;
-    armMotor.setControl(armAngleRequest.withPosition(angle));
-    targetAngle = angle;
-    return true;
-  }
-
-  /** Set arm target angle to current arm angle */
-  public void holdArmAngle() {
-    setArmAngle(getArmAngle());
-  }
-
-  public void holdTargetArmAngle() {
-    setArmAngle(targetAngle);
-  }
-
-  /**
-   * @param downward false for up, true for down
-   */
-  public void moveArm(boolean downward) {
-    double velocity = downward ? -Shooter.ARM_VELOCITY_DOWN : Shooter.ARM_VELOCITY_UP;
-    armMotor.setControl(armVelocityRequest.withVelocity(velocity));
-  }
-
-  // Method to stow arm at set angle
-  public void stowArm() {
-    setArmAngle(Shooter.ARM_STOW_ROTATION);
+  private void moveArmAngle(double angle) {
+    if (!validator.moveArmAngleValid(angle)) return;
+    targetArmAngle = angle;
+    armMotor.setControl(armAngleRequest.withPosition(targetArmAngle));
   }
 
   /** Method to intake algae by starting feed and shooter inwards */
@@ -199,7 +202,7 @@ public class ShooterSubsystem implements Subsystem, Sendable {
             runOnce(() -> enableShooter(true)), // pull algae back
             new WaitCommand(0.5), // time to pull back
             runOnce(() -> enableShooter(false)), // rev up the shooter
-            new WaitCommand(2.0), // give it time to come up to target speed
+            new WaitCommand(0.5), // give it time to come up to target speed
             runOnce(() -> enableFeed(false)), // hawk tuah
             new WaitCommand(1.5), // wait for shooting to finish
             runOnce(this::disableShooterAndFeed) // turn everything off
@@ -216,7 +219,7 @@ public class ShooterSubsystem implements Subsystem, Sendable {
     return new SequentialCommandGroup(
             runOnce(this::disableShooterAndFeed), // stop everything first
             runOnce(() -> enableFeed(true)),
-            new WaitCommand(1), // time to pull back
+            new WaitCommand(1.0), // time to pull back
             runOnce(() -> shootProcessor()), // rev up the shooter to processor speed
             new WaitCommand(1.2), // give it time to come up to target speed
             runOnce(() -> enableFeed(false)), // hawk tuah
@@ -230,6 +233,7 @@ public class ShooterSubsystem implements Subsystem, Sendable {
   public void initSendable(SendableBuilder builder) {
     builder.setSmartDashboardType("Shooter");
     builder.addDoubleProperty("true arm angle", this::getArmAngle, null);
-    builder.addDoubleProperty("goal arm angle", () -> targetAngle, this::setArmAngle);
+    builder.addDoubleProperty("target arm angle", () -> targetArmAngle, this::moveArmAngle);
+    builder.addStringProperty("State", () -> getState().toString(), null);
   }
 }

@@ -8,23 +8,29 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
-import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.Driver;
 // import frc.robot.aesthetic.Colors;
 import frc.robot.controller.AgnosticController;
 import frc.robot.generated.TunerConstants;
+import frc.robot.state.State;
+import frc.robot.state.Validator;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.GroundIntakeSubsystem;
@@ -40,8 +46,13 @@ import frc.robot.subsystems.ShooterSubsystem;
 public class RobotContainer {
   private double MaxSpeed =
       TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
+  private double LowMaxSpeed = MaxSpeed / 2; // TODO: set lowered speed for precise alignment
+  private boolean loweredSpeed = false;
+
   private double MaxAngularRate =
       RotationsPerSecond.of(1.5).in(RadiansPerSecond); // 3/4 of a rotation per second max
+  private double LowMaxAngularRate =
+      MaxAngularRate / 2; // TODO: set lowered rate for precise alignment
   // angular velocity
 
   /* Setting up bindings for necessary control of the swerve drive platform */
@@ -54,21 +65,26 @@ public class RobotContainer {
 
   // The robot's subsystems and commands are defined here...
   private final CommandSwerveDrivetrain drivetrain; // declared later due to NamedCommands
-  private final GroundIntakeSubsystem groundIntake = new GroundIntakeSubsystem();
-  private final ShooterSubsystem shooter = new ShooterSubsystem();
-  public final ElevatorSubsystem elevator = new ElevatorSubsystem();
+  private final Validator validator = new Validator();
+  public final ElevatorSubsystem elevator = new ElevatorSubsystem(validator);
+  private final ShooterSubsystem shooter = new ShooterSubsystem(validator);
+  private final GroundIntakeSubsystem groundIntake = new GroundIntakeSubsystem(validator);
   private final AgnosticController driverController =
       new AgnosticController(Driver.kDriverControllerPort);
   private final AgnosticController operatorController =
       driverController; // Aliased to main controller for now, TODO
   private final Telemetry logger = new Telemetry(MaxSpeed);
-  //   private final Colors colors = new Colors();
+  // private final Colors colors = new Colors();
 
   // sendable for choosing autos
   private final SendableChooser<Command> autoChooser;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    // NOTE: robot must be in stowed state when initializing because of assumptions
+    validator.elevator = elevator;
+    validator.shooter = shooter;
+    validator.groundIntake = groundIntake;
     // Configure the trigger bindings
     // colors.animateCandle(Colors.Effect.CHROMA);
     registerNamedCommands();
@@ -76,21 +92,20 @@ public class RobotContainer {
     configureBindings();
     autoChooser = AutoBuilder.buildAutoChooser("ventura_auto");
     SmartDashboard.putData("Auto Mode", autoChooser);
-    SmartDashboard.putData("shooter", shooter);
     SmartDashboard.putData("elevator", elevator);
-    elevator.setSubsystems(shooter, groundIntake);
-    shooter.setSubsystems(elevator, groundIntake);
+    SmartDashboard.putData("shooter", shooter);
+    SmartDashboard.putData("ground intake", groundIntake);
+    SmartDashboard.putData("validator", validator);
   }
 
   /** Register named commands, for use in autonomous */
   public void registerNamedCommands() {
-    // GroundIntake commands
+    // Ground intake commands
     NamedCommands.registerCommand(
         "groundIntakeDown",
-        groundIntake.runOnce(() -> groundIntake.setMode(GroundIntakeSubsystem.Mode.DOWN)));
+        groundIntake.runOnce(() -> groundIntake.setState(State.GroundIntake.DOWN)));
     NamedCommands.registerCommand(
-        "groundIntakeUp",
-        groundIntake.runOnce(() -> groundIntake.setMode(GroundIntakeSubsystem.Mode.UP)));
+        "groundIntakeUp", groundIntake.runOnce(() -> groundIntake.setState(State.GroundIntake.UP)));
     NamedCommands.registerCommand(
         "groundIntakeOff", groundIntake.runOnce(() -> groundIntake.off()));
 
@@ -111,13 +126,20 @@ public class RobotContainer {
 
     // Elevator commands
     NamedCommands.registerCommand(
-        "moveElevatorL1", elevator.runOnce(elevator::moveToL1));
+        "moveElevatorGroundIntake",
+        elevator.runOnce(() -> elevator.setState(State.Elevator.GROUND_INTAKE)));
     NamedCommands.registerCommand(
-        "moveElevatorL2", elevator.runOnce(elevator::moveToL2));
-    
+        "moveElevatorL1", elevator.runOnce(() -> elevator.setState(State.Elevator.L1)));
+    NamedCommands.registerCommand(
+        "moveElevatorL2", elevator.runOnce(() -> elevator.setState(State.Elevator.L2)));
+    NamedCommands.registerCommand(
+        "moveElevatorShoot", elevator.runOnce(() -> elevator.setState(State.Elevator.SHOOT)));
+
+    NamedCommands.registerCommand("L1", runL1());
+    NamedCommands.registerCommand("L2", runL2());
+
     // Stow after auto
-    NamedCommands.registerCommand(
-        "stowSubsystems", shooter.runOnce(() -> { shooter.stowArm(); elevator.stowElevator(); new WaitCommand(1.2); groundIntake.setMode(GroundIntakeSubsystem.Mode.UP); }));
+    NamedCommands.registerCommand("stowSubsystems", stowSubsystems());
   }
 
   /**
@@ -131,13 +153,25 @@ public class RobotContainer {
     }
 
     // Driver Controls
+    // TODO: way to do precise movement near reef
     drivetrain.setDefaultCommand(
         drivetrain.applyRequest(
-            () ->
-                drive
-                    .withVelocityX(driverController.getLeftY() * MaxSpeed * (1 - elevator.getHeight()))
-                    .withVelocityY(driverController.getLeftX() * MaxSpeed * (1 - elevator.getHeight()))
-                    .withRotationalRate(-driverController.getRightX() * MaxAngularRate * (1 - elevator.getHeight()))));
+            () -> {
+              double speed;
+              double angularRate;
+              double fraction = getSwerveSpeedFraction();
+              if (loweredSpeed) {
+                speed = LowMaxSpeed;
+                angularRate = LowMaxAngularRate;
+              } else {
+                speed = MaxSpeed * fraction;
+                angularRate = MaxAngularRate * fraction;
+              }
+              return drive
+                  .withVelocityX(driverController.getLeftY() * speed)
+                  .withVelocityY(driverController.getLeftX() * speed)
+                  .withRotationalRate(-driverController.getRightX() * angularRate);
+            }));
 
     driverController
         .resetHeading()
@@ -146,72 +180,74 @@ public class RobotContainer {
     drivetrain.registerTelemetry(logger::telemeterize);
 
     // Operator Controls
+    // TODO: delay transitions so that state machine always reflects reality
     // Elevator controls
-    operatorController.b().onTrue(elevator.runOnce(elevator::moveToL1));
-    operatorController.y().onTrue(elevator.runOnce(elevator::moveToL2));
-    operatorController
-        .povUp()
-        .whileTrue(elevator.runOnce(() -> elevator.moveElevator(false)))
-        .whileTrue(elevator.run(elevator::elevatorMovement))
-        .onFalse(elevator.runOnce(elevator::holdHeight));
-    operatorController
-        .povDown()
-        .whileTrue(elevator.runOnce(() -> elevator.moveElevator(true)))
-        .whileTrue(elevator.run(elevator::elevatorMovement))
-        .onFalse(elevator.runOnce(elevator::holdHeight));
+    operatorController.b().onTrue(runL1());
+    operatorController.y().onTrue(runL2());
+    operatorController.povUp().onTrue(elevator.runOnce(() -> elevator.moveState(false)));
+    operatorController.povDown().onTrue(elevator.runOnce(() -> elevator.moveState(true)));
 
     // GroundIntake controls
-    operatorController.a()
-        .onTrue(groundIntake.runOnce(groundIntake::toggleMode))
-        .onFalse(groundIntake.runOnce(groundIntake::off));
+    operatorController.a().onTrue(runGroundIntake());
 
-    // Shooter pivot controls
-    operatorController.povRight()
-        .onTrue(shooter.runOnce(() -> shooter.changePresetAngle(false)))
-        .onFalse(shooter.runOnce(shooter::holdTargetArmAngle));
-    operatorController
-        .povLeft()
-        .whileTrue(shooter.runOnce(() -> shooter.changePresetAngle(true)))
-        .onFalse(shooter.runOnce(shooter::holdTargetArmAngle));
+    // Shooter arm controls
+    // Note: will not do anything if an uninterruptible shoot procedure is running
+    operatorController.povRight().onTrue(shooter.runOnce(() -> shooter.moveState(false)));
+    operatorController.povLeft().onTrue(shooter.runOnce(() -> shooter.moveState(true)));
 
     // Shooter motor controls
-    operatorController.leftTrigger()
-        .onTrue(shooter.runOnce(() -> { shooter.intakeAlgae(); groundIntake.enablePulley(); }))
-        .onFalse(shooter.runOnce(() -> { shooter.disableShooter(); shooter.brakeFeed(); groundIntake.disablePulley(); }));
+    operatorController
+        .leftTrigger()
+        .onTrue(
+            shooter.runOnce(
+                () -> {
+                  shooter.intakeAlgae();
+                  groundIntake.enablePulley();
+                }))
+        .onFalse(
+            shooter.runOnce(
+                () -> {
+                  shooter.disableShooter();
+                  shooter.brakeFeed();
+                  groundIntake.disablePulley();
+                }));
     operatorController.rightTrigger().onTrue(shooter.runShootAlgae());
     operatorController.x().onTrue(shooter.runShootProcessor());
 
     // Reset odometry
-    operatorController.resetHeading().onTrue(drivetrain.runOnce(() -> {
-        Pose2d x = drivetrain.getState().Pose;
-        x = x.rotateBy(new Rotation2d(Math.PI));
-        drivetrain.resetPose(x);
-    }));
+    operatorController
+        .resetHeading()
+        .onTrue(
+            drivetrain.runOnce(
+                () -> {
+                  Pose2d x = drivetrain.getState().Pose;
+                  x = x.rotateBy(new Rotation2d(Math.PI));
+                  drivetrain.resetPose(x);
+                }));
 
     // Stow all subsystems
-    operatorController.rightStick()
-    .onTrue(shooter.runOnce(() -> { shooter.stowArm(); elevator.stowElevator(); new WaitCommand(1.2); groundIntake.setMode(GroundIntakeSubsystem.Mode.UP); }));
+    operatorController.rightStick().onTrue(stowSubsystems());
   }
 
   void bindSysId() {
-    driverController //
+    driverController
         .back()
         .and(driverController.y())
         .whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-    driverController //
+    driverController
         .back()
         .and(driverController.x())
         .whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-    driverController //
+    driverController
         .start()
         .and(driverController.y())
         .whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-    driverController //
+    driverController
         .start()
         .and(driverController.x())
         .whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
-    driverController //
+    driverController
         .start()
         .and(driverController.povDown())
         .onTrue(drivetrain.runOnce(drivetrain::sysIdCycleRoutine));
@@ -219,5 +255,106 @@ public class RobotContainer {
 
   public Command getAutonomousCommand() {
     return autoChooser.getSelected();
+  }
+
+  public Command runGroundIntake() {
+    return new SequentialCommandGroup(
+            new InstantCommand(() -> setSafety(false)), // we don't need safety for this
+            groundIntake.runOnce(
+                () -> groundIntake.setState(State.GroundIntake.DOWN)), // move ground intake down
+            new WaitCommand(0.5), // wait until it's set
+            elevator.runOnce(
+                () ->
+                    elevator.setState(
+                        State.Elevator.GROUND_INTAKE)), // move elevator to ground intake position
+            new WaitUntilCommand(elevator::atSetpoint).withTimeout(1.0), // wait until it's set
+            shooter.runOnce(
+                () ->
+                    shooter.setState(
+                        State.Shooter.GROUND_INTAKE)), // move shooter to ground intake angle
+            new WaitUntilCommand(shooter::atSetpoint).withTimeout(1.0), // wait until it's set
+            new InstantCommand(() -> setSafety(true)) // put safety back
+            )
+        .withInterruptBehavior(InterruptionBehavior.kCancelIncoming); // don't get interrupted
+  }
+
+  public Command runL1() {
+    return new SequentialCommandGroup(
+            new InstantCommand(() -> setSafety(false)), // we don't need safety for this
+            elevator.runOnce(
+                () -> elevator.setState(State.Elevator.L1)), // move elevator to L1 position
+            new WaitUntilCommand(elevator::atSetpoint).withTimeout(1.0), // wait until it's set
+            shooter.runOnce(
+                () ->
+                    shooter.setState(State.Shooter.REEF_INTAKE)), // move shooter to L1 intake angle
+            new WaitCommand(2.0), // wait until it's set
+            groundIntake.runOnce(
+                () ->
+                    groundIntake.setState(
+                        State.GroundIntake.UP)), // move ground intake up (away from reef)
+            new WaitCommand(0.5), // wait until it's set
+            new InstantCommand(() -> setSafety(true)) // put safety back
+            )
+        .withInterruptBehavior(InterruptionBehavior.kCancelIncoming); // don't get interrupted
+  }
+
+  public Command runL2() {
+    return new SequentialCommandGroup(
+            new InstantCommand(() -> setSafety(false)), // we don't need safety for this
+            elevator.runOnce(
+                () -> elevator.setState(State.Elevator.L2)), // move elevator to L1 position
+            new WaitUntilCommand(elevator::atSetpoint).withTimeout(1.0), // wait until it's set
+            shooter.runOnce(
+                () ->
+                    shooter.setState(State.Shooter.REEF_INTAKE)), // move shooter to L1 intake angle
+            new WaitCommand(2.0), // wait until it's set
+            groundIntake.runOnce(
+                () ->
+                    groundIntake.setState(
+                        State.GroundIntake.UP)), // move ground intake up (away from reef)
+            new WaitCommand(0.5), // wait until it's set
+            new InstantCommand(() -> setSafety(true)) // put safety back
+            )
+        .withInterruptBehavior(InterruptionBehavior.kCancelIncoming); // don't get interrupted
+  }
+
+  public Command stowSubsystems() {
+    return new SequentialCommandGroup(
+            new InstantCommand(() -> setSafety(false)),
+            groundIntake.runOnce(
+                () ->
+                    groundIntake.setState(
+                        State.GroundIntake.DOWN)), // move ground intake out of the way
+            new WaitCommand(1.0), // wait until it's set
+            shooter.runOnce(() -> shooter.setState(State.Shooter.STOW)), // stow shooter
+            new WaitUntilCommand(shooter::atSetpoint).withTimeout(3.0), // wait until it's set
+            elevator.runOnce(() -> elevator.setState(State.Elevator.BOTTOM)), // stow elevator
+            new WaitUntilCommand(elevator::atSetpoint).withTimeout(3.0), // wait until it's set
+            groundIntake.runOnce(() -> groundIntake.setState(State.GroundIntake.UP)),
+            new WaitCommand(0.5), // wait until it's set
+            new InstantCommand(() -> setSafety(true)))
+        .withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
+  }
+
+  public void setSafety(boolean state) {
+    Validator.safetyEnabled = state;
+  }
+
+  private double getSwerveSpeedFraction() {
+    // https://www.desmos.com/calculator/ghdph63sxf
+    final double slowingHeight = 0.2;
+    final double minSpeedFraction = 0.05;
+    final double curveCoefficient = (minSpeedFraction - 1) / Math.pow(slowingHeight - 1, 2);
+    final double height = elevator.getHeight();
+    double speedFraction;
+    if (height < slowingHeight) {
+      speedFraction = 1.0;
+    } else {
+      double curveTerm = curveCoefficient * (height - slowingHeight) * (height - 1);
+      speedFraction = (1 - minSpeedFraction) / (slowingHeight - 1) * (height - slowingHeight) + 1;
+      speedFraction += curveTerm;
+    }
+    speedFraction = MathUtil.clamp(speedFraction, minSpeedFraction, 1.0);
+    return speedFraction;
   }
 }
