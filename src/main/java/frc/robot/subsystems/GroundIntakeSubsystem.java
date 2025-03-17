@@ -18,7 +18,6 @@ public class GroundIntakeSubsystem extends SubsystemBase {
   private final Encoder encoder =
       new Encoder(GroundIntake.encoderChannelA, GroundIntake.encoderChannelB);
 
-  private double intakeVoltage = 0.0;
   private boolean disabled = false;
 
   private State.GroundIntake state = State.GroundIntake.UP;
@@ -78,35 +77,24 @@ public class GroundIntakeSubsystem extends SubsystemBase {
   }
 
   /**
-   * Check if the current angle is at or past a given angle This factors in the direction of the
-   * intake motor
+   * Check if the current angle is at the state angle
    *
-   * @param targetAngle the angle to see if the ground intake is at or past
    * @return true if the current angle is at or past the given angle
    */
-  public boolean atAngle(double targetAngle) {
-    if (intakeVoltage != 0.0)
-      return Math.signum(intakeVoltage) * (targetAngle - getAngle()) < GroundIntake.ANGLE_TOLERANCE;
-    return Math.abs(targetAngle - getAngle()) < GroundIntake.ANGLE_TOLERANCE;
-  }
-
-  private void setIntakeVoltage(double voltage) {
-    intakeVoltage = voltage;
-    intakeMotor.setVoltage(intakeVoltage);
+  public boolean atSetpoint() {
+    return GroundIntake.intakePID.atSetpoint();
   }
 
   private void intakeUp() {
-    // setIntakeVoltage(GroundIntake.INTAKE_UP_VOLTAGE);
     GroundIntake.intakePID.setSetpoint(GroundIntake.UP_ANGLE);
   }
 
   private void intakeDown() {
-    // setIntakeVoltage(GroundIntake.INTAKE_DOWN_VOLTAGE);
     GroundIntake.intakePID.setSetpoint(GroundIntake.DOWN_ANGLE);
   }
 
   private void intakeOff() {
-    setIntakeVoltage(0.0);
+    intakeMotor.setVoltage(0.0);
   }
 
   public void enablePulley() {
@@ -135,9 +123,8 @@ public class GroundIntakeSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // if (intakeVoltage != 0.0 && atAngle(state.angle)) intakeOff();
     if (disabled) return;
-    setIntakeVoltage(
+    intakeMotor.setVoltage(
       GroundIntake.intakePID.calculate(getAngle()) + 
       GroundIntake.intakeFf.calculate(state.angle, 1.0)
     );
@@ -150,9 +137,8 @@ public class GroundIntakeSubsystem extends SubsystemBase {
         "pulley voltage",
         () -> pulleyMotor.getMotorVoltage().getValueAsDouble(),
         pulleyMotor::setVoltage);
-    builder.addDoubleProperty("intake voltage", () -> intakeVoltage, this::setIntakeVoltage);
     builder.addDoubleProperty("angle", this::getAngle, null);
-    builder.addBooleanProperty("at state angle", () -> atAngle(state.angle), null);
+    builder.addBooleanProperty("at state angle", this::atSetpoint, null);
     builder.addStringProperty(
         "State",
         () -> getState().toString(),

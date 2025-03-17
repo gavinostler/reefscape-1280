@@ -110,10 +110,6 @@ public final class Constants {
 
     public static final int intakeId = 19;
     public static final int INTAKE_CURRENT_LIMIT = 20;
-    public static final double INTAKE_UP_VOLTAGE = 3.0; // TODO: tune
-    public static final double INTAKE_DOWN_VOLTAGE = -3.0; //
-
-    public static final double INTAKE_SETPOINT = 0.06;
 
     public static final SparkMaxConfig intakeConfig = new SparkMaxConfig();
 
