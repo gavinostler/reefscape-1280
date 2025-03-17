@@ -14,6 +14,7 @@ import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import com.revrobotics.spark.config.ClosedLoopConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
+
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.util.Color8Bit;
@@ -104,11 +105,11 @@ public final class Constants {
     public static final int encoderChannelB = 4;
     public static final double DISTANCE_PER_PULSE = 0.000531;
     public static final double ENCODER_OFFSET = 0.25;
-    public static final double ANGLE_TOLERANCE = 0.02;
+    public static final double ANGLE_TOLERANCE = 0.01;
     public static final boolean REVERSE_ENCODER = true;
 
     public static final int intakeId = 19;
-    public static final int INTAKE_CURRENT_LIMIT = 40;
+    public static final int INTAKE_CURRENT_LIMIT = 20;
     public static final double INTAKE_UP_VOLTAGE = 3.0; // TODO: tune
     public static final double INTAKE_DOWN_VOLTAGE = -3.0; //
 
@@ -121,11 +122,11 @@ public final class Constants {
       intakeConfig.smartCurrentLimit(INTAKE_CURRENT_LIMIT);
     }
 
-    public static final PIDController intakePID = new PIDController(0.0, 0.0, 0.0);
-    public static final ArmFeedforward intakeFf = new ArmFeedforward(0, 1, 0.005);
+    public static final PIDController intakePID = new PIDController(40.0, 0.0, 5);
+    public static final ArmFeedforward intakeFf = new ArmFeedforward(0.0, 0.5, 0.0, 1.0);
 
     static {
-      intakePID.setTolerance(0.005);
+      intakePID.setTolerance(ANGLE_TOLERANCE);
     }
 
     public static final int pulleyId = 20;

@@ -189,6 +189,7 @@ public class RobotContainer {
 
     // GroundIntake controls
     operatorController.a().onTrue(runGroundIntake());
+    // operatorController.a().onTrue(groundIntake.runOnce(groundIntake::toggleState));
 
     // Shooter arm controls
     // Note: will not do anything if an uninterruptible shoot procedure is running

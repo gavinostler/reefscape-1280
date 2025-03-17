@@ -19,6 +19,7 @@ public class GroundIntakeSubsystem extends SubsystemBase {
       new Encoder(GroundIntake.encoderChannelA, GroundIntake.encoderChannelB);
 
   private double intakeVoltage = 0.0;
+  private boolean disabled = false;
 
   private State.GroundIntake state = State.GroundIntake.UP;
   private final Validator validator;
@@ -95,11 +96,13 @@ public class GroundIntakeSubsystem extends SubsystemBase {
   }
 
   private void intakeUp() {
-    setIntakeVoltage(GroundIntake.INTAKE_UP_VOLTAGE);
+    // setIntakeVoltage(GroundIntake.INTAKE_UP_VOLTAGE);
+    GroundIntake.intakePID.setSetpoint(GroundIntake.UP_ANGLE);
   }
 
   private void intakeDown() {
-    setIntakeVoltage(GroundIntake.INTAKE_DOWN_VOLTAGE);
+    // setIntakeVoltage(GroundIntake.INTAKE_DOWN_VOLTAGE);
+    GroundIntake.intakePID.setSetpoint(GroundIntake.DOWN_ANGLE);
   }
 
   private void intakeOff() {
@@ -127,11 +130,17 @@ public class GroundIntakeSubsystem extends SubsystemBase {
   public void off() {
     intakeOff();
     disablePulley();
+    disabled = true;
   }
 
   @Override
   public void periodic() {
-    if (intakeVoltage != 0.0 && atAngle(state.angle)) intakeOff();
+    // if (intakeVoltage != 0.0 && atAngle(state.angle)) intakeOff();
+    if (disabled) return;
+    setIntakeVoltage(
+      GroundIntake.intakePID.calculate(getAngle()) + 
+      GroundIntake.intakeFf.calculate(state.angle, 1.0)
+    );
   }
 
   @Override
