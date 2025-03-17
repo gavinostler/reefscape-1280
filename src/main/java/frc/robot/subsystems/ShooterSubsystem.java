@@ -69,7 +69,7 @@ public class ShooterSubsystem implements Subsystem, Sendable {
    * @param value the state to try to set
    */
   public void setState(State.Shooter value) {
-    if (state == value || !validator.setStateValid(value)) return;
+    if (!validator.setStateValid(value)) return;
     state = value;
     moveArmAngle(state.angle);
   }

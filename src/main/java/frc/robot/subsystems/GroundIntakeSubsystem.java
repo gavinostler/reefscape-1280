@@ -48,7 +48,7 @@ public class GroundIntakeSubsystem extends SubsystemBase {
    * @param value the state to try to set
    */
   public void setState(State.GroundIntake value) {
-    if (state == value || !validator.setStateValid(value)) return;
+    if (!validator.setStateValid(value)) return;
     state = value;
     switch (state) {
       case DOWN -> down();
