@@ -14,8 +14,9 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.LinearFilter;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -65,7 +66,7 @@ public class RobotContainer {
               DriveRequestType.Velocity); // Use open-loop control for drive motors
 
   // The robot's subsystems and commands are defined here...
-  private final CommandSwerveDrivetrain drivetrain; // declared later due to NamedCommands
+  public final CommandSwerveDrivetrain drivetrain; // declared later due to NamedCommands
   private final Validator validator = new Validator();
   public final ElevatorSubsystem elevator = new ElevatorSubsystem(validator);
   private final ShooterSubsystem shooter = new ShooterSubsystem(validator);
@@ -222,15 +223,15 @@ public class RobotContainer {
     operatorController.rightTrigger().onTrue(shooter.runShootAlgae());
     operatorController.x().onTrue(shooter.runShootProcessor());
 
-    // Reset odometry
+    // Reset heading
     operatorController
         .resetHeading()
         .onTrue(
             drivetrain.runOnce(
                 () -> {
-                  Pose2d x = drivetrain.getState().Pose;
-                  x = x.rotateBy(new Rotation2d(Math.PI));
-                  drivetrain.resetPose(x);
+                  Rotation2d x = drivetrain.getState().Pose.getRotation();
+                  x = x.rotateBy(new Rotation2d(Math.PI)).rotateBy(drivetrain.getOperatorForwardDirection());
+                  drivetrain.resetRotation(x);
                 }));
 
     // Stow all subsystems
