@@ -129,7 +129,7 @@ public class ShooterSubsystem implements Subsystem, Sendable {
   }
 
   public void disableShooter() {
-    leaderShooterMotor.setControl(shooterNeutralRequest);
+    leaderShooterMotor.setControl(shooterVelocityRequest.withVelocity(0.0));
   }
 
   /**
