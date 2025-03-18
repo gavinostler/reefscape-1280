@@ -7,7 +7,10 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants.GroundIntake;
 import frc.robot.state.State;
 import frc.robot.state.Validator;
@@ -35,7 +38,7 @@ public class GroundIntakeSubsystem extends SubsystemBase {
     encoder.setDistancePerPulse(GroundIntake.DISTANCE_PER_PULSE);
     encoder.setReverseDirection(GroundIntake.REVERSE_ENCODER);
 
-    setState(state);
+    // setState(state);
   }
 
   public State.GroundIntake getState() {
@@ -49,7 +52,7 @@ public class GroundIntakeSubsystem extends SubsystemBase {
    * @param value the state to try to set
    */
   public void setState(State.GroundIntake value) {
-    if (state == value || !validator.setStateValid(value)) return;
+    if (!validator.setStateValid(value)) return;
     state = value;
     switch (state) {
       case DOWN -> down();
@@ -98,6 +101,16 @@ public class GroundIntakeSubsystem extends SubsystemBase {
   private void intakeUp() {
     // setIntakeVoltage(GroundIntake.INTAKE_UP_VOLTAGE);
     GroundIntake.intakePID.setSetpoint(GroundIntake.UP_ANGLE);
+    new SequentialCommandGroup(
+      runOnce(() -> {
+        setIntakeVoltage(5);
+        disabled = true;
+      }),
+      new WaitCommand(0.3),
+      runOnce(() -> {
+        disabled = false;
+      })
+    ).schedule();
   }
 
   private void intakeDown() {

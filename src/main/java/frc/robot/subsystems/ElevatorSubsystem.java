@@ -28,7 +28,7 @@ public class ElevatorSubsystem implements Subsystem, Sendable {
 
     motor.getConfigurator().apply(Elevator.elevatorConfigs);
 
-    setState(state);
+    // setState(state);
   }
 
   public State.Elevator getState() {
@@ -42,7 +42,7 @@ public class ElevatorSubsystem implements Subsystem, Sendable {
    * @param value the state to try to set
    */
   public void setState(State.Elevator value) {
-    if (state == value || !validator.setStateValid(value)) return;
+    if (!validator.setStateValid(value)) return;
     state = value;
     moveHeight(state.height);
   }

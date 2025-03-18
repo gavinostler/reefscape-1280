@@ -55,7 +55,7 @@ public class ShooterSubsystem implements Subsystem, Sendable {
 
     armMotor.getConfigurator().apply(Shooter.armConfigs);
 
-    setState(state);
+    // setState(state);
   }
 
   public State.Shooter getState() {
@@ -69,7 +69,7 @@ public class ShooterSubsystem implements Subsystem, Sendable {
    * @param value the state to try to set
    */
   public void setState(State.Shooter value) {
-    if (state == value || !validator.setStateValid(value)) return;
+    if (!validator.setStateValid(value)) return;
     state = value;
     moveArmAngle(state.angle);
   }
@@ -202,9 +202,9 @@ public class ShooterSubsystem implements Subsystem, Sendable {
             runOnce(() -> enableShooter(true)), // pull algae back
             new WaitCommand(0.5), // time to pull back
             runOnce(() -> enableShooter(false)), // rev up the shooter
-            new WaitCommand(0.5), // give it time to come up to target speed
+            new WaitCommand(1.0), // give it time to come up to target speed
             runOnce(() -> enableFeed(false)), // hawk tuah
-            new WaitCommand(1.5), // wait for shooting to finish
+            new WaitCommand(0.5), // wait for shooting to finish
             runOnce(this::disableShooterAndFeed) // turn everything off
             )
         .withInterruptBehavior(InterruptionBehavior.kCancelIncoming); // don't get interrupted
@@ -223,7 +223,7 @@ public class ShooterSubsystem implements Subsystem, Sendable {
             runOnce(() -> shootProcessor()), // rev up the shooter to processor speed
             new WaitCommand(1.2), // give it time to come up to target speed
             runOnce(() -> enableFeed(false)), // hawk tuah
-            new WaitCommand(1.5), // wait for shooting to finish
+            new WaitCommand(0.5), // wait for shooting to finish
             runOnce(this::disableShooterAndFeed) // turn everything off
             )
         .withInterruptBehavior(InterruptionBehavior.kCancelIncoming); // don't get interrupted

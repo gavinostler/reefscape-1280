@@ -13,6 +13,7 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -58,8 +59,8 @@ public class RobotContainer {
   /* Setting up bindings for necessary control of the swerve drive platform */
   private final SwerveRequest.FieldCentric drive =
       new SwerveRequest.FieldCentric()
-          .withDeadband(MaxSpeed * 0.1)
-          .withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
+          .withDeadband(MaxSpeed * 0.02)
+          .withRotationalDeadband(MaxAngularRate * 0.02) // Add a 10% deadband
           .withDriveRequestType(
               DriveRequestType.Velocity); // Use open-loop control for drive motors
 
@@ -96,6 +97,10 @@ public class RobotContainer {
     SmartDashboard.putData("shooter", shooter);
     SmartDashboard.putData("ground intake", groundIntake);
     SmartDashboard.putData("validator", validator);
+
+    elevator.setState(elevator.getState());
+    shooter.setState(shooter.getState());
+    groundIntake.setState(groundIntake.getState());
   }
 
   /** Register named commands, for use in autonomous */
@@ -154,6 +159,8 @@ public class RobotContainer {
 
     // Driver Controls
     // TODO: way to do precise movement near reef
+    LinearFilter filterX = LinearFilter.movingAverage(5);
+    LinearFilter filterY = LinearFilter.movingAverage(5);
     drivetrain.setDefaultCommand(
         drivetrain.applyRequest(
             () -> {
@@ -168,9 +175,9 @@ public class RobotContainer {
                 angularRate = MaxAngularRate * fraction;
               }
               return drive
-                  .withVelocityX(driverController.getLeftY() * speed)
-                  .withVelocityY(driverController.getLeftX() * speed)
-                  .withRotationalRate(-driverController.getRightX() * angularRate);
+                  .withVelocityX(filterY.calculate(MathUtil.applyDeadband(driverController.getLeftY(), 0.1)) * speed)
+                  .withVelocityY(filterX.calculate(MathUtil.applyDeadband(driverController.getLeftX(), 0.1)) * speed)
+                  .withRotationalRate(-MathUtil.applyDeadband(driverController.getRightX(), 0.1) * angularRate);
             }));
 
     driverController
@@ -346,7 +353,7 @@ public class RobotContainer {
     final double slowingHeight = 0.2;
     final double minSpeedFraction = 0.05;
     final double curveCoefficient = (minSpeedFraction - 1) / Math.pow(slowingHeight - 1, 2);
-    final double height = elevator.getHeight();
+    final double height = MathUtil.clamp(elevator.getHeight() + 0.2*Math.sin(shooter.getArmAngle()*2*Math.PI), 0, 1);
     double speedFraction;
     if (height < slowingHeight) {
       speedFraction = 1.0;
