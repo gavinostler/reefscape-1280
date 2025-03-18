@@ -2,10 +2,6 @@ package frc.robot.state;
 
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
-import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
-import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
-import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
-import edu.wpi.first.wpilibj.util.Color8Bit;
 import frc.robot.Constants;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.GroundIntakeSubsystem;
@@ -120,60 +116,5 @@ public class Validator implements Sendable {
         (boolean value) -> {
           safetyEnabled = value;
         });
-  }
-
-  // View in Glass
-  private class Display {
-    Mechanism2d mech = new Mechanism2d(6, 10, new Color8Bit(0, 0, 0));
-    MechanismRoot2d root = mech.getRoot("robot", 3, 1);
-
-    // TODO: real vs state ground intake
-    MechanismLigament2d groundIntake;
-    MechanismLigament2d stateElevator;
-    MechanismLigament2d realElevator;
-    MechanismLigament2d stateShooter;
-    MechanismLigament2d realShooter;
-
-    static final double GROUND_INTAKE_ANGLE_UP = 100;
-    static final double GROUND_INTAKE_ANGLE_DOWN = 10;
-    static final int ELEVATOR_HEIGHT_MIN = 2;
-    static final int ELEVATOR_HEIGHT_MAX = 7;
-
-    void update() {
-      groundIntake.setAngle(
-          switch (Validator.this.groundIntake.getState()) {
-            case DOWN -> GROUND_INTAKE_ANGLE_DOWN;
-            case UP -> GROUND_INTAKE_ANGLE_UP;
-          });
-      stateElevator.setLength( // Elevator state preview
-          ELEVATOR_HEIGHT_MIN
-              + (ELEVATOR_HEIGHT_MAX - ELEVATOR_HEIGHT_MIN)
-                  * Validator.this.elevator.getState().height);
-      realElevator.setLength( // Actual height from encoder
-          ELEVATOR_HEIGHT_MIN
-              + (ELEVATOR_HEIGHT_MAX - ELEVATOR_HEIGHT_MIN) * Validator.this.elevator.getHeight());
-      stateShooter.setAngle( // Shooter state preview
-          Validator.this.shooter.getState().angle * 360.0);
-      realShooter.setAngle( // Actual height from encoder
-          Validator.this.shooter.getArmAngle() * 360.0);
-    }
-
-    public Display() { // Ignore horrid API
-      root.append(new MechanismLigament2d("drivebaseLeft", 2, 0));
-      groundIntake =
-          root.append(new MechanismLigament2d("drivebaseRight", 2, 0))
-              .append(new MechanismLigament2d("groundIntake", 3, GROUND_INTAKE_ANGLE_UP));
-      stateElevator =
-          root.append(
-              new MechanismLigament2d(
-                  "stateElevator", ELEVATOR_HEIGHT_MIN, 90, 6, new Color8Bit(255, 0, 255)));
-      realElevator = root.append(new MechanismLigament2d("realElevator", ELEVATOR_HEIGHT_MIN, 90));
-      stateShooter =
-          stateElevator.append(
-              new MechanismLigament2d("stateShooter", 2, 0, 6, new Color8Bit(255, 0, 255)));
-      realShooter = realElevator.append(new MechanismLigament2d("realShooter", 2, 0));
-
-      update();
-    }
   }
 }
