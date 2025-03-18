@@ -10,9 +10,8 @@ public class State {
     TOP(Constants.Elevator.TOP_HEIGHT),
     SHOOT(Constants.Elevator.SHOOT_HEIGHT),
     L2(Constants.Elevator.L2_HEIGHT),
-    L1(Constants.Elevator.L1_HEIGHT),
-    // TODO: move ground intake above L1
     GROUND_INTAKE(Constants.Elevator.GROUND_INTAKE_HEIGHT),
+    L1(Constants.Elevator.L1_HEIGHT),
     BOTTOM(Constants.Elevator.BOTTOM_HEIGHT);
 
     public final double height;
@@ -115,31 +114,29 @@ public class State {
           put(new RobotState(Elevator.L2, Shooter.GROUND_INTAKE, GroundIntake.DOWN), true);
           put(new RobotState(Elevator.L2, Shooter.GROUND_INTAKE, GroundIntake.UP), true);
           // Above here, all robot states are always valid as the elevator is high enough
+
+          put(new RobotState(Elevator.GROUND_INTAKE, Shooter.STOW, GroundIntake.DOWN), true);
+          put(new RobotState(Elevator.GROUND_INTAKE, Shooter.STOW, GroundIntake.UP), true);
+          put(new RobotState(Elevator.GROUND_INTAKE, Shooter.SHOOT, GroundIntake.DOWN), true);
+          put(new RobotState(Elevator.GROUND_INTAKE, Shooter.SHOOT, GroundIntake.UP), true);
+          put(new RobotState(Elevator.GROUND_INTAKE, Shooter.REEF_INTAKE, GroundIntake.DOWN), true);
+          put(new RobotState(Elevator.GROUND_INTAKE, Shooter.REEF_INTAKE, GroundIntake.UP), true);
+          // ground intake
+          put(
+              new RobotState(Elevator.GROUND_INTAKE, Shooter.GROUND_INTAKE, GroundIntake.DOWN),
+              true);
+          put(new RobotState(Elevator.GROUND_INTAKE, Shooter.GROUND_INTAKE, GroundIntake.UP), false);
+
           put(new RobotState(Elevator.L1, Shooter.STOW, GroundIntake.DOWN), true);
           put(new RobotState(Elevator.L1, Shooter.STOW, GroundIntake.UP), true);
           put(new RobotState(Elevator.L1, Shooter.SHOOT, GroundIntake.DOWN), true);
           put(new RobotState(Elevator.L1, Shooter.SHOOT, GroundIntake.UP), true);
           put(new RobotState(Elevator.L1, Shooter.REEF_INTAKE, GroundIntake.DOWN), true);
+          // TODO: \/ ?
           put(new RobotState(Elevator.L1, Shooter.REEF_INTAKE, GroundIntake.UP), true);
-          put(new RobotState(Elevator.L1, Shooter.GROUND_INTAKE, GroundIntake.DOWN), true);
-          // invalid ground intake transition
+          put(new RobotState(Elevator.L1, Shooter.GROUND_INTAKE, GroundIntake.DOWN), false);
           put(new RobotState(Elevator.L1, Shooter.GROUND_INTAKE, GroundIntake.UP), false);
 
-          put(new RobotState(Elevator.GROUND_INTAKE, Shooter.STOW, GroundIntake.DOWN), true);
-          put(new RobotState(Elevator.GROUND_INTAKE, Shooter.STOW, GroundIntake.UP), true);
-          put(new RobotState(Elevator.GROUND_INTAKE, Shooter.SHOOT, GroundIntake.DOWN), true);
-          // TODO: \/ ?
-          put(new RobotState(Elevator.GROUND_INTAKE, Shooter.SHOOT, GroundIntake.UP), true);
-          put(new RobotState(Elevator.GROUND_INTAKE, Shooter.REEF_INTAKE, GroundIntake.DOWN), true);
-          // invalid ground intake transition
-          put(new RobotState(Elevator.GROUND_INTAKE, Shooter.REEF_INTAKE, GroundIntake.UP), false);
-          // sole ground intake transition
-          put(
-              new RobotState(Elevator.GROUND_INTAKE, Shooter.GROUND_INTAKE, GroundIntake.DOWN),
-              true);
-          // ground intake
-          put(new RobotState(Elevator.GROUND_INTAKE, Shooter.GROUND_INTAKE, GroundIntake.UP), true);
-          // NOTE: Any state with a possible unsafe transition to ground intake is set as invalid
 
           put(new RobotState(Elevator.BOTTOM, Shooter.STOW, GroundIntake.DOWN), true);
           put(new RobotState(Elevator.BOTTOM, Shooter.STOW, GroundIntake.UP), true); // stow
