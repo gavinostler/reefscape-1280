@@ -27,8 +27,6 @@ public class ElevatorSubsystem implements Subsystem, Sendable {
     this.validator = validator;
 
     motor.getConfigurator().apply(Elevator.elevatorConfigs);
-
-    // setState(state);
   }
 
   public State.Elevator getState() {

@@ -7,7 +7,6 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -36,8 +35,6 @@ public class GroundIntakeSubsystem extends SubsystemBase {
     encoder.reset();
     encoder.setDistancePerPulse(GroundIntake.DISTANCE_PER_PULSE);
     encoder.setReverseDirection(GroundIntake.REVERSE_ENCODER);
-
-    // setState(state);
   }
 
   public State.GroundIntake getState() {

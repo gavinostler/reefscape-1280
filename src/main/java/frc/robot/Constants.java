@@ -58,7 +58,7 @@ public final class Constants {
     public static final double SHOOT_HEIGHT = 0.9; // TODO
     public static final double L2_HEIGHT = 0.7;
     public static final double L1_HEIGHT = 0.44;
-    public static final double GROUND_INTAKE_HEIGHT = 0.527; // TODO
+    public static final double GROUND_INTAKE_HEIGHT = 0.527;
     public static final double BOTTOM_HEIGHT = 0.0;
     public static final double HEIGHT_TOLERANCE = 0.01;
 
@@ -141,8 +141,8 @@ public final class Constants {
     public static final double ARM_MIN_ANGLE = -0.25;
     public static final double ARM_MAX_ANGLE = 0.225;
 
-    public static final double STOW_ANGLE = 0.22; // TODO set stow angle
-    public static final double SHOOT_ANGLE = 0.16; // TODO
+    public static final double STOW_ANGLE = 0.22;
+    public static final double SHOOT_ANGLE = 0.16;
     public static final double REEF_INTAKE_ANGLE = 0.055;
     public static final double GROUND_INTAKE_ANGLE = -0.151;
     public static final double ANGLE_TOLERANCE = 0.01;
