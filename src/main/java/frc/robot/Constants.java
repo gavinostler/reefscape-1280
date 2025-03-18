@@ -99,7 +99,7 @@ public final class Constants {
 
   public static class GroundIntake {
     public static final double UP_ANGLE = 0.25;
-    public static final double DOWN_ANGLE = 0.084; // TODO
+    public static final double DOWN_ANGLE = 0.084;
 
     public static final int encoderChannelA = 3;
     public static final int encoderChannelB = 4;
@@ -110,10 +110,6 @@ public final class Constants {
 
     public static final int intakeId = 19;
     public static final int INTAKE_CURRENT_LIMIT = 20;
-    public static final double INTAKE_UP_VOLTAGE = 3.0; // TODO: tune
-    public static final double INTAKE_DOWN_VOLTAGE = -3.0; //
-
-    public static final double INTAKE_SETPOINT = 0.06;
 
     public static final SparkMaxConfig intakeConfig = new SparkMaxConfig();
 
@@ -131,7 +127,7 @@ public final class Constants {
 
     public static final int pulleyId = 20;
     public static final double PULLEY_CURRENT_LIMIT = 50.0;
-    public static final double PULLEY_VOLTAGE = 5.0; // TODO: tune
+    public static final double PULLEY_VOLTAGE = 5.0;
 
     public static final TalonFXConfiguration pulleyConfigs = new TalonFXConfiguration();
 
@@ -148,7 +144,7 @@ public final class Constants {
     public static final double STOW_ANGLE = 0.22; // TODO set stow angle
     public static final double SHOOT_ANGLE = 0.16; // TODO
     public static final double REEF_INTAKE_ANGLE = 0.055;
-    public static final double GROUND_INTAKE_ANGLE = -0.151; // TODO
+    public static final double GROUND_INTAKE_ANGLE = -0.151;
     public static final double ANGLE_TOLERANCE = 0.01;
 
     public static final int rightShooterId = 12;
