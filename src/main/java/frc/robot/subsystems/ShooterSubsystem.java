@@ -113,14 +113,11 @@ public class ShooterSubsystem implements Subsystem, Sendable {
    * @param inward Sets the shooter direction for intake/shooting. (it sucks)
    */
   public void enableShooter(boolean inward) {
-    double target = inward ? -Shooter.SHOOTER_INTAKE_TARGET_RPS : Shooter.SHOOTER_SHOOT_TARGET_RPS;
-    leaderShooterMotor.setControl(
-        shooterVelocityRequest.withVelocity(Shooter.SHOOTER_GEAR_REDUCTION * target));
-  }
-
-  // ugly method for processor
-  public void shootProcessor() {
-    double target = Shooter.SHOOTER_PROCESSOR_TARGET_RPS;
+    double target;
+    if (getArmAngle() >= 0.0)
+      target = inward ? Shooter.SHOOTER_INTAKE_TARGET_RPS : Shooter.SHOOTER_SHOOT_TARGET_RPS;
+    else
+      target = inward ? Shooter.SHOOTER_INTAKE_TARGET_RPS : Shooter.SHOOTER_PROCESSOR_TARGET_RPS;
     leaderShooterMotor.setControl(
         shooterVelocityRequest.withVelocity(Shooter.SHOOTER_GEAR_REDUCTION * target));
   }
@@ -175,7 +172,7 @@ public class ShooterSubsystem implements Subsystem, Sendable {
    * @param angle Rotations
    * @return boolean if successful
    */
-  private void moveArmAngle(double angle) {
+  public void moveArmAngle(double angle) {
     if (!validator.moveArmAngleValid(angle)) return;
     targetArmAngle = angle;
     armMotor.setControl(armAngleRequest.withPosition(targetArmAngle));
@@ -212,19 +209,19 @@ public class ShooterSubsystem implements Subsystem, Sendable {
    *
    * @return Command for the shoot procedure
    */
-  public Command runShootProcessor() {
-    return new SequentialCommandGroup(
-            runOnce(this::disableShooterAndFeed), // stop everything first
-            runOnce(() -> enableFeed(true)),
-            new WaitCommand(1.0), // time to pull back
-            runOnce(() -> shootProcessor()), // rev up the shooter to processor speed
-            new WaitCommand(1.2), // give it time to come up to target speed
-            runOnce(() -> enableFeed(false)), // hawk tuah
-            new WaitCommand(0.5), // wait for shooting to finish
-            runOnce(this::disableShooterAndFeed) // turn everything off
-            )
-        .withInterruptBehavior(InterruptionBehavior.kCancelIncoming); // don't get interrupted
-  }
+  // public Command runShootProcessor() {
+  //   return new SequentialCommandGroup(
+  //           runOnce(this::disableShooterAndFeed), // stop everything first
+  //           runOnce(() -> enableFeed(true)),
+  //           new WaitCommand(1.0), // time to pull back
+  //           runOnce(() -> shootProcessor()), // rev up the shooter to processor speed
+  //           new WaitCommand(1.2), // give it time to come up to target speed
+  //           runOnce(() -> enableFeed(false)), // hawk tuah
+  //           new WaitCommand(0.5), // wait for shooting to finish
+  //           runOnce(this::disableShooterAndFeed) // turn everything off
+  //           )
+  //       .withInterruptBehavior(InterruptionBehavior.kCancelIncoming); // don't get interrupted
+  // }
 
   @Override
   public void initSendable(SendableBuilder builder) {

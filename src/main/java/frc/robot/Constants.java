@@ -81,9 +81,9 @@ public final class Constants {
       // TODO: merge kG with feedforward?
       elevatorConfigs.Slot0.kG = -0.8; // TODO: tune
       elevatorConfigs.Slot0.kS = 0.0;
-      elevatorConfigs.Slot0.kV = 7.0;
+      elevatorConfigs.Slot0.kV = 10.0;
       elevatorConfigs.Slot0.kA = 0.0;
-      elevatorConfigs.Slot0.kP = 20.0;
+      elevatorConfigs.Slot0.kP = 40.0;
       elevatorConfigs.Slot0.kI = 0.0;
       elevatorConfigs.Slot0.kD = 1.0;
       elevatorConfigs.Slot0.StaticFeedforwardSign = StaticFeedforwardSignValue.UseVelocitySign;
@@ -118,7 +118,7 @@ public final class Constants {
       intakeConfig.smartCurrentLimit(INTAKE_CURRENT_LIMIT);
     }
 
-    public static final PIDController intakePID = new PIDController(40.0, 0.0, 5);
+    public static final PIDController intakePID = new PIDController(120.0, 0.0, 10.0);
     public static final ArmFeedforward intakeFf = new ArmFeedforward(0.0, 0.5, 0.0, 1.0);
 
     static {
@@ -150,7 +150,7 @@ public final class Constants {
     public static final int rightShooterId = 12;
     public static final int leftShooterId = 14;
     public static final double SHOOTER_SHOOT_TARGET_RPS = 100.0;
-    public static final double SHOOTER_INTAKE_TARGET_RPS = 15.0;
+    public static final double SHOOTER_INTAKE_TARGET_RPS = -15.0;
     public static final double SHOOTER_PROCESSOR_TARGET_RPS = 20.0; // TODO: set processor speed
     public static final double SHOOTER_GEAR_REDUCTION = 1.0;
     public static final double SHOOTER_CURRENT_LIMIT = 80.0;
@@ -218,9 +218,9 @@ public final class Constants {
       armConfigs.Slot0.kD = 1.0;
       armConfigs.Slot0.StaticFeedforwardSign = StaticFeedforwardSignValue.UseVelocitySign;
       // https://www.chiefdelphi.com/t/motion-magic-help-ctre/483319/2
-      armConfigs.MotionMagic.MotionMagicCruiseVelocity = 0.1; // Target cruise velocity in rps
-      armConfigs.MotionMagic.MotionMagicAcceleration = 0.1; // Target acceleration in rps/s
-      armConfigs.MotionMagic.MotionMagicJerk = 1.0; // Target jerk in rps/(s^2)
+      armConfigs.MotionMagic.MotionMagicCruiseVelocity = 0.2; // Target cruise velocity in rps
+      armConfigs.MotionMagic.MotionMagicAcceleration = 0.4; // Target acceleration in rps/s
+      armConfigs.MotionMagic.MotionMagicJerk = 0.8; // Target jerk in rps/(s^2)
       armConfigs.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
       armConfigs.Feedback.FeedbackRemoteSensorID = armEncoderId;
       armConfigs.Feedback.SensorToMechanismRatio = 1.0;

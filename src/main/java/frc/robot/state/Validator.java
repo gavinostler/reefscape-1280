@@ -13,7 +13,7 @@ public class Validator implements Sendable {
   public GroundIntakeSubsystem groundIntake;
 
   // Set to false to consider both state and position as always valid
-  public static boolean safetyEnabled = false;
+  public static boolean safetyEnabled = true;
 
   /**
    * Check if setting a state is valid

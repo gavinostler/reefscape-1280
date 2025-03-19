@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.Driver;
+import frc.robot.Constants.GroundIntake;
 // import frc.robot.aesthetic.Colors;
 import frc.robot.controller.AgnosticController;
 import frc.robot.generated.TunerConstants;
@@ -128,7 +129,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("disableFeed", shooter.runOnce(() -> shooter.disableFeed()));
     NamedCommands.registerCommand("runIntakeAlgae", shooter.runOnce(shooter::intakeAlgae));
     NamedCommands.registerCommand("runShootAlgae", shooter.runShootAlgae());
-    NamedCommands.registerCommand("shootProcessor", shooter.runShootProcessor());
+    NamedCommands.registerCommand("runProcessor", runProcessor());
 
     // Elevator commands
     NamedCommands.registerCommand(
@@ -145,7 +146,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("L2", runL2());
 
     // Stow after auto
-    NamedCommands.registerCommand("stowSubsystems", stowSubsystems());
+    NamedCommands.registerCommand("runStowSubsystems", runStowSubsystems());
   }
 
   /**
@@ -160,8 +161,11 @@ public class RobotContainer {
 
     // Driver Controls
     // TODO: way to do precise movement near reef
-    LinearFilter filterX = LinearFilter.movingAverage(5);
-    LinearFilter filterY = LinearFilter.movingAverage(5);
+    int moveTaps = 10;
+    int rotationTaps = 10;
+    LinearFilter filterX = LinearFilter.movingAverage(moveTaps);
+    LinearFilter filterY = LinearFilter.movingAverage(moveTaps);
+    LinearFilter filterRotation = LinearFilter.movingAverage(rotationTaps);
     drivetrain.setDefaultCommand(
         drivetrain.applyRequest(
             () -> {
@@ -178,7 +182,7 @@ public class RobotContainer {
               return drive
                   .withVelocityX(filterY.calculate(MathUtil.applyDeadband(driverController.getLeftY(), 0.1)) * speed)
                   .withVelocityY(filterX.calculate(MathUtil.applyDeadband(driverController.getLeftX(), 0.1)) * speed)
-                  .withRotationalRate(-MathUtil.applyDeadband(driverController.getRightX(), 0.1) * angularRate);
+                  .withRotationalRate(filterRotation.calculate(-MathUtil.applyDeadband(driverController.getRightX(), 0.1)) * angularRate);
             }));
 
     driverController
@@ -221,7 +225,7 @@ public class RobotContainer {
                   groundIntake.disablePulley();
                 }));
     operatorController.rightTrigger().onTrue(shooter.runShootAlgae());
-    operatorController.x().onTrue(shooter.runShootProcessor());
+    operatorController.x().onTrue(runProcessor());
 
     // Reset heading
     operatorController
@@ -235,7 +239,7 @@ public class RobotContainer {
                 }));
 
     // Stow all subsystems
-    operatorController.rightStick().onTrue(stowSubsystems());
+    operatorController.rightStick().onTrue(runStowSubsystems());
   }
 
   void bindSysId() {
@@ -327,7 +331,21 @@ public class RobotContainer {
         .withInterruptBehavior(InterruptionBehavior.kCancelIncoming); // don't get interrupted
   }
 
-  public Command stowSubsystems() {
+  public Command runProcessor() {
+    return new SequentialCommandGroup(
+        new InstantCommand(() -> setSafety(false)),
+        groundIntake.runOnce(() -> GroundIntake.intakePID.setSetpoint(0.006)),
+        new WaitCommand(1.0),
+        shooter.runOnce(() -> shooter.moveArmAngle(0.0)),
+        new WaitCommand(1.4),
+        elevator.runOnce(() -> elevator.moveHeight(0.266)),
+        new WaitCommand(1.0),
+        new InstantCommand(() -> setSafety(true))
+        // NOTE: state is out of sync but its quite safe so this can be ignored
+    ).withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
+  }
+
+  public Command runStowSubsystems() {
     return new SequentialCommandGroup(
             new InstantCommand(() -> setSafety(false)),
             groundIntake.runOnce(
@@ -352,9 +370,9 @@ public class RobotContainer {
   private double getSwerveSpeedFraction() {
     // https://www.desmos.com/calculator/ghdph63sxf
     final double slowingHeight = 0.2;
-    final double minSpeedFraction = 0.05;
+    final double minSpeedFraction = 0.30;
     final double curveCoefficient = (minSpeedFraction - 1) / Math.pow(slowingHeight - 1, 2);
-    final double height = MathUtil.clamp(elevator.getHeight() + 0.2*Math.sin(shooter.getArmAngle()*2*Math.PI), 0, 1);
+    final double height = MathUtil.clamp(elevator.getHeight() + 0.1*Math.sin(shooter.getArmAngle()*2*Math.PI), 0, 1);
     double speedFraction;
     if (height < slowingHeight) {
       speedFraction = 1.0;

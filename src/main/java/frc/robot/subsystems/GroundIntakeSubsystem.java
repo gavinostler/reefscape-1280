@@ -89,7 +89,7 @@ public class GroundIntakeSubsystem extends SubsystemBase {
     GroundIntake.intakePID.setSetpoint(GroundIntake.UP_ANGLE);
     new SequentialCommandGroup(
       runOnce(() -> {
-        intakeMotor.setVoltage(5);
+        intakeMotor.setVoltage(10.0);
         disabled = true;
       }),
       new WaitCommand(0.3),
