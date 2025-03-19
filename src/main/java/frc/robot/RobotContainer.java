@@ -12,8 +12,12 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.LinearFilter;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -343,6 +347,33 @@ public class RobotContainer {
             new WaitCommand(0.5), // wait until it's set
             new InstantCommand(() -> setSafety(true)))
         .withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
+  }
+
+  // Origin from Blue Alliance bottom-right corner
+  class Field {
+    AprilTagFieldLayout tagLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape);
+    
+    /**
+     * Aligns to the vertical corresponding to the relevant net and side.
+     * @param alliance Our alliance
+     * @param distance Desired horizontal (X) distance from barge tag in meters
+     */
+    Command alignBarge(Alliance alliance, double distance) {
+      // If we are Blue use the top net (id 14, 4) else use bottom net (id 15, 5)
+      double leftSideTagX = (alliance == Alliance.Blue ? tagLayout.getTagPose(14) : tagLayout.getTagPose(15)).get().getX();
+      double rightSideTagX = (alliance == Alliance.Blue ? tagLayout.getTagPose(4) : tagLayout.getTagPose(5)).get().getX();
+
+      return drivetrain.getAlignToFieldPosition(() -> {
+        var driveTranslation = drivetrain.getState().Pose.getTranslation();
+        if (Math.abs(driveTranslation.getX() - leftSideTagX) < Math.abs(driveTranslation.getX() - rightSideTagX)) {
+          // Left side is closer
+          return new Pose2d(leftSideTagX - distance, driveTranslation.getY(), new Rotation2d(Math.PI));
+        } else {
+          // Right side is closer
+          return new Pose2d(rightSideTagX + distance, driveTranslation.getY(), new Rotation2d(0.0));
+        }
+      });
+    }
   }
 
   public void setSafety(boolean state) {

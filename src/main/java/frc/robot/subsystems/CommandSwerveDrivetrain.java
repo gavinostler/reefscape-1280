@@ -290,22 +290,22 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   /**
    * Get command to align to a given field position with a certain heading
    *
-   * @param targetPose where u want to go
+   * @param targetPoseSupplier where u want to go
    */
-  public Command getAlignToFieldPosition(Pose2d targetPose) {
+  public Command getAlignToFieldPosition(Supplier<Pose2d> targetPoseSupplier) {
     fieldPositionController.setSetpoint(0);
     fieldPositionController.setTolerance(0.1);
     return run(
         () -> {
-          var relPose = targetPose.minus(getState().Pose);
-          double x_vel = fieldPositionController.calculate(relPose.getX());
-          double y_vel = fieldPositionController.calculate(relPose.getY());
+          var relPose = targetPoseSupplier.get().minus(getState().Pose);
+          double vel_mag = fieldPositionController.calculate(relPose.getTranslation().getNorm());
+          var vel = relPose.times(vel_mag);
           setControl(
               alignDriveRequest
-                  .withVelocityX(x_vel)
-                  .withVelocityY(y_vel)
-                  .withTargetDirection(targetPose.getRotation()));
-        });
+                  .withVelocityX(vel.getX())
+                  .withVelocityY(vel.getY())
+                  .withTargetDirection(targetPoseSupplier.get().getRotation()));
+        }).until(fieldPositionController::atSetpoint).withTimeout(2.0);
   }
 
   private void startSimThread() {
