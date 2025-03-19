@@ -35,6 +35,8 @@ public class GroundIntakeSubsystem extends SubsystemBase {
     encoder.reset();
     encoder.setDistancePerPulse(GroundIntake.DISTANCE_PER_PULSE);
     encoder.setReverseDirection(GroundIntake.REVERSE_ENCODER);
+
+    GroundIntake.intakePID.setSetpoint(GroundIntake.UP_ANGLE);
   }
 
   public State.GroundIntake getState() {
@@ -91,6 +93,7 @@ public class GroundIntakeSubsystem extends SubsystemBase {
       runOnce(() -> {
         intakeMotor.setVoltage(10.0);
         disabled = true;
+        System.out.println("Applied impulse");
       }),
       new WaitCommand(0.3),
       runOnce(() -> {
@@ -144,11 +147,11 @@ public class GroundIntakeSubsystem extends SubsystemBase {
   public void initSendable(SendableBuilder builder) {
     builder.setSmartDashboardType("Ground Intake");
     builder.addDoubleProperty(
-        "pulley voltage",
-        () -> pulleyMotor.getMotorVoltage().getValueAsDouble(),
-        pulleyMotor::setVoltage);
+        "intake voltage",
+        () -> intakeMotor.getAppliedOutput(),
+        intakeMotor::setVoltage);
     builder.addDoubleProperty("angle", this::getAngle, null);
-    builder.addBooleanProperty("at state angle", this::atSetpoint, null);
+    builder.addDoubleProperty("setpoint", GroundIntake.intakePID::getSetpoint, null);
     builder.addStringProperty(
         "State",
         () -> getState().toString(),
