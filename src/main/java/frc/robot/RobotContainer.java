@@ -210,6 +210,7 @@ public class RobotContainer {
     operatorController.b().onTrue(runL1());
     operatorController.y().onTrue(runL2());
     operatorController.leftBumper().onTrue(runBarge());
+    operatorController.rightBumper().onTrue(vision.run(vision::reefAlign)).onFalse(vision.runOnce(vision::stop));
     operatorController.povUp().onTrue(elevator.runOnce(() -> elevator.moveState(false)));
     operatorController.povDown().onTrue(elevator.runOnce(() -> elevator.moveState(true)));
 
