@@ -55,12 +55,12 @@ public final class Constants {
 
   public static class Elevator {
     public static final double TOP_HEIGHT = 1.0;
-    public static final double SHOOT_HEIGHT = 0.9; // TODO
+    public static final double SHOOT_HEIGHT = 0.89; // TODO
     public static final double L2_HEIGHT = 0.7;
     public static final double GROUND_INTAKE_HEIGHT = 0.527;
     public static final double L1_HEIGHT = 0.44;
     public static final double BOTTOM_HEIGHT = 0.0;
-    public static final double HEIGHT_TOLERANCE = 0.01;
+    public static final double HEIGHT_TOLERANCE = 0.03;
 
     public static final int motorId = 18;
     public static final double CURRENT_LIMIT = 80.0;
@@ -109,7 +109,7 @@ public final class Constants {
     public static final boolean REVERSE_ENCODER = true;
 
     public static final int intakeId = 19;
-    public static final int INTAKE_CURRENT_LIMIT = 20;
+    public static final int INTAKE_CURRENT_LIMIT = 30;
 
     public static final SparkMaxConfig intakeConfig = new SparkMaxConfig();
 
@@ -119,7 +119,7 @@ public final class Constants {
     }
 
     public static final PIDController intakePID = new PIDController(80.0, 0.0, 5.0);
-    public static final ArmFeedforward intakeFf = new ArmFeedforward(0.0, 0.5, 0.0, 1.0);
+    public static final ArmFeedforward intakeFf = new ArmFeedforward(1.0, 0.5, 0.0, 1.0);
 
     static {
       intakePID.setTolerance(ANGLE_TOLERANCE);
@@ -175,8 +175,8 @@ public final class Constants {
           InvertedValue.CounterClockwise_Positive; // right is primary, positive is out
       // TODO: tune gains
       shooterConfigs.Slot0.kS = 0.1; // Add kS V output to overcome static friction
-      shooterConfigs.Slot0.kV = 0.2; // A velocity target of 1 rps results in kV V output
-      shooterConfigs.Slot0.kA = 0.4; // An acceleration of 1 rps/s requires kA V output
+      shooterConfigs.Slot0.kV = 0.4; // A velocity target of 1 rps results in kV V output
+      shooterConfigs.Slot0.kA = 0.8; // An acceleration of 1 rps/s requires kA V output
       shooterConfigs.Slot0.kP = 0.15; // An error of 1 rps results in kP V output
       shooterConfigs.Slot0.kI = 0.0; // integrated error (0: no output for error)
       shooterConfigs.Slot0.kD = 0.0; // error derivative

@@ -200,6 +200,7 @@ public class RobotContainer {
     // Elevator controls
     operatorController.b().onTrue(runL1());
     operatorController.y().onTrue(runL2());
+    operatorController.leftBumper().onTrue(runBarge());
     operatorController.povUp().onTrue(elevator.runOnce(() -> elevator.moveState(false)));
     operatorController.povDown().onTrue(elevator.runOnce(() -> elevator.moveState(true)));
 
@@ -279,12 +280,12 @@ public class RobotContainer {
             new InstantCommand(() -> setSafety(false)), // we don't need safety for this
             groundIntake.runOnce(
                 () -> groundIntake.setState(State.GroundIntake.DOWN)), // move ground intake down
-            new WaitCommand(0.5), // wait until it's set
+            new WaitUntilCommand(groundIntake::atSetpoint).withTimeout(1.0), // wait until it's set
             elevator.runOnce(
                 () ->
                     elevator.setState(
                         State.Elevator.GROUND_INTAKE)), // move elevator to ground intake position
-            new WaitUntilCommand(elevator::atSetpoint).withTimeout(1.0), // wait until it's set
+            new WaitUntilCommand(elevator::atSetpoint).withTimeout(2.0), // wait until it's set
             shooter.runOnce(
                 () ->
                     shooter.setState(
@@ -300,16 +301,17 @@ public class RobotContainer {
             new InstantCommand(() -> setSafety(false)), // we don't need safety for this
             elevator.runOnce(
                 () -> elevator.setState(State.Elevator.L1)), // move elevator to L1 position
-            new WaitUntilCommand(elevator::atSetpoint).withTimeout(1.0), // wait until it's set
+            new WaitUntilCommand(elevator::atSetpoint).withTimeout(2.0), // wait until it's set
             shooter.runOnce(
                 () ->
                     shooter.setState(State.Shooter.REEF_INTAKE)), // move shooter to L1 intake angle
-            new WaitCommand(2.0), // wait until it's set
+            new WaitUntilCommand(shooter::atSetpoint).withTimeout(2.0), // wait until it's set
+            groundIntake.kickUp(0.4),
             groundIntake.runOnce(
                 () ->
                     groundIntake.setState(
                         State.GroundIntake.UP)), // move ground intake up (away from reef)
-            new WaitCommand(0.5), // wait until it's set
+            new WaitUntilCommand(groundIntake::atSetpoint).withTimeout(1.0), // wait until it's set
             new InstantCommand(() -> setSafety(true)) // put safety back
             )
         .withInterruptBehavior(InterruptionBehavior.kCancelIncoming); // don't get interrupted
@@ -320,30 +322,44 @@ public class RobotContainer {
             new InstantCommand(() -> setSafety(false)), // we don't need safety for this
             elevator.runOnce(
                 () -> elevator.setState(State.Elevator.L2)), // move elevator to L1 position
-            new WaitUntilCommand(elevator::atSetpoint).withTimeout(1.0), // wait until it's set
+            new WaitUntilCommand(elevator::atSetpoint).withTimeout(2.0), // wait until it's set
             shooter.runOnce(
                 () ->
                     shooter.setState(State.Shooter.REEF_INTAKE)), // move shooter to L1 intake angle
-            new WaitCommand(2.0), // wait until it's set
+            new WaitUntilCommand(shooter::atSetpoint).withTimeout(2.0), // wait until it's set
+            groundIntake.kickUp(0.4),
             groundIntake.runOnce(
                 () ->
                     groundIntake.setState(
                         State.GroundIntake.UP)), // move ground intake up (away from reef)
-            new WaitCommand(0.5), // wait until it's set
+            new WaitUntilCommand(groundIntake::atSetpoint).withTimeout(1.0), // wait until it's set
             new InstantCommand(() -> setSafety(true)) // put safety back
             )
         .withInterruptBehavior(InterruptionBehavior.kCancelIncoming); // don't get interrupted
+  }
+
+  public Command runBarge() {
+    return new SequentialCommandGroup(
+      new InstantCommand(() -> setSafety(false)),
+      elevator.runOnce(
+          () -> elevator.setState(State.Elevator.SHOOT)),
+      new WaitUntilCommand(elevator::atSetpoint).withTimeout(1.0),
+      shooter.runOnce(
+          () -> shooter.setState(State.Shooter.SHOOT)),
+      new WaitUntilCommand(shooter::atSetpoint).withTimeout(1.0),
+      new InstantCommand(() -> setSafety(true))
+    ).withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
   }
 
   public Command runProcessor() {
     return new SequentialCommandGroup(
         new InstantCommand(() -> setSafety(false)),
         groundIntake.runOnce(() -> GroundIntake.intakePID.setSetpoint(0.006)),
-        new WaitCommand(1.0),
+        new WaitUntilCommand(groundIntake::atSetpoint).withTimeout(1.0),
         shooter.runOnce(() -> shooter.moveArmAngle(0.0)),
-        new WaitCommand(1.4),
+        new WaitUntilCommand(shooter::atSetpoint).withTimeout(2.0),
         elevator.runOnce(() -> elevator.moveHeight(0.266)),
-        new WaitCommand(1.0),
+        new WaitUntilCommand(elevator::atSetpoint).withTimeout(2.0),
         new InstantCommand(() -> setSafety(true))
         // NOTE: state is out of sync but its quite safe so this can be ignored
     ).withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
@@ -356,13 +372,14 @@ public class RobotContainer {
                 () ->
                     groundIntake.setState(
                         State.GroundIntake.DOWN)), // move ground intake out of the way
-            new WaitCommand(1.0), // wait until it's set
+            new WaitUntilCommand(groundIntake::atSetpoint).withTimeout(1.0), // wait until it's set
             shooter.runOnce(() -> shooter.setState(State.Shooter.STOW)), // stow shooter
             new WaitUntilCommand(shooter::atSetpoint).withTimeout(3.0), // wait until it's set
             elevator.runOnce(() -> elevator.setState(State.Elevator.BOTTOM)), // stow elevator
             new WaitUntilCommand(elevator::atSetpoint).withTimeout(3.0), // wait until it's set
+            groundIntake.kickUp(0.4),
             groundIntake.runOnce(() -> groundIntake.setState(State.GroundIntake.UP)),
-            new WaitCommand(0.5), // wait until it's set
+            new WaitUntilCommand(groundIntake::atSetpoint).withTimeout(1.0), // wait until it's set
             new InstantCommand(() -> setSafety(true)))
         .withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
   }

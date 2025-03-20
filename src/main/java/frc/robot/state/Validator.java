@@ -63,37 +63,38 @@ public class Validator implements Sendable {
    * @return true if it is a valid robot position, false if invalid or unsafe
    */
   public static boolean positionsValid(double height, double armAngle, boolean intakeUp) {
-    if (!safetyEnabled) return true;
-    if (height < 0.0 || height > 1.0) return false;
-    if (armAngle < Constants.Shooter.ARM_MIN_ANGLE || armAngle > Constants.Shooter.ARM_MAX_ANGLE)
-      return false;
-    // TODO: find better values
-    if (height > 0.6)
-      // Elevator high enough for complete safety
-      return true;
-    if (intakeUp) {
-      if (height > 0.3 && armAngle > 0.01)
-        // Arm above horizontal and elevator high enough
-        return true;
-      if (armAngle > 0.21)
-        // Arm stowed
-        return true;
-    } else {
-      if (height > 0.1 && armAngle > 0.01)
-        // Arm above horizontal and elevator high enough
-        return true;
-      if (armAngle > 0.1)
-        // Elevator at bottom but arm high enough
-        return true;
-    }
-    System.out.println(
-        "(debug) Invalid positions: elevator="
-            + height
-            + ", arm="
-            + armAngle
-            + ", intakeUp="
-            + intakeUp);
-    return false;
+    return true;
+    // if (!safetyEnabled) return true;
+    // if (height < 0.0 || height > 1.0) return false;
+    // if (armAngle < Constants.Shooter.ARM_MIN_ANGLE || armAngle > Constants.Shooter.ARM_MAX_ANGLE)
+    //   return false;
+    // // TODO: find better values
+    // if (height > 0.6)
+    //   // Elevator high enough for complete safety
+    //   return true;
+    // if (intakeUp) {
+    //   if (height > 0.3 && armAngle > 0.01)
+    //     // Arm above horizontal and elevator high enough
+    //     return true;
+    //   if (armAngle > 0.21)
+    //     // Arm stowed
+    //     return true;
+    // } else {
+    //   if (height > 0.1 && armAngle > 0.01)
+    //     // Arm above horizontal and elevator high enough
+    //     return true;
+    //   if (armAngle > 0.1)
+    //     // Elevator at bottom but arm high enough
+    //     return true;
+    // }
+    // System.out.println(
+    //     "(debug) Invalid positions: elevator="
+    //         + height
+    //         + ", arm="
+    //         + armAngle
+    //         + ", intakeUp="
+    //         + intakeUp);
+    // return false;
   }
 
   @Override

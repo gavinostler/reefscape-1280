@@ -7,6 +7,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -89,17 +90,6 @@ public class GroundIntakeSubsystem extends SubsystemBase {
 
   private void intakeUp() {
     GroundIntake.intakePID.setSetpoint(GroundIntake.UP_ANGLE);
-    new SequentialCommandGroup(
-      runOnce(() -> {
-        intakeMotor.setVoltage(10.0);
-        disabled = true;
-        System.out.println("Applied impulse");
-      }),
-      new WaitCommand(0.3),
-      runOnce(() -> {
-        disabled = false;
-      })
-    ).schedule();
   }
 
   private void intakeDown() {
@@ -107,6 +97,7 @@ public class GroundIntakeSubsystem extends SubsystemBase {
   }
 
   private void intakeOff() {
+    disabled = true;
     intakeMotor.setVoltage(0.0);
   }
 
@@ -131,16 +122,27 @@ public class GroundIntakeSubsystem extends SubsystemBase {
   public void off() {
     intakeOff();
     disablePulley();
-    disabled = true;
+  }
+
+  public Command kickUp(double seconds) {
+    return new SequentialCommandGroup(
+      runOnce(() -> {
+        intakeMotor.setVoltage(10.0);
+        disabled = true;
+        System.out.println("Applied impulse");
+      }),
+      new WaitCommand(seconds),
+      runOnce(() -> {
+        disabled = false;
+      })
+    );
   }
 
   @Override
   public void periodic() {
-    if (disabled) return;
-    intakeMotor.setVoltage(
-      GroundIntake.intakePID.calculate(getAngle()) + 
-      GroundIntake.intakeFf.calculate(state.angle, 1.0)
-    );
+    // if (disabled) return;
+    double voltage = GroundIntake.intakePID.calculate(getAngle()) + GroundIntake.intakeFf.calculate(state.angle * Math.PI * 2, 3.0);
+    intakeMotor.setVoltage(voltage);
   }
 
   @Override

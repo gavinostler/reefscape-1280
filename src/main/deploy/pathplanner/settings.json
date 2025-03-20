@@ -9,14 +9,14 @@
   "defaultMaxAngVel": 540.0,
   "defaultMaxAngAccel": 720.0,
   "defaultNominalVoltage": 12.0,
-  "robotMass": 51.301297,
+  "robotMass": 50.349,
   "robotMOI": 6.883,
   "robotTrackwidth": 0.546,
-  "driveWheelRadius": 0.05,
-  "driveGearing": 5.143,
-  "maxDriveSpeed": 8.28,
+  "driveWheelRadius": 0.032,
+  "driveGearing": 6.746,
+  "maxDriveSpeed": 6.0,
   "driveMotorType": "krakenX60",
-  "driveCurrentLimit": 60.0,
+  "driveCurrentLimit": 80.0,
   "wheelCOF": 1.2,
   "flModuleX": 0.29,
   "flModuleY": 0.29,
@@ -28,5 +28,7 @@
   "brModuleY": -0.29,
   "bumperOffsetX": 0.0,
   "bumperOffsetY": 0.0,
-  "robotFeatures": []
+  "robotFeatures": [
+    "{\"name\":\"Rectangle\",\"type\":\"rounded_rect\",\"data\":{\"center\":{\"x\":0.0,\"y\":0.0},\"size\":{\"width\":0.6,\"length\":0.2},\"borderRadius\":0.05,\"strokeWidth\":0.02,\"filled\":true}}"
+  ]
 }
