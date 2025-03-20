@@ -83,7 +83,7 @@ public class VisionSubsystem extends SubsystemBase {
     if (pipelineResults.size() > 0) {
       this.pipelineResults = pipelineResults;
     }
-    final Optional<PhotonPipelineResult> pipeline = getPipeline(camera, 0);
+    final Optional<PhotonPipelineResult> pipeline = getPipeline(0);
 
     if (pipeline.isPresent()) updateEstimatedRobotPose(pipeline.get());
   }
@@ -113,8 +113,8 @@ public class VisionSubsystem extends SubsystemBase {
     overrideSwerve = false;
   }
 
-  public Optional<PhotonPipelineResult> getPipeline(PhotonCamera cam, int index) {
-    final PhotonPipelineResult pipeline = pipelineResults.get(0);
+  public Optional<PhotonPipelineResult> getPipeline(int index) {
+    final PhotonPipelineResult pipeline = pipelineResults.get(index);
 
     return Optional.of(pipeline);
   }
@@ -133,7 +133,7 @@ public class VisionSubsystem extends SubsystemBase {
    * Aligns to the nearest reef tag.
    */
   public void reefAlign() {
-    final Optional<PhotonPipelineResult> pipeline = getPipeline(camera, 0);
+    final Optional<PhotonPipelineResult> pipeline = getPipeline(0);
 
     if (pipeline.isEmpty()) {
       overrideSwerve = false;
