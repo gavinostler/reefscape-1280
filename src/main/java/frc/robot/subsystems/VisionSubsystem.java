@@ -155,7 +155,7 @@ public class VisionSubsystem extends SubsystemBase {
     for (PhotonTrackedTarget target : targets) {
       for (int tagId : reefIds) {
         if (tagId != target.getFiducialId()) {
-          return;
+          continue;
         }
 
         Pose3d tagPose = this.aprilTagFieldLayout.getTagPose(tagId).get();
