@@ -14,7 +14,6 @@ import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import com.revrobotics.spark.config.ClosedLoopConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
-
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.util.Color8Bit;
@@ -225,5 +224,11 @@ public final class Constants {
       armConfigs.Feedback.FeedbackRemoteSensorID = armEncoderId;
       armConfigs.Feedback.SensorToMechanismRatio = 1.0;
     }
+  }
+
+  public static class Vision {
+    public static final double exitVelocity12V = 6.7056; // m/s
+    public static final double algaeMass = 0.6803886; // kg
+    public static final double bargeHeight = 2.2; // m
   }
 }

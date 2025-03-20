@@ -295,8 +295,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   public Command getAlignToFieldPosition(Supplier<Pose2d> targetPoseSupplier) {
     fieldPositionController.setSetpoint(0);
     fieldPositionController.setTolerance(0.1);
-    return run(
-        () -> {
+    return run(() -> {
           var relPose = targetPoseSupplier.get().minus(getState().Pose);
           double vel_mag = fieldPositionController.calculate(relPose.getTranslation().getNorm());
           var vel = relPose.times(vel_mag);
@@ -305,7 +304,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                   .withVelocityX(vel.getX())
                   .withVelocityY(vel.getY())
                   .withTargetDirection(targetPoseSupplier.get().getRotation()));
-        }).until(fieldPositionController::atSetpoint).withTimeout(2.0);
+        })
+        .until(fieldPositionController::atSetpoint)
+        .withTimeout(2.0);
   }
 
   private void startSimThread() {

@@ -2,7 +2,6 @@ package frc.robot.state;
 
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
-import frc.robot.Constants;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.GroundIntakeSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;

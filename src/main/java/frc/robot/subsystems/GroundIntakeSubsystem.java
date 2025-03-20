@@ -125,22 +125,25 @@ public class GroundIntakeSubsystem extends SubsystemBase {
   public Command runKickUp(double seconds) {
     final double VOLTAGE = 10.0;
     return new SequentialCommandGroup(
-      runOnce(() -> {
-        pidEnabled = false;
-        intakeMotor.setVoltage(VOLTAGE);
-        System.out.println("Applied ground intake kick impulse");
-      }),
-      new WaitCommand(seconds),
-      runOnce(() -> {
-        pidEnabled = true;
-      })
-    );
+        runOnce(
+            () -> {
+              pidEnabled = false;
+              intakeMotor.setVoltage(VOLTAGE);
+              System.out.println("Applied ground intake kick impulse");
+            }),
+        new WaitCommand(seconds),
+        runOnce(
+            () -> {
+              pidEnabled = true;
+            }));
   }
 
   @Override
   public void periodic() {
     if (pidEnabled) {
-      double voltage = GroundIntake.intakePID.calculate(getAngle()) + GroundIntake.intakeFf.calculate(state.angle * Math.PI * 2, 3.0);
+      double voltage =
+          GroundIntake.intakePID.calculate(getAngle())
+              + GroundIntake.intakeFf.calculate(state.angle * Math.PI * 2, 3.0);
       intakeMotor.setVoltage(voltage);
     }
   }
@@ -149,9 +152,7 @@ public class GroundIntakeSubsystem extends SubsystemBase {
   public void initSendable(SendableBuilder builder) {
     builder.setSmartDashboardType("Ground Intake");
     builder.addDoubleProperty(
-        "intake voltage",
-        () -> intakeMotor.getAppliedOutput(),
-        intakeMotor::setVoltage);
+        "intake voltage", () -> intakeMotor.getAppliedOutput(), intakeMotor::setVoltage);
     builder.addDoubleProperty("angle", this::getAngle, null);
     builder.addDoubleProperty("setpoint", GroundIntake.intakePID::getSetpoint, null);
     builder.addStringProperty(
