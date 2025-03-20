@@ -2,7 +2,6 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
-import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -31,7 +30,6 @@ public class ShooterSubsystem implements Subsystem, Sendable {
   private final TalonFX armMotor = new TalonFX(Shooter.armId);
   private final CANcoder armEncoder = new CANcoder(Shooter.armEncoderId);
 
-  private final NeutralOut shooterNeutralRequest = new NeutralOut();
   private final VelocityVoltage shooterVelocityRequest = new VelocityVoltage(0.0);
   private final MotionMagicVoltage armAngleRequest = new MotionMagicVoltage(0.0);
 
@@ -192,9 +190,9 @@ public class ShooterSubsystem implements Subsystem, Sendable {
   public Command runShootAlgae() {
     return new SequentialCommandGroup(
             runOnce(this::disableShooterAndFeed), // stop everything first
-            runOnce(() -> enableFeed(true)),
-            runOnce(() -> enableShooter(true)), // pull algae back
-            new WaitCommand(0.2), // time to pull back
+            // runOnce(() -> enableFeed(true)), // ASSUME algae is already pulled back
+            // runOnce(() -> enableShooter(true)), // pull algae back
+            // new WaitCommand(0.2), // time to pull back
             runOnce(() -> enableShooter(false)), // rev up the shooter
             new WaitCommand(0.7), // give it time to come up to target speed
             runOnce(() -> enableFeed(false)), // hawk tuah
@@ -203,25 +201,6 @@ public class ShooterSubsystem implements Subsystem, Sendable {
             )
         .withInterruptBehavior(InterruptionBehavior.kCancelIncoming); // don't get interrupted
   }
-
-  /**
-   * Command group to shoot processor
-   *
-   * @return Command for the shoot procedure
-   */
-  // public Command runShootProcessor() {
-  //   return new SequentialCommandGroup(
-  //           runOnce(this::disableShooterAndFeed), // stop everything first
-  //           runOnce(() -> enableFeed(true)),
-  //           new WaitCommand(1.0), // time to pull back
-  //           runOnce(() -> shootProcessor()), // rev up the shooter to processor speed
-  //           new WaitCommand(1.2), // give it time to come up to target speed
-  //           runOnce(() -> enableFeed(false)), // hawk tuah
-  //           new WaitCommand(0.5), // wait for shooting to finish
-  //           runOnce(this::disableShooterAndFeed) // turn everything off
-  //           )
-  //       .withInterruptBehavior(InterruptionBehavior.kCancelIncoming); // don't get interrupted
-  // }
 
   @Override
   public void initSendable(SendableBuilder builder) {
