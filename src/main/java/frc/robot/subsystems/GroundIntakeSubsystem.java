@@ -21,7 +21,8 @@ public class GroundIntakeSubsystem extends SubsystemBase {
   private final Encoder encoder =
       new Encoder(GroundIntake.encoderChannelA, GroundIntake.encoderChannelB);
 
-  private boolean disabled = false;
+  // If currently true, intake voltage is set by PID in periodic
+  private boolean pidEnabled = false;
 
   private State.GroundIntake state = State.GroundIntake.UP;
   private final Validator validator;
@@ -54,8 +55,8 @@ public class GroundIntakeSubsystem extends SubsystemBase {
     if (!validator.setStateValid(value)) return;
     state = value;
     switch (state) {
-      case DOWN -> down();
-      case UP -> up();
+      case DOWN -> intakeDown();
+      case UP -> intakeUp();
     }
   }
 
@@ -88,16 +89,23 @@ public class GroundIntakeSubsystem extends SubsystemBase {
     return GroundIntake.intakePID.atSetpoint();
   }
 
+  private void moveIntake(double setpoint) {
+    pidEnabled = true;
+    GroundIntake.intakePID.setSetpoint(setpoint);
+  }
+
   private void intakeUp() {
-    GroundIntake.intakePID.setSetpoint(GroundIntake.UP_ANGLE);
+    if (!validator.moveGroundIntakeValid(true)) return;
+    moveIntake(GroundIntake.UP_ANGLE);
   }
 
   private void intakeDown() {
-    GroundIntake.intakePID.setSetpoint(GroundIntake.DOWN_ANGLE);
+    if (!validator.moveGroundIntakeValid(false)) return;
+    moveIntake(GroundIntake.DOWN_ANGLE);
   }
 
   private void intakeOff() {
-    disabled = true;
+    pidEnabled = false;
     intakeMotor.setVoltage(0.0);
   }
 
@@ -109,40 +117,32 @@ public class GroundIntakeSubsystem extends SubsystemBase {
     pulleyMotor.setVoltage(0.0);
   }
 
-  private void up() {
-    if (!validator.moveGroundIntakeValid(true)) return;
-    intakeUp();
-  }
-
-  private void down() {
-    if (!validator.moveGroundIntakeValid(false)) return;
-    intakeDown();
-  }
-
   public void off() {
     intakeOff();
     disablePulley();
   }
 
-  public Command kickUp(double seconds) {
+  public Command runKickUp(double seconds) {
+    final double VOLTAGE = 10.0;
     return new SequentialCommandGroup(
       runOnce(() -> {
-        intakeMotor.setVoltage(10.0);
-        disabled = true;
-        System.out.println("Applied impulse");
+        pidEnabled = false;
+        intakeMotor.setVoltage(VOLTAGE);
+        System.out.println("Applied ground intake kick impulse");
       }),
       new WaitCommand(seconds),
       runOnce(() -> {
-        disabled = false;
+        pidEnabled = true;
       })
     );
   }
 
   @Override
   public void periodic() {
-    // if (disabled) return;
-    double voltage = GroundIntake.intakePID.calculate(getAngle()) + GroundIntake.intakeFf.calculate(state.angle * Math.PI * 2, 3.0);
-    intakeMotor.setVoltage(voltage);
+    if (pidEnabled) {
+      double voltage = GroundIntake.intakePID.calculate(getAngle()) + GroundIntake.intakeFf.calculate(state.angle * Math.PI * 2, 3.0);
+      intakeMotor.setVoltage(voltage);
+    }
   }
 
   @Override

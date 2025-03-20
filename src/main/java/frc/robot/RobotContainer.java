@@ -306,11 +306,11 @@ public class RobotContainer {
                 () ->
                     shooter.setState(State.Shooter.REEF_INTAKE)), // move shooter to L1 intake angle
             new WaitUntilCommand(shooter::atSetpoint).withTimeout(2.0), // wait until it's set
-            groundIntake.kickUp(0.4),
             groundIntake.runOnce(
                 () ->
                     groundIntake.setState(
                         State.GroundIntake.UP)), // move ground intake up (away from reef)
+            groundIntake.runKickUp(0.4),
             new WaitUntilCommand(groundIntake::atSetpoint).withTimeout(1.0), // wait until it's set
             new InstantCommand(() -> setSafety(true)) // put safety back
             )
@@ -327,11 +327,11 @@ public class RobotContainer {
                 () ->
                     shooter.setState(State.Shooter.REEF_INTAKE)), // move shooter to L1 intake angle
             new WaitUntilCommand(shooter::atSetpoint).withTimeout(2.0), // wait until it's set
-            groundIntake.kickUp(0.4),
             groundIntake.runOnce(
                 () ->
                     groundIntake.setState(
                         State.GroundIntake.UP)), // move ground intake up (away from reef)
+            groundIntake.runKickUp(0.4),
             new WaitUntilCommand(groundIntake::atSetpoint).withTimeout(1.0), // wait until it's set
             new InstantCommand(() -> setSafety(true)) // put safety back
             )
@@ -377,8 +377,8 @@ public class RobotContainer {
             new WaitUntilCommand(shooter::atSetpoint).withTimeout(3.0), // wait until it's set
             elevator.runOnce(() -> elevator.setState(State.Elevator.BOTTOM)), // stow elevator
             new WaitUntilCommand(elevator::atSetpoint).withTimeout(3.0), // wait until it's set
-            groundIntake.kickUp(0.4),
             groundIntake.runOnce(() -> groundIntake.setState(State.GroundIntake.UP)),
+            groundIntake.runKickUp(0.4),
             new WaitUntilCommand(groundIntake::atSetpoint).withTimeout(1.0), // wait until it's set
             new InstantCommand(() -> setSafety(true)))
         .withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
