@@ -12,14 +12,13 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
-
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -27,7 +26,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
@@ -42,6 +40,7 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.GroundIntakeSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
+import frc.robot.subsystems.VisionSubsystem;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -78,8 +77,9 @@ public class RobotContainer {
   private final GroundIntakeSubsystem groundIntake = new GroundIntakeSubsystem(validator);
   private final AgnosticController driverController =
       new AgnosticController(Driver.kDriverControllerPort);
-  private final AgnosticController operatorController =
+  public final AgnosticController operatorController =
       driverController; // Aliased to main controller for now, TODO
+  private final VisionSubsystem vision = new VisionSubsystem();
   private final Telemetry logger = new Telemetry(MaxSpeed);
   // private final Colors colors = new Colors();
 
@@ -173,6 +173,9 @@ public class RobotContainer {
     drivetrain.setDefaultCommand(
         drivetrain.applyRequest(
             () -> {
+              if (vision.isOverridingSwerve()) {
+                return vision.drive();
+              }
               double speed;
               double angularRate;
               double fraction = getSwerveSpeedFraction();
@@ -184,9 +187,16 @@ public class RobotContainer {
                 angularRate = MaxAngularRate * fraction;
               }
               return drive
-                  .withVelocityX(filterY.calculate(MathUtil.applyDeadband(driverController.getLeftY(), 0.1)) * speed)
-                  .withVelocityY(filterX.calculate(MathUtil.applyDeadband(driverController.getLeftX(), 0.1)) * speed)
-                  .withRotationalRate(filterRotation.calculate(-MathUtil.applyDeadband(driverController.getRightX(), 0.1)) * angularRate);
+                  .withVelocityX(
+                      filterY.calculate(MathUtil.applyDeadband(driverController.getLeftY(), 0.1))
+                          * speed)
+                  .withVelocityY(
+                      filterX.calculate(MathUtil.applyDeadband(driverController.getLeftX(), 0.1))
+                          * speed)
+                  .withRotationalRate(
+                      filterRotation.calculate(
+                              -MathUtil.applyDeadband(driverController.getRightX(), 0.1))
+                          * angularRate);
             }));
 
     driverController
@@ -201,6 +211,7 @@ public class RobotContainer {
     operatorController.b().onTrue(runL1());
     operatorController.y().onTrue(runL2());
     operatorController.leftBumper().onTrue(runBarge());
+    operatorController.rightBumper().onTrue(vision.run(vision::reefAlign)).onFalse(vision.runOnce(vision::stop));
     operatorController.povUp().onTrue(elevator.runOnce(() -> elevator.moveState(false)));
     operatorController.povDown().onTrue(elevator.runOnce(() -> elevator.moveState(true)));
 
@@ -239,7 +250,9 @@ public class RobotContainer {
             drivetrain.runOnce(
                 () -> {
                   Rotation2d x = drivetrain.getState().Pose.getRotation();
-                  x = x.rotateBy(new Rotation2d(Math.PI)).rotateBy(drivetrain.getOperatorForwardDirection());
+                  x =
+                      x.rotateBy(new Rotation2d(Math.PI))
+                          .rotateBy(drivetrain.getOperatorForwardDirection());
                   drivetrain.resetRotation(x);
                 }));
 
@@ -340,29 +353,28 @@ public class RobotContainer {
 
   public Command runBarge() {
     return new SequentialCommandGroup(
-      new InstantCommand(() -> setSafety(false)),
-      elevator.runOnce(
-          () -> elevator.setState(State.Elevator.SHOOT)),
-      new WaitUntilCommand(elevator::atSetpoint).withTimeout(1.0),
-      shooter.runOnce(
-          () -> shooter.setState(State.Shooter.SHOOT)),
-      new WaitUntilCommand(shooter::atSetpoint).withTimeout(1.0),
-      new InstantCommand(() -> setSafety(true))
-    ).withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
+            new InstantCommand(() -> setSafety(false)),
+            elevator.runOnce(() -> elevator.setState(State.Elevator.SHOOT)),
+            new WaitUntilCommand(elevator::atSetpoint).withTimeout(1.0),
+            shooter.runOnce(() -> shooter.setState(State.Shooter.SHOOT)),
+            new WaitUntilCommand(shooter::atSetpoint).withTimeout(1.0),
+            new InstantCommand(() -> setSafety(true)))
+        .withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
   }
 
   public Command runProcessor() {
     return new SequentialCommandGroup(
-        new InstantCommand(() -> setSafety(false)),
-        groundIntake.runOnce(() -> GroundIntake.intakePID.setSetpoint(0.006)),
-        new WaitUntilCommand(groundIntake::atSetpoint).withTimeout(1.0),
-        shooter.runOnce(() -> shooter.moveArmAngle(0.0)),
-        new WaitUntilCommand(shooter::atSetpoint).withTimeout(2.0),
-        elevator.runOnce(() -> elevator.moveHeight(0.266)),
-        new WaitUntilCommand(elevator::atSetpoint).withTimeout(2.0),
-        new InstantCommand(() -> setSafety(true))
-        // NOTE: state is out of sync but its quite safe so this can be ignored
-    ).withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
+            new InstantCommand(() -> setSafety(false)),
+            groundIntake.runOnce(() -> GroundIntake.intakePID.setSetpoint(0.006)),
+            new WaitUntilCommand(groundIntake::atSetpoint).withTimeout(1.0),
+            shooter.runOnce(() -> shooter.moveArmAngle(0.0)),
+            new WaitUntilCommand(shooter::atSetpoint).withTimeout(2.0),
+            elevator.runOnce(() -> elevator.moveHeight(0.266)),
+            new WaitUntilCommand(elevator::atSetpoint).withTimeout(2.0),
+            new InstantCommand(() -> setSafety(true))
+            // NOTE: state is out of sync but its quite safe so this can be ignored
+            )
+        .withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
   }
 
   public Command runStowSubsystems() {
@@ -387,27 +399,38 @@ public class RobotContainer {
   // Origin from Blue Alliance bottom-right corner
   class Field {
     AprilTagFieldLayout tagLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape);
-    
+
     /**
      * Aligns to the vertical corresponding to the relevant net and side.
+     *
      * @param alliance Our alliance
      * @param distance Desired horizontal (X) distance from barge tag in meters
      */
     Command alignBarge(Alliance alliance, double distance) {
       // If we are Blue use the top net (id 14, 4) else use bottom net (id 15, 5)
-      double leftSideTagX = (alliance == Alliance.Blue ? tagLayout.getTagPose(14) : tagLayout.getTagPose(15)).get().getX();
-      double rightSideTagX = (alliance == Alliance.Blue ? tagLayout.getTagPose(4) : tagLayout.getTagPose(5)).get().getX();
+      double leftSideTagX =
+          (alliance == Alliance.Blue ? tagLayout.getTagPose(14) : tagLayout.getTagPose(15))
+              .get()
+              .getX();
+      double rightSideTagX =
+          (alliance == Alliance.Blue ? tagLayout.getTagPose(4) : tagLayout.getTagPose(5))
+              .get()
+              .getX();
 
-      return drivetrain.getAlignToFieldPosition(() -> {
-        var driveTranslation = drivetrain.getState().Pose.getTranslation();
-        if (Math.abs(driveTranslation.getX() - leftSideTagX) < Math.abs(driveTranslation.getX() - rightSideTagX)) {
-          // Left side is closer
-          return new Pose2d(leftSideTagX - distance, driveTranslation.getY(), new Rotation2d(Math.PI));
-        } else {
-          // Right side is closer
-          return new Pose2d(rightSideTagX + distance, driveTranslation.getY(), new Rotation2d(0.0));
-        }
-      });
+      return drivetrain.getAlignToFieldPosition(
+          () -> {
+            var driveTranslation = drivetrain.getState().Pose.getTranslation();
+            if (Math.abs(driveTranslation.getX() - leftSideTagX)
+                < Math.abs(driveTranslation.getX() - rightSideTagX)) {
+              // Left side is closer
+              return new Pose2d(
+                  leftSideTagX - distance, driveTranslation.getY(), new Rotation2d(Math.PI));
+            } else {
+              // Right side is closer
+              return new Pose2d(
+                  rightSideTagX + distance, driveTranslation.getY(), new Rotation2d(0.0));
+            }
+          });
     }
   }
 
@@ -420,7 +443,9 @@ public class RobotContainer {
     final double slowingHeight = 0.2;
     final double minSpeedFraction = 0.30;
     final double curveCoefficient = (minSpeedFraction - 1) / Math.pow(slowingHeight - 1, 2);
-    final double height = MathUtil.clamp(elevator.getHeight() + 0.1*Math.sin(shooter.getArmAngle()*2*Math.PI), 0, 1);
+    final double height =
+        MathUtil.clamp(
+            elevator.getHeight() + 0.1 * Math.sin(shooter.getArmAngle() * 2 * Math.PI), 0, 1);
     double speedFraction;
     if (height < slowingHeight) {
       speedFraction = 1.0;
@@ -431,5 +456,20 @@ public class RobotContainer {
     }
     speedFraction = MathUtil.clamp(speedFraction, minSpeedFraction, 1.0);
     return speedFraction;
+  }
+
+  /**
+   * Incorporate vision estimates into drivetrain pose estimates
+   * Use only while vision is running
+   * Intended to enhance autonomous
+   */
+  private void addVisionMeasurement() {
+    Pose2d visionEstimate = vision.getEstimatedPose2d();
+    if (visionEstimate == null) return;
+    Pose2d currentEstimate = drivetrain.getState().Pose;
+    double estimatesDistance = currentEstimate.getTranslation().getDistance(visionEstimate.getTranslation());
+    // Filter out bad vision measurements
+    if (estimatesDistance > 1.0) return;
+    drivetrain.addVisionMeasurement(visionEstimate, Timer.getFPGATimestamp());
   }
 }

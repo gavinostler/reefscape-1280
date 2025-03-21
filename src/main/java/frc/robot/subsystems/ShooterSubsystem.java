@@ -114,8 +114,7 @@ public class ShooterSubsystem implements Subsystem, Sendable {
     double target;
     if (getArmAngle() >= 0.0)
       target = inward ? Shooter.SHOOTER_INTAKE_TARGET_RPS : Shooter.SHOOTER_SHOOT_TARGET_RPS;
-    else
-      target = inward ? Shooter.SHOOTER_INTAKE_TARGET_RPS : Shooter.SHOOTER_PROCESSOR_TARGET_RPS;
+    else target = inward ? Shooter.SHOOTER_INTAKE_TARGET_RPS : Shooter.SHOOTER_PROCESSOR_TARGET_RPS;
     leaderShooterMotor.setControl(
         shooterVelocityRequest.withVelocity(Shooter.SHOOTER_GEAR_REDUCTION * target));
   }
