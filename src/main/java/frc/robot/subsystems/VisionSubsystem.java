@@ -10,6 +10,7 @@ import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -116,6 +117,13 @@ public class VisionSubsystem extends SubsystemBase {
 
     if (possiblePose.isEmpty()) return;
     this.estimatedRobotPose = possiblePose.get();
+  }
+
+  /*
+   * Get the estimated vision robot pose as 2d
+   */
+  public Pose2d getEstimatedPose2d() {
+    return estimatedRobotPose.estimatedPose.toPose2d();
   }
 
   /*

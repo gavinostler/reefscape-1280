@@ -18,6 +18,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -455,5 +456,20 @@ public class RobotContainer {
     }
     speedFraction = MathUtil.clamp(speedFraction, minSpeedFraction, 1.0);
     return speedFraction;
+  }
+
+  /**
+   * Incorporate vision estimates into drivetrain pose estimates
+   * Use only while vision is running
+   * Intended to enhance autonomous
+   */
+  private void addVisionMeasurement() {
+    Pose2d visionEstimate = vision.getEstimatedPose2d();
+    if (visionEstimate == null) return;
+    Pose2d currentEstimate = drivetrain.getState().Pose;
+    double estimatesDistance = currentEstimate.getTranslation().getDistance(visionEstimate.getTranslation());
+    // Filter out bad vision measurements
+    if (estimatesDistance > 1.0) return;
+    drivetrain.addVisionMeasurement(visionEstimate, Timer.getFPGATimestamp());
   }
 }
