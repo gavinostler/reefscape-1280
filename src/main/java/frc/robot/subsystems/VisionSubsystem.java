@@ -188,8 +188,8 @@ public class VisionSubsystem extends SubsystemBase {
     overrideSwerve = true;
     lastRobotVector = vector;
     
-    moveX = pid.atSetpoint() ? 0 : -(vector.getX() * MaxSpeed/2);
-    moveY = pid.atSetpoint() ? 0 : -(vector.getY() * MaxSpeed/2);
+    moveX = pid.atSetpoint() ? 0 : (vector.getX() * MaxSpeed/2);
+    moveY = pid.atSetpoint() ? 0 : (vector.getY() * MaxSpeed/2);
     rotation = desiredTag2d.getRotation();
   }
   
