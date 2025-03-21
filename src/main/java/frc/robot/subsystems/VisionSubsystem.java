@@ -42,8 +42,8 @@ public class VisionSubsystem extends SubsystemBase {
   /* Setting up bindings for necessary control of the swerve drive platform */
   private final SwerveRequest.FieldCentricFacingAngle drive =
     new SwerveRequest.FieldCentricFacingAngle()
-      .withDeadband(MaxSpeed * 0.1)
-      .withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
+      .withDeadband(MaxSpeed * 0.01)
+      .withRotationalDeadband(MaxAngularRate * 0.01) // Add a 10% deadband
       .withDriveRequestType(DriveRequestType.Velocity);
 
   private Rotation2d rotation = new Rotation2d();
@@ -57,7 +57,7 @@ public class VisionSubsystem extends SubsystemBase {
   private AprilTagFieldLayout aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape);
   private Transform3d robotToFrontCam;
   private PhotonPoseEstimator photonPoseEstimator;
-  private EstimatedRobotPose estimatedRobotPose;
+  private Pose2d estimatedRobotPose;
   private Optional<PhotonPipelineResult> latestPipelineResult;
 
   private static int[] reefIds = new int[] {6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22};
@@ -65,12 +65,11 @@ public class VisionSubsystem extends SubsystemBase {
   public VisionSubsystem() {
     robotToFrontCam =
         new Transform3d(
-            new Translation3d(0, 0.0, 0.5),
-            new Rotation3d(0, Math.toRadians(30), Math.toRadians(0)));
+            new Translation3d(0, 0.195, 0.5),
+            new Rotation3d(0, Math.toRadians(0), Math.toRadians(0)));
     photonPoseEstimator =
         new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.LOWEST_AMBIGUITY, robotToFrontCam);
 
-    pid.setTolerance(0.0001);
   }
 
   @Override
@@ -94,7 +93,7 @@ public class VisionSubsystem extends SubsystemBase {
         .withVelocityX(moveX) // For now, do not allow movement
         .withVelocityY(moveY) // For now, do not allow movement
         .withTargetDirection(this.rotation)
-        .withHeadingPID(10, 0, 0);
+        .withHeadingPID(1.2, 0, 0);
   }
 
   /*
@@ -118,14 +117,14 @@ public class VisionSubsystem extends SubsystemBase {
     final Optional<EstimatedRobotPose> possiblePose = photonPoseEstimator.update(pipeline);
 
     if (possiblePose.isEmpty()) return;
-    this.estimatedRobotPose = possiblePose.get();
+    this.estimatedRobotPose = possiblePose.get().estimatedPose.toPose2d().plus(new Transform2d(0,0, new Rotation2d(Math.toRadians(180))));
   }
 
   /*
    * Get the estimated vision robot pose as 2d
    */
   public Pose2d getEstimatedPose2d() {
-    return estimatedRobotPose.estimatedPose.toPose2d();
+    return estimatedRobotPose;
   }
 
   /*
@@ -158,7 +157,7 @@ public class VisionSubsystem extends SubsystemBase {
 
         Pose3d tagPose = this.aprilTagFieldLayout.getTagPose(tagId).get();
 
-        Pose3d dist = tagPose.relativeTo(estimatedRobotPose.estimatedPose);
+        Pose2d dist = tagPose.toPose2d().relativeTo(estimatedRobotPose);
         double xDist = dist.getMeasureX().magnitude();
         double yDist = dist.getMeasureY().magnitude();
 
@@ -178,18 +177,18 @@ public class VisionSubsystem extends SubsystemBase {
 
     final Pose3d desiredTag = this.aprilTagFieldLayout.getTagPose(closestTag).get();
     
-    final Pose2d desiredTag2d = desiredTag.toPose2d().transformBy(new Transform2d(1.0, 0.0, new Rotation2d(0)));
-    final Pose2d robotVector2d = estimatedRobotPose.estimatedPose.toPose2d();
+    final Pose2d desiredTag2d = desiredTag.toPose2d().plus(new Transform2d(0.5, 0.0, new Rotation2d()));
+    final Pose2d robotVector2d = estimatedRobotPose;
     final Pose2d adjustedPosition = desiredTag2d.relativeTo(robotVector2d);
 
-    final double pidCalc = pid.calculate(adjustedPosition.getTranslation().getNorm(), 0);
+    final double pidCalc = Math.min(Math.max(pid.calculate(adjustedPosition.getTranslation().getNorm(), 0), -1),1);
     final Pose2d vector = adjustedPosition.times(pidCalc);
     
     overrideSwerve = true;
     lastRobotVector = vector;
     
-    moveX = pid.atSetpoint() ? 0 : (vector.getX() * MaxSpeed/2);
-    moveY = pid.atSetpoint() ? 0 : (vector.getY() * MaxSpeed/2);
+    moveX = -(vector.getMeasureX().magnitude() * MaxSpeed);
+    moveY = -(vector.getMeasureY().magnitude() * MaxSpeed);
     rotation = desiredTag2d.getRotation();
   }
   
@@ -202,10 +201,11 @@ public class VisionSubsystem extends SubsystemBase {
     builder.addDoubleProperty("Robot Vector X Magnitude", () -> lastRobotVector.getMeasureX().magnitude(), null);
     builder.addDoubleProperty("Robot Vector Y Magnitude", () -> lastRobotVector.getMeasureY().magnitude(), null);
     builder.addStringProperty("Robot Vector Rotation", () -> lastRobotVector.getRotation().toString(), null);
-    builder.addStringProperty("Robot Pose (Unadjusted)", () -> estimatedRobotPose.estimatedPose.toPose2d().toString(), null);
+    builder.addStringProperty("Robot Pose (Unadjusted)", () -> {if (estimatedRobotPose == null) return ""; return estimatedRobotPose.toString();}, null);
     
     builder.addStringProperty("Desired Rotation", () -> rotation.toString(), null);
-    builder.addStringProperty("Desired Rotation", () -> rotation.toString(), null);
+    builder.addDoubleProperty("Move X", () -> moveX, null);
+    builder.addDoubleProperty("Move Y", () -> moveY, null);
   }
 }
 

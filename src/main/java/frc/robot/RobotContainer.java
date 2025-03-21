@@ -103,6 +103,7 @@ public class RobotContainer {
     SmartDashboard.putData("shooter", shooter);
     SmartDashboard.putData("ground intake", groundIntake);
     SmartDashboard.putData("validator", validator);
+    SmartDashboard.putData("vision", vision);
 
     elevator.setState(elevator.getState());
     shooter.setState(shooter.getState());

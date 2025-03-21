@@ -55,9 +55,9 @@ public final class Constants {
   public static class Elevator {
     public static final double TOP_HEIGHT = 1.0;
     public static final double SHOOT_HEIGHT = 0.89; // TODO
-    public static final double L2_HEIGHT = 0.7;
+    public static final double L2_HEIGHT = 0.73;
     public static final double GROUND_INTAKE_HEIGHT = 0.527;
-    public static final double L1_HEIGHT = 0.44;
+    public static final double L1_HEIGHT = 0.46;
     public static final double BOTTOM_HEIGHT = 0.0;
     public static final double HEIGHT_TOLERANCE = 0.03;
 
@@ -117,7 +117,7 @@ public final class Constants {
       intakeConfig.smartCurrentLimit(INTAKE_CURRENT_LIMIT);
     }
 
-    public static final PIDController intakePID = new PIDController(50.0, 0.0, 5.0);
+    public static final PIDController intakePID = new PIDController(40.0, 0.0, 5.0);
     public static final ArmFeedforward intakeFf = new ArmFeedforward(1.0, 0.5, 0.0, 1.0);
 
     static {
