@@ -15,8 +15,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.generated.TunerConstants;
 import java.util.List;
@@ -41,34 +39,32 @@ public class VisionSubsystem extends SubsystemBase {
 
   /* Setting up bindings for necessary control of the swerve drive platform */
   private final SwerveRequest.FieldCentricFacingAngle drive =
-      new SwerveRequest.FieldCentricFacingAngle()
-          .withDeadband(MaxSpeed * 0.1)
-          .withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
-          .withDriveRequestType(DriveRequestType.Velocity);
+    new SwerveRequest.FieldCentricFacingAngle()
+      .withDeadband(MaxSpeed * 0.1)
+      .withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
+      .withDriveRequestType(DriveRequestType.Velocity);
 
   private Rotation2d rotation = new Rotation2d();
   private double moveX = 0.0;
   private double moveY = 0.0;
   private boolean overrideSwerve = false;
 
-  private PhotonCamera camera;
-  private AprilTagFieldLayout aprilTagFieldLayout;
-  private Transform3d robotToCam;
+  private PhotonCamera frontCamera = new PhotonCamera("front");
+  private AprilTagFieldLayout aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape);
+  private Transform3d robotToFrontCam;
   private PhotonPoseEstimator photonPoseEstimator;
   private EstimatedRobotPose estimatedRobotPose;
-  private List<PhotonPipelineResult> pipelineResults;
+  private Optional<PhotonPipelineResult> latestPipelineResult;
 
   private static int[] reefIds = new int[] {6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22};
 
   public VisionSubsystem() {
-    camera = new PhotonCamera("front"); // temp name
-    aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape);
-    robotToCam =
+    robotToFrontCam =
         new Transform3d(
             new Translation3d(0, 0.0, 0.5),
             new Rotation3d(0, Math.toRadians(30), Math.toRadians(180)));
     photonPoseEstimator =
-        new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.LOWEST_AMBIGUITY, robotToCam);
+        new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.LOWEST_AMBIGUITY, robotToFrontCam);
 
     xPID.setSetpoint(1.5);
     yPID.setSetpoint(0);
@@ -78,14 +74,13 @@ public class VisionSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    final List<PhotonPipelineResult> pipelineResults = camera.getAllUnreadResults();
+    final List<PhotonPipelineResult> pipelineResults = frontCamera.getAllUnreadResults();
 
     if (pipelineResults.size() > 0) {
-      this.pipelineResults = pipelineResults;
+      latestPipelineResult = Optional.of(pipelineResults.get(0)); // optional because index can be null if photonvision disconnects
+      
+      if (latestPipelineResult.isPresent()) updateEstimatedRobotPose(latestPipelineResult.get()); // depends on latest pipeline result
     }
-    final Optional<PhotonPipelineResult> pipeline = getPipeline(0);
-
-    if (pipeline.isPresent()) updateEstimatedRobotPose(pipeline.get());
   }
 
   /*
@@ -113,12 +108,6 @@ public class VisionSubsystem extends SubsystemBase {
     overrideSwerve = false;
   }
 
-  public Optional<PhotonPipelineResult> getPipeline(int index) {
-    final PhotonPipelineResult pipeline = pipelineResults.get(index);
-
-    return Optional.of(pipeline);
-  }
-
   /*
    * Updates the estimated robot pose for vision.
    */
@@ -133,17 +122,14 @@ public class VisionSubsystem extends SubsystemBase {
    * Aligns to the nearest reef tag.
    */
   public void reefAlign() {
-    final Optional<PhotonPipelineResult> pipeline = getPipeline(0);
 
-    if (pipeline.isEmpty()) {
+    if (latestPipelineResult.isEmpty()) {
       overrideSwerve = false;
       return;
     }
 
     // final PhotonTrackedTarget bestTarget = pipeline.get().getBestTarget();
-    final List<PhotonTrackedTarget> targets = pipeline.get().getTargets();
-    final Optional<Alliance> allianceOptional = DriverStation.getAlliance();
-    if (allianceOptional.isEmpty()) return;
+    final List<PhotonTrackedTarget> targets = latestPipelineResult.get().getTargets();
     if (estimatedRobotPose == null || targets.isEmpty()) {
       overrideSwerve = false;
       return;
