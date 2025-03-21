@@ -16,6 +16,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.generated.TunerConstants;
 import java.util.List;
@@ -63,14 +65,12 @@ public class VisionSubsystem extends SubsystemBase {
     robotToFrontCam =
         new Transform3d(
             new Translation3d(0, 0.0, 0.5),
-            new Rotation3d(0, Math.toRadians(30), Math.toRadians(180)));
+            new Rotation3d(0, Math.toRadians(30), Math.toRadians(0)));
     photonPoseEstimator =
         new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.LOWEST_AMBIGUITY, robotToFrontCam);
 
-    xPID.setSetpoint(1.5);
-    yPID.setSetpoint(0);
-    xPID.setTolerance(0.05);
-    yPID.setTolerance(0.05);
+    // xPID.setTolerance(0.001);
+    // yPID.setTolerance(0.001);
   }
 
   @Override
@@ -92,7 +92,7 @@ public class VisionSubsystem extends SubsystemBase {
         .withVelocityX(moveX) // For now, do not allow movement
         .withVelocityY(moveY) // For now, do not allow movement
         .withTargetDirection(this.rotation)
-        .withHeadingPID(12, 0, 0);
+        .withHeadingPID(10, 0, 0);
   }
 
   /*
@@ -132,6 +132,7 @@ public class VisionSubsystem extends SubsystemBase {
   public void reefAlign() {
 
     if (latestPipelineResult.isEmpty()) {
+      System.out.println("NO LATEST PIPELINE");
       overrideSwerve = false;
       return;
     }
@@ -139,6 +140,7 @@ public class VisionSubsystem extends SubsystemBase {
     // final PhotonTrackedTarget bestTarget = pipeline.get().getBestTarget();
     final List<PhotonTrackedTarget> targets = latestPipelineResult.get().getTargets();
     if (estimatedRobotPose == null || targets.isEmpty()) {
+      System.out.println("TARGETS INVALID");
       overrideSwerve = false;
       return;
     }
@@ -167,19 +169,30 @@ public class VisionSubsystem extends SubsystemBase {
     }
 
     if (closestTag < 1 || closestTag > 22) {
+      System.out.println("DISABLED BY INVALID ID");
       overrideSwerve = false;
       return;
     }
 
     final Pose3d desiredTag = this.aprilTagFieldLayout.getTagPose(closestTag).get();
-    final Transform3d robotVector = desiredTag.minus(estimatedRobotPose.estimatedPose);
+    final Pose3d robotVector = desiredTag.relativeTo(estimatedRobotPose.estimatedPose);
+
+    SmartDashboard.putString("rfwbhjkwrfouhwerfbjk", robotVector.toString());
 
     overrideSwerve = true;
 
-    moveX = (-xPID.calculate(-robotVector.getX()) * MaxSpeed) / 4;
+    moveX = (xPID.calculate(robotVector.getMeasureX().magnitude(), 1) * MaxSpeed/2);
     moveX = xPID.atSetpoint() ? 0 : moveX;
-    moveY = (-yPID.calculate(-robotVector.getY()) * MaxSpeed) / 4;
+    moveY = (yPID.calculate(robotVector.getMeasureY().magnitude(), 0) * MaxSpeed/2);
     moveY = yPID.atSetpoint() ? 0 : moveY;
+
+    System.out.println(robotVector.getMeasureX().magnitude());
+    System.out.println(robotVector.getMeasureY().magnitude());
     rotation = desiredTag.getRotation().toRotation2d();
+    System.out.println(robotVector.getRotation().toRotation2d());
+    System.out.println(estimatedRobotPose.estimatedPose.toPose2d().toString());
+    System.out.println("---------");
   }
 }
+
+

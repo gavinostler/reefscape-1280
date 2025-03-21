@@ -175,7 +175,7 @@ public class RobotContainer {
             () -> {
               if (vision.isOverridingSwerve()) {
                 return vision.drive();
-              }
+              } 
               double speed;
               double angularRate;
               double fraction = getSwerveSpeedFraction();
@@ -255,6 +255,7 @@ public class RobotContainer {
                           .rotateBy(drivetrain.getOperatorForwardDirection());
                   drivetrain.resetRotation(x);
                 }));
+
 
     // Stow all subsystems
     operatorController.rightStick().onTrue(runStowSubsystems());
@@ -463,13 +464,13 @@ public class RobotContainer {
    * Use only while vision is running
    * Intended to enhance autonomous
    */
-  private void addVisionMeasurement() {
-    Pose2d visionEstimate = vision.getEstimatedPose2d();
-    if (visionEstimate == null) return;
-    Pose2d currentEstimate = drivetrain.getState().Pose;
-    double estimatesDistance = currentEstimate.getTranslation().getDistance(visionEstimate.getTranslation());
+  /* private void addVisionMeasurement() {
+    /* Pose2d visionEstimate = vision.getEstimatedPose2d();
+    if (visionEstimate == null) return; */
+    /* Pose2d currentEstimate = drivetrain.getState().Pose;
+    double estimatesDistance = currentEstimate.getTranslation().getDistance(visionEstimate.getTranslation()); */
     // Filter out bad vision measurements
-    if (estimatesDistance > 1.0) return;
+    /* if (estimatesDistance > 1.0) return;
     drivetrain.addVisionMeasurement(visionEstimate, Timer.getFPGATimestamp());
-  }
+  } */
 }

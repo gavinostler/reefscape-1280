@@ -117,7 +117,7 @@ public final class Constants {
       intakeConfig.smartCurrentLimit(INTAKE_CURRENT_LIMIT);
     }
 
-    public static final PIDController intakePID = new PIDController(80.0, 0.0, 5.0);
+    public static final PIDController intakePID = new PIDController(50.0, 0.0, 5.0);
     public static final ArmFeedforward intakeFf = new ArmFeedforward(1.0, 0.5, 0.0, 1.0);
 
     static {
