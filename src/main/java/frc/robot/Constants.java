@@ -98,7 +98,7 @@ public final class Constants {
   }
 
   public static class GroundIntake {
-    public static final double UP_ANGLE = 0.25;
+    public static final double UP_ANGLE = 0.22;
     public static final double DOWN_ANGLE = 0.084;
 
     public static final int encoderChannelA = 3;
