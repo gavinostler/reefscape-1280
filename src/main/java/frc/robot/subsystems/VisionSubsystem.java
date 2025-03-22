@@ -59,6 +59,7 @@ public class VisionSubsystem extends SubsystemBase {
   private PhotonPoseEstimator photonPoseEstimator;
   private Pose2d estimatedRobotPose;
   private Optional<PhotonPipelineResult> latestPipelineResult;
+  public Rotation2d operatorForward = new Rotation2d();
 
   private static int[] reefIds = new int[] {6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22};
 
@@ -187,8 +188,8 @@ public class VisionSubsystem extends SubsystemBase {
     overrideSwerve = true;
     lastRobotVector = vector;
     
-    moveX = -(vector.getMeasureX().magnitude() * MaxSpeed);
-    moveY = -(vector.getMeasureY().magnitude() * MaxSpeed);
+    moveX = Math.min(Math.max(-(vector.getMeasureX().magnitude() * 5), -MaxSpeed/3), MaxSpeed/3);
+    moveY = Math.min(Math.max(-(vector.getMeasureY().magnitude() * 5), -MaxSpeed/3), MaxSpeed/3);
     rotation = desiredTag2d.getRotation();
   }
   

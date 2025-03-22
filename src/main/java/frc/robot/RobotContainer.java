@@ -78,6 +78,7 @@ public class RobotContainer {
   public final ElevatorSubsystem elevator = new ElevatorSubsystem(validator);
   private final ShooterSubsystem shooter = new ShooterSubsystem(validator);
   private final GroundIntakeSubsystem groundIntake = new GroundIntakeSubsystem(validator);
+  private final AgnosticController dummy =  new AgnosticController(Driver.kDriverControllerPort);
   private final XboxController driverController =
       new XboxController(Driver.kDriverControllerPort);
   public final XboxController operatorController =
@@ -113,6 +114,10 @@ public class RobotContainer {
     elevator.setState(elevator.getState());
     shooter.setState(shooter.getState());
     groundIntake.setState(groundIntake.getState());
+  }
+
+  public void updateVision() {
+    vision.operatorForward = drivetrain.getOperatorForwardDirection();
   }
 
   /** Register named commands, for use in autonomous */
@@ -452,12 +457,12 @@ public class RobotContainer {
 
   private double getSwerveSpeedFraction() {
     // https://www.desmos.com/calculator/ghdph63sxf
-    final double slowingHeight = 0.2;
+    final double slowingHeight = 0;
     final double minSpeedFraction = 0.30;
     final double curveCoefficient = (minSpeedFraction - 1) / Math.pow(slowingHeight - 1, 2);
-    final double height =
+    double height =
         MathUtil.clamp(
-            elevator.getHeight() + 0.1 * Math.sin(shooter.getArmAngle() * 2 * Math.PI), 0, 1);
+            (elevator.getHeight() + 0.1 * Math.sin(shooter.getArmAngle() * 2 * Math.PI)) * 1.2, 0, 1);
     double speedFraction;
     if (height < slowingHeight) {
       speedFraction = 1.0;
@@ -469,6 +474,7 @@ public class RobotContainer {
     speedFraction = MathUtil.clamp(speedFraction, minSpeedFraction, 1.0);
     return speedFraction;
   }
+
 
   /**
    * Incorporate vision estimates into drivetrain pose estimates

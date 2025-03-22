@@ -57,7 +57,7 @@ public final class Constants {
     public static final double SHOOT_HEIGHT = 0.92; // TODO
     public static final double L2_HEIGHT = 0.70;
     public static final double GROUND_INTAKE_HEIGHT = 0.527;
-    public static final double L1_HEIGHT = 0.445;
+    public static final double L1_HEIGHT = 0.435;
     public static final double BOTTOM_HEIGHT = 0.0;
     public static final double HEIGHT_TOLERANCE = 0.03;
 
