@@ -25,7 +25,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "a_s6_L3_shootB"
+            "pathName": "a_s6_L3_shootB1"
           }
         },
         {
@@ -43,7 +43,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "B_intakeA_s1_L2"
+            "pathName": "B1_intakeA_s1_L2"
           }
         },
         {
@@ -61,7 +61,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "a_s1_L2_shootB"
+            "pathName": "a_s1_L2_shootB2"
           }
         },
         {
@@ -79,7 +79,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "B_intakeA_s2_L3"
+            "pathName": "B2_intakeA_s2_L3"
           }
         },
         {
@@ -97,7 +97,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "a_s2_L3_shootB"
+            "pathName": "a_s2_L3_shootB3"
           }
         },
         {
