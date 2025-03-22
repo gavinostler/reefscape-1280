@@ -18,6 +18,7 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.generated.TunerConstants;
 import java.util.List;
@@ -66,7 +67,7 @@ public class VisionSubsystem extends SubsystemBase {
   public VisionSubsystem() {
     robotToFrontCam =
         new Transform3d(
-            new Translation3d(0, 0.195, 0.5),
+            new Translation3d(0, 0.12, 0.5),
             new Rotation3d(0, Math.toRadians(0), Math.toRadians(0)));
     photonPoseEstimator =
         new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.LOWEST_AMBIGUITY, robotToFrontCam);
@@ -118,7 +119,7 @@ public class VisionSubsystem extends SubsystemBase {
     final Optional<EstimatedRobotPose> possiblePose = photonPoseEstimator.update(pipeline);
 
     if (possiblePose.isEmpty()) return;
-    this.estimatedRobotPose = possiblePose.get().estimatedPose.toPose2d().plus(new Transform2d(0,0, new Rotation2d(Math.toRadians(180))));
+    this.estimatedRobotPose = possiblePose.get().estimatedPose.toPose2d().plus(new Transform2d(0,0, new Rotation2d(Math.toRadians(DriverStation.getAlliance().get() == DriverStation.Alliance.Red ? 180 : 0))));
   }
 
   /*
@@ -178,7 +179,7 @@ public class VisionSubsystem extends SubsystemBase {
 
     final Pose3d desiredTag = this.aprilTagFieldLayout.getTagPose(closestTag).get();
     
-    final Pose2d desiredTag2d = desiredTag.toPose2d().plus(new Transform2d(0.5, 0.0, new Rotation2d()));
+    final Pose2d desiredTag2d = desiredTag.toPose2d().plus(new Transform2d(0.3, 0.0, new Rotation2d()));
     final Pose2d robotVector2d = estimatedRobotPose;
     final Pose2d adjustedPosition = desiredTag2d.relativeTo(robotVector2d);
 
@@ -188,8 +189,8 @@ public class VisionSubsystem extends SubsystemBase {
     overrideSwerve = true;
     lastRobotVector = vector;
     
-    moveX = Math.min(Math.max(-(vector.getMeasureX().magnitude() * 5), -MaxSpeed/3), MaxSpeed/3);
-    moveY = Math.min(Math.max(-(vector.getMeasureY().magnitude() * 5), -MaxSpeed/3), MaxSpeed/3);
+    moveX = Math.min(Math.max(-(vector.getMeasureX().magnitude() * 5), -MaxSpeed/5), MaxSpeed/5);
+    moveY = Math.min(Math.max(-(vector.getMeasureY().magnitude() * 5), -MaxSpeed/5), MaxSpeed/5);
     rotation = desiredTag2d.getRotation();
   }
   
