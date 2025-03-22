@@ -195,7 +195,7 @@ public class ShooterSubsystem implements Subsystem, Sendable {
             runOnce(() -> enableShooter(false)), // rev up the shooter
             new WaitCommand(0.7), // give it time to come up to target speed
             runOnce(() -> enableFeed(false)), // hawk tuah
-            new WaitCommand(0.5), // wait for shooting to finish
+            new WaitCommand(1), // wait for shooting to finish
             runOnce(this::disableShooterAndFeed) // turn everything off
             )
         .withInterruptBehavior(InterruptionBehavior.kCancelIncoming); // don't get interrupted
