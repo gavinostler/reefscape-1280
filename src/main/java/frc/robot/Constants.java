@@ -55,9 +55,9 @@ public final class Constants {
   public static class Elevator {
     public static final double TOP_HEIGHT = 1.0;
     public static final double SHOOT_HEIGHT = 0.89; // TODO
-    public static final double L2_HEIGHT = 0.73;
+    public static final double L2_HEIGHT = 0.70;
     public static final double GROUND_INTAKE_HEIGHT = 0.527;
-    public static final double L1_HEIGHT = 0.46;
+    public static final double L1_HEIGHT = 0.445;
     public static final double BOTTOM_HEIGHT = 0.0;
     public static final double HEIGHT_TOLERANCE = 0.03;
 
@@ -118,7 +118,7 @@ public final class Constants {
     }
 
     public static final PIDController intakePID = new PIDController(40.0, 0.0, 5.0);
-    public static final ArmFeedforward intakeFf = new ArmFeedforward(1.0, 0.5, 0.0, 1.0);
+    public static final ArmFeedforward intakeFf = new ArmFeedforward(1.0, 0.2, 0.0, 1.0);
 
     static {
       intakePID.setTolerance(ANGLE_TOLERANCE);
@@ -141,14 +141,14 @@ public final class Constants {
     public static final double ARM_MAX_ANGLE = 0.225;
 
     public static final double STOW_ANGLE = 0.22;
-    public static final double SHOOT_ANGLE = 0.16;
+    public static final double SHOOT_ANGLE = 0.20;
     public static final double REEF_INTAKE_ANGLE = 0.055;
     public static final double GROUND_INTAKE_ANGLE = -0.151;
     public static final double ANGLE_TOLERANCE = 0.01;
 
     public static final int rightShooterId = 12;
     public static final int leftShooterId = 14;
-    public static final double SHOOTER_SHOOT_TARGET_RPS = 100.0;
+    public static final double SHOOTER_SHOOT_TARGET_RPS = 22.0;
     public static final double SHOOTER_INTAKE_TARGET_RPS = -15.0;
     public static final double SHOOTER_PROCESSOR_TARGET_RPS = 20.0; // TODO: set processor speed
     public static final double SHOOTER_GEAR_REDUCTION = 1.0;
@@ -157,7 +157,7 @@ public final class Constants {
     public static final int rightFeedId = 13;
     public static final int leftFeedId = 15;
     public static final double FEED_IN_SPEED = -0.5;
-    public static final double FEED_OUT_SPEED = 0.7;
+    public static final double FEED_OUT_SPEED = 0.35;
     public static final int FEED_CURRENT_LIMIT = 40;
 
     public static final int armId = 16;
@@ -173,9 +173,9 @@ public final class Constants {
       shooterConfigs.MotorOutput.Inverted =
           InvertedValue.CounterClockwise_Positive; // right is primary, positive is out
       // TODO: tune gains
-      shooterConfigs.Slot0.kS = 0.1; // Add kS V output to overcome static friction
-      shooterConfigs.Slot0.kV = 0.4; // A velocity target of 1 rps results in kV V output
-      shooterConfigs.Slot0.kA = 0.8; // An acceleration of 1 rps/s requires kA V output
+      shooterConfigs.Slot0.kS = 0.0; // Add kS V output to overcome static friction
+      shooterConfigs.Slot0.kV = 0.1; // A velocity target of 1 rps results in kV V output
+      shooterConfigs.Slot0.kA = 0.2; // An acceleration of 1 rps/s requires kA V output
       shooterConfigs.Slot0.kP = 0.15; // An error of 1 rps results in kP V output
       shooterConfigs.Slot0.kI = 0.0; // integrated error (0: no output for error)
       shooterConfigs.Slot0.kD = 0.0; // error derivative

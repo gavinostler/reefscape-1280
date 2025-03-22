@@ -23,9 +23,11 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
@@ -51,7 +53,7 @@ import frc.robot.subsystems.VisionSubsystem;
 @SuppressWarnings("unused") // Blah blah
 public class RobotContainer {
   private double MaxSpeed =
-      TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
+      TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 0.6; // kSpeedAt12Volts desired top speed
   private double LowMaxSpeed = MaxSpeed / 2; // TODO: set lowered speed for precise alignment
   private boolean loweredSpeed = false;
 
@@ -94,7 +96,7 @@ public class RobotContainer {
     validator.groundIntake = groundIntake;
     // Configure the trigger bindings
     // colors.animateCandle(Colors.Effect.CHROMA);
-    registerNamedCommands();
+    // registerNamedCommands();
     drivetrain = TunerConstants.createDrivetrain(); // AFTER NamedCommands are registered
     configureBindings();
     autoChooser = AutoBuilder.buildAutoChooser("ventura_auto");
@@ -105,6 +107,8 @@ public class RobotContainer {
     SmartDashboard.putData("validator", validator);
     SmartDashboard.putData("vision", vision);
 
+    SmartDashboard.putData(CommandScheduler.getInstance());
+
     elevator.setState(elevator.getState());
     shooter.setState(shooter.getState());
     groundIntake.setState(groundIntake.getState());
@@ -112,43 +116,30 @@ public class RobotContainer {
 
   /** Register named commands, for use in autonomous */
   public void registerNamedCommands() {
-    // Ground intake commands
-    NamedCommands.registerCommand(
-        "groundIntakeDown",
-        groundIntake.runOnce(() -> groundIntake.setState(State.GroundIntake.DOWN)));
-    NamedCommands.registerCommand(
-        "groundIntakeUp", groundIntake.runOnce(() -> groundIntake.setState(State.GroundIntake.UP)));
-    NamedCommands.registerCommand(
-        "groundIntakeOff", groundIntake.runOnce(() -> groundIntake.off()));
 
     // All shooter commands
-    NamedCommands.registerCommand(
-        "enableShooterOut", shooter.runOnce(() -> shooter.enableShooter(false)));
-    NamedCommands.registerCommand(
-        "enableShooterIn", shooter.runOnce(() -> shooter.enableShooter(true)));
-    NamedCommands.registerCommand(
-        "disableShooter", shooter.runOnce(() -> shooter.disableShooter()));
-    NamedCommands.registerCommand(
-        "enableFeedOut", shooter.runOnce(() -> shooter.enableFeed(false)));
-    NamedCommands.registerCommand("enableFeedIn", shooter.runOnce(() -> shooter.enableFeed(true)));
-    NamedCommands.registerCommand("disableFeed", shooter.runOnce(() -> shooter.disableFeed()));
-    NamedCommands.registerCommand("runIntakeAlgae", shooter.runOnce(shooter::intakeAlgae));
     NamedCommands.registerCommand("runShootAlgae", shooter.runShootAlgae());
-    NamedCommands.registerCommand("runProcessor", runProcessor());
-
-    // Elevator commands
+    NamedCommands.registerCommand("runIntake", 
+        shooter.runOnce(
+            () -> {
+                shooter.intakeAlgae();
+                groundIntake.enablePulley();
+            }));
+    NamedCommands.registerCommand("stopIntake",
+        shooter.runOnce(
+            () -> {
+                shooter.disableShooter();
+                shooter.brakeFeed();
+                groundIntake.disablePulley();
+            }));
+        
+    // State commands
     NamedCommands.registerCommand(
-        "moveElevatorGroundIntake",
-        elevator.runOnce(() -> elevator.setState(State.Elevator.GROUND_INTAKE)));
+        "runL1", runL1());
     NamedCommands.registerCommand(
-        "moveElevatorL1", elevator.runOnce(() -> elevator.setState(State.Elevator.L1)));
+        "runL2", runL2());
     NamedCommands.registerCommand(
-        "moveElevatorL2", elevator.runOnce(() -> elevator.setState(State.Elevator.L2)));
-    NamedCommands.registerCommand(
-        "moveElevatorShoot", elevator.runOnce(() -> elevator.setState(State.Elevator.SHOOT)));
-
-    NamedCommands.registerCommand("L1", runL1());
-    NamedCommands.registerCommand("L2", runL2());
+        "runBarge", runBarge());
 
     // Stow after auto
     NamedCommands.registerCommand("runStowSubsystems", runStowSubsystems());
@@ -166,7 +157,7 @@ public class RobotContainer {
 
     // Driver Controls
     // TODO: way to do precise movement near reef
-    int moveTaps = 10;
+    int moveTaps = 20;
     int rotationTaps = 10;
     LinearFilter filterX = LinearFilter.movingAverage(moveTaps);
     LinearFilter filterY = LinearFilter.movingAverage(moveTaps);
@@ -379,6 +370,24 @@ public class RobotContainer {
         .withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
   }
 
+  public Command runIntake() {
+    return new SequentialCommandGroup(
+        new InstantCommand(() -> setSafety(false)),
+        shooter.runOnce(
+                () -> {
+                  shooter.intakeAlgae();
+                  groundIntake.enablePulley();
+                }),
+        new WaitCommand(1.5),
+        shooter.runOnce(
+                () -> {
+                  shooter.disableShooter();
+                  shooter.brakeFeed();
+                  groundIntake.disablePulley();
+                }),
+         new InstantCommand(() -> setSafety(true)))
+    .withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
+  }
   public Command runStowSubsystems() {
     return new SequentialCommandGroup(
             new InstantCommand(() -> setSafety(false)),
