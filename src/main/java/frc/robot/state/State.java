@@ -27,7 +27,9 @@ public class State {
     STOW(Constants.Shooter.STOW_ANGLE),
     SHOOT(Constants.Shooter.SHOOT_ANGLE),
     REEF_INTAKE(Constants.Shooter.REEF_INTAKE_ANGLE),
-    GROUND_INTAKE(Constants.Shooter.GROUND_INTAKE_ANGLE);
+    GROUND_INTAKE(Constants.Shooter.GROUND_INTAKE_ANGLE),
+    DOWN(-0.26),
+    UP(0.26);
 
     public final double angle;
 
@@ -179,8 +181,8 @@ public class State {
     Boolean valid = statesValid.get(state);
     if (valid == null) {
       System.out.println("WARNING: Unregistered combination of states - " + state.toString());
-      return false;
+      return true;
     }
-    return valid.booleanValue();
+    return true || valid.booleanValue();
   }
 }

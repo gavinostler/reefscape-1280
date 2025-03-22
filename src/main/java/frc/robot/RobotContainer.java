@@ -8,6 +8,8 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
+import java.time.InstantSource;
+
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -98,7 +100,7 @@ public class RobotContainer {
     validator.groundIntake = groundIntake;
     // Configure the trigger bindings
     // colors.animateCandle(Colors.Effect.CHROMA);
-    // registerNamedCommands();
+    registerNamedCommands();
     drivetrain = TunerConstants.createDrivetrain(); // AFTER NamedCommands are registered
     configureBindings();
     autoChooser = AutoBuilder.buildAutoChooser("ventura_auto");
@@ -215,6 +217,7 @@ public class RobotContainer {
 
     // GroundIntake controls
     operatorController.a().onTrue(runGroundIntake());
+    operatorController.back().onTrue(runDislodge());
     // operatorController.a().onTrue(groundIntake.runOnce(groundIntake::toggleState));
 
     // Shooter arm controls
@@ -359,6 +362,32 @@ public class RobotContainer {
             new WaitUntilCommand(shooter::atSetpoint).withTimeout(1.0),
             new InstantCommand(() -> setSafety(true)))
         .withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
+  }
+
+  public Command runDislodge() {
+    return new SequentialCommandGroup(
+            new InstantCommand(() -> setSafety(false)),
+            groundIntake.runOnce(() -> GroundIntake.intakePID.setSetpoint(0.006)),
+            new WaitUntilCommand(groundIntake::atSetpoint).withTimeout(1.0),
+            elevator.runOnce(() -> elevator.setState(State.Elevator.L2)),
+            new WaitUntilCommand(elevator::atSetpoint).withTimeout(2.0),
+            shooter.runOnce(() -> shooter.setState(State.Shooter.DOWN)),
+            new WaitUntilCommand(shooter::atSetpoint).withTimeout(2.0),
+            shooter.runOnce(
+                () -> {
+                  shooter.intakeAlgae();
+                }),
+            new WaitCommand(0.45),
+            shooter.runOnce(
+                    () -> {
+                      shooter.disableShooter();
+                      shooter.brakeFeed();
+                    }),
+            new WaitUntilCommand(elevator::atSetpoint).withTimeout(1.0),
+                    shooter.runOnce(() -> shooter.setState(State.Shooter.REEF_INTAKE)),
+            new InstantCommand((() -> setSafety(true)))
+            )
+          .withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
   }
 
   public Command runProcessor() {

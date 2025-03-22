@@ -81,18 +81,22 @@ public class ShooterSubsystem implements Subsystem, Sendable {
     if (downward) {
       next =
           switch (state) {
+            case UP -> State.Shooter.STOW;
             case STOW -> State.Shooter.SHOOT;
             case SHOOT -> State.Shooter.REEF_INTAKE;
             case REEF_INTAKE -> State.Shooter.GROUND_INTAKE;
-            case GROUND_INTAKE -> State.Shooter.GROUND_INTAKE;
+            case GROUND_INTAKE -> State.Shooter.DOWN;
+            case DOWN -> State.Shooter.DOWN;
           };
     } else {
       next =
           switch (state) {
+            case UP -> State.Shooter.UP;
             case STOW -> State.Shooter.STOW;
             case SHOOT -> State.Shooter.STOW;
             case REEF_INTAKE -> State.Shooter.SHOOT;
             case GROUND_INTAKE -> State.Shooter.REEF_INTAKE;
+            case DOWN -> State.Shooter.GROUND_INTAKE;
           };
     }
     return next;

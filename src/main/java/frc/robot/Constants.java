@@ -157,7 +157,7 @@ public final class Constants {
     public static final int rightFeedId = 13;
     public static final int leftFeedId = 15;
     public static final double FEED_IN_SPEED = -0.5;
-    public static final double FEED_OUT_SPEED = 0.35;
+    public static final double FEED_OUT_SPEED = 0.4;
     public static final int FEED_CURRENT_LIMIT = 40;
 
     public static final int armId = 16;
