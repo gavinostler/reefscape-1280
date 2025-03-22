@@ -35,6 +35,7 @@ import frc.robot.Constants.Driver;
 import frc.robot.Constants.GroundIntake;
 // import frc.robot.aesthetic.Colors;
 import frc.robot.controller.AgnosticController;
+import frc.robot.controller.XboxController;
 import frc.robot.generated.TunerConstants;
 import frc.robot.state.State;
 import frc.robot.state.Validator;
@@ -77,9 +78,9 @@ public class RobotContainer {
   public final ElevatorSubsystem elevator = new ElevatorSubsystem(validator);
   private final ShooterSubsystem shooter = new ShooterSubsystem(validator);
   private final GroundIntakeSubsystem groundIntake = new GroundIntakeSubsystem(validator);
-  private final AgnosticController driverController =
-      new AgnosticController(Driver.kDriverControllerPort);
-  public final AgnosticController operatorController =
+  private final XboxController driverController =
+      new XboxController(Driver.kDriverControllerPort);
+  public final XboxController operatorController =
       driverController; // Aliased to main controller for now, TODO
   private final VisionSubsystem vision = new VisionSubsystem();
   private final Telemetry logger = new Telemetry(MaxSpeed);
@@ -474,13 +475,13 @@ public class RobotContainer {
    * Use only while vision is running
    * Intended to enhance autonomous
    */
-  /* private void addVisionMeasurement() {
-    /* Pose2d visionEstimate = vision.getEstimatedPose2d();
-    if (visionEstimate == null) return; */
-    /* Pose2d currentEstimate = drivetrain.getState().Pose;
-    double estimatesDistance = currentEstimate.getTranslation().getDistance(visionEstimate.getTranslation()); */
+   private void addVisionMeasurement() {
+     Pose2d visionEstimate = vision.getEstimatedPose2d();
+    if (visionEstimate == null) return; 
+    Pose2d currentEstimate = drivetrain.getState().Pose;
+    double estimatesDistance = currentEstimate.getTranslation().getDistance(visionEstimate.getTranslation());
     // Filter out bad vision measurements
-    /* if (estimatesDistance > 1.0) return;
+    if (estimatesDistance > 1.0) return;
     drivetrain.addVisionMeasurement(visionEstimate, Timer.getFPGATimestamp());
-  } */
+  } 
 }
