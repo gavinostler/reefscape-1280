@@ -25,7 +25,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "h3_intakeA_s1_L2"
+            "pathName": "h3_intakeA_s2_L3"
           }
         },
         {
@@ -43,7 +43,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "a_s1_L2_shootB3"
+            "pathName": "a_s2_L3_shootB3"
           }
         },
         {
