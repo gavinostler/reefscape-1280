@@ -124,7 +124,7 @@ public class VisionSubsystem extends SubsystemBase {
     final Optional<EstimatedRobotPose> possiblePose = photonPoseEstimator.update(pipeline);
 
     if (possiblePose.isEmpty()) return;
-    this.estimatedRobotPose = possiblePose.get().estimatedPose.toPose2d().plus(new Transform2d(0,0, new Rotation2d(Math.toRadians(DriverStation.getAlliance().get() == DriverStation.Alliance.Red ? 0 : 180))));
+    this.estimatedRobotPose = possiblePose.get().estimatedPose.toPose2d().plus(new Transform2d(0,0, new Rotation2d(Math.toRadians(DriverStation.getAlliance().get() == DriverStation.Alliance.Red ? 180 : 0))));
     this.lastPoseUpdate = pipeline.getTimestampSeconds();
   }
 
