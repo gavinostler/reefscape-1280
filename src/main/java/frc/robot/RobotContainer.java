@@ -35,6 +35,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.Driver;
 import frc.robot.Constants.GroundIntake;
+import frc.robot.Constants.Shooter;
 // import frc.robot.aesthetic.Colors;
 import frc.robot.controller.AgnosticController;
 import frc.robot.controller.XboxController;
@@ -397,9 +398,9 @@ public class RobotContainer {
             groundIntake.runOnce(() -> GroundIntake.intakePID.setSetpoint(0.006)),
             new WaitUntilCommand(groundIntake::atSetpoint).withTimeout(1.0),
             shooter.runOnce(() -> shooter.moveArmAngle(0.0)),
-            new WaitUntilCommand(shooter::atSetpoint).withTimeout(2.0),
+            new WaitUntilCommand(() -> MathUtil.isNear(0.0, shooter.getArmAngle(), Shooter.ANGLE_TOLERANCE)).withTimeout(2.0),
             elevator.runOnce(() -> elevator.moveHeight(0.266)),
-            new WaitUntilCommand(elevator::atSetpoint).withTimeout(2.0),
+            new WaitUntilCommand(() -> MathUtil.isNear(0.266, elevator.getHeight(), Shooter.ANGLE_TOLERANCE)).withTimeout(1.0),
             new InstantCommand(() -> setSafety(true))
             // NOTE: state is out of sync but its quite safe so this can be ignored
             )
