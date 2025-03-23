@@ -25,7 +25,7 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 1.5
+            "waitTime": 0.8
           }
         },
         {
@@ -41,21 +41,27 @@
           }
         },
         {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.3
+          }
+        },
+        {
           "type": "named",
           "data": {
             "name": "runShootAlgae"
           }
         },
         {
-          "type": "named",
-          "data": {
-            "name": "runStowSubsystems"
-          }
-        },
-        {
           "type": "path",
           "data": {
             "pathName": "B1_back"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "runStowSubsystems"
           }
         }
       ]
