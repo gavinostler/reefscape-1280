@@ -136,14 +136,13 @@ public class State {
           put(new RobotState(Elevator.L1, Shooter.SHOOT, GroundIntake.DOWN), true);
           put(new RobotState(Elevator.L1, Shooter.SHOOT, GroundIntake.UP), true);
           put(new RobotState(Elevator.L1, Shooter.REEF_INTAKE, GroundIntake.DOWN), true);
-          // TODO: \/ ?
           put(new RobotState(Elevator.L1, Shooter.REEF_INTAKE, GroundIntake.UP), true);
           put(new RobotState(Elevator.L1, Shooter.GROUND_INTAKE, GroundIntake.DOWN), false);
           put(new RobotState(Elevator.L1, Shooter.GROUND_INTAKE, GroundIntake.UP), false);
 
           put(new RobotState(Elevator.BOTTOM, Shooter.STOW, GroundIntake.DOWN), true);
           put(new RobotState(Elevator.BOTTOM, Shooter.STOW, GroundIntake.UP), true); // stow
-          put(new RobotState(Elevator.BOTTOM, Shooter.SHOOT, GroundIntake.DOWN), false); // TODO: ?
+          put(new RobotState(Elevator.BOTTOM, Shooter.SHOOT, GroundIntake.DOWN), true);
           put(new RobotState(Elevator.BOTTOM, Shooter.SHOOT, GroundIntake.UP), false);
           put(new RobotState(Elevator.BOTTOM, Shooter.REEF_INTAKE, GroundIntake.DOWN), false);
           put(new RobotState(Elevator.BOTTOM, Shooter.REEF_INTAKE, GroundIntake.UP), false);
