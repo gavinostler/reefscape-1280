@@ -80,11 +80,11 @@ public final class Constants {
       // TODO: merge kG with feedforward?
       elevatorConfigs.Slot0.kG = -0.8; // TODO: tune
       elevatorConfigs.Slot0.kS = 0.0;
-      elevatorConfigs.Slot0.kV = 10.0;
+      elevatorConfigs.Slot0.kV = 15.0;
       elevatorConfigs.Slot0.kA = 0.0;
       elevatorConfigs.Slot0.kP = 40.0;
       elevatorConfigs.Slot0.kI = 0.0;
-      elevatorConfigs.Slot0.kD = 1.0;
+      elevatorConfigs.Slot0.kD = 2.0;
       elevatorConfigs.Slot0.StaticFeedforwardSign = StaticFeedforwardSignValue.UseVelocitySign;
       // https://www.chiefdelphi.com/t/motion-magic-help-ctre/483319/2
       elevatorConfigs.MotionMagic.MotionMagicCruiseVelocity = 2.0; // Target cruise velocity in rps
