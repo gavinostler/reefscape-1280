@@ -11,12 +11,6 @@
           }
         },
         {
-          "type": "wait",
-          "data": {
-            "waitTime": 1.0
-          }
-        },
-        {
           "type": "named",
           "data": {
             "name": "runIntake"
@@ -31,13 +25,7 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 2.0
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "stopIntake"
+            "waitTime": 0.8
           }
         },
         {
@@ -55,7 +43,7 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 1.0
+            "waitTime": 0.3
           }
         },
         {
@@ -65,21 +53,15 @@
           }
         },
         {
-          "type": "wait",
+          "type": "path",
           "data": {
-            "waitTime": 1.0
+            "pathName": "B3_back"
           }
         },
         {
           "type": "named",
           "data": {
             "name": "runStowSubsystems"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "B3_back"
           }
         }
       ]
