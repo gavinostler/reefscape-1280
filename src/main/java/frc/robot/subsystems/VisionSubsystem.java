@@ -61,6 +61,7 @@ public class VisionSubsystem extends SubsystemBase {
   private Pose2d estimatedRobotPose;
   private Optional<PhotonPipelineResult> latestPipelineResult;
   public Rotation2d operatorForward = new Rotation2d();
+  public Pose2d drivetrainRobotPose;
 
   private static int[] reefIds = new int[] {6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22};
 
@@ -82,8 +83,8 @@ public class VisionSubsystem extends SubsystemBase {
 
     if (pipelineResults.size() > 0) {
       latestPipelineResult = Optional.of(pipelineResults.get(0)); // optional because index can be null if photonvision disconnects
-      
-      if (latestPipelineResult.isPresent()) updateEstimatedRobotPose(latestPipelineResult.get()); // depends on latest pipeline result
+       // depends on latest pipeline result
+       if (latestPipelineResult.isPresent()) {updateEstimatedRobotPose(latestPipelineResult.get());};
     }
   }
 
@@ -141,8 +142,7 @@ public class VisionSubsystem extends SubsystemBase {
     }
 
     // final PhotonTrackedTarget bestTarget = pipeline.get().getBestTarget();
-    final List<PhotonTrackedTarget> targets = latestPipelineResult.get().getTargets();
-    if (estimatedRobotPose == null || targets.isEmpty()) {
+    if (estimatedRobotPose == null) {
       warning = "NO TARGETS/INVALID ROBOT POSE";
       overrideSwerve = false;
       return;
@@ -151,11 +151,7 @@ public class VisionSubsystem extends SubsystemBase {
 
     int closestTag = -1;
     double closestDist = Double.MAX_VALUE;
-    for (PhotonTrackedTarget target : targets) {
       for (int tagId : reefIds) {
-        if (tagId != target.getFiducialId()) {
-          continue;
-        }
 
         Pose3d tagPose = this.aprilTagFieldLayout.getTagPose(tagId).get();
 
@@ -169,7 +165,6 @@ public class VisionSubsystem extends SubsystemBase {
           closestTag = tagId;
         }
       }
-    }
 
     if (closestTag < 1 || closestTag > 22) {
       warning = "DISABLED BY INVALID ID";
@@ -179,7 +174,7 @@ public class VisionSubsystem extends SubsystemBase {
 
     final Pose3d desiredTag = this.aprilTagFieldLayout.getTagPose(closestTag).get();
     
-    final Pose2d desiredTag2d = desiredTag.toPose2d().plus(new Transform2d(0.3, 0.0, new Rotation2d()));
+    final Pose2d desiredTag2d = desiredTag.toPose2d().plus(new Transform2d(1.1, 0.0, new Rotation2d()));
     final Pose2d robotVector2d = estimatedRobotPose;
     final Pose2d adjustedPosition = desiredTag2d.relativeTo(robotVector2d);
 
@@ -203,7 +198,8 @@ public class VisionSubsystem extends SubsystemBase {
     builder.addDoubleProperty("Robot Vector X Magnitude", () -> lastRobotVector.getMeasureX().magnitude(), null);
     builder.addDoubleProperty("Robot Vector Y Magnitude", () -> lastRobotVector.getMeasureY().magnitude(), null);
     builder.addStringProperty("Robot Vector Rotation", () -> lastRobotVector.getRotation().toString(), null);
-    builder.addStringProperty("Robot Pose (Unadjusted)", () -> {if (estimatedRobotPose == null) return ""; return estimatedRobotPose.toString();}, null);
+    builder.addStringProperty("Robot Pose (Vision)", () -> {if (estimatedRobotPose == null) return ""; return estimatedRobotPose.toString();}, null);
+    builder.addStringProperty("Robot Pose (Drivetrain + Vision)", () -> {if (drivetrainRobotPose == null) return ""; return drivetrainRobotPose.toString();}, null);
     
     builder.addStringProperty("Desired Rotation", () -> rotation.toString(), null);
     builder.addDoubleProperty("Move X", () -> moveX, null);

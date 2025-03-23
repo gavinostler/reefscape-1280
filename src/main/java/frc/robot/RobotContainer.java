@@ -120,6 +120,7 @@ public class RobotContainer {
 
   public void updateVision() {
     vision.operatorForward = drivetrain.getOperatorForwardDirection();
+    vision.drivetrainRobotPose = drivetrain.getState().Pose;
   }
 
   /** Register named commands, for use in autonomous */
@@ -510,13 +511,14 @@ public class RobotContainer {
    * Use only while vision is running
    * Intended to enhance autonomous
    */
-   private void addVisionMeasurement() {
+   public void addVisionMeasurement() {
      Pose2d visionEstimate = vision.getEstimatedPose2d();
     if (visionEstimate == null) return; 
     Pose2d currentEstimate = drivetrain.getState().Pose;
     double estimatesDistance = currentEstimate.getTranslation().getDistance(visionEstimate.getTranslation());
     // Filter out bad vision measurements
-    if (estimatesDistance > 1.0) return;
+    // if (estimatesDistance > 1.0) return;
+    
     drivetrain.addVisionMeasurement(visionEstimate, Timer.getFPGATimestamp());
   } 
 }
