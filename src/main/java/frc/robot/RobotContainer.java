@@ -518,6 +518,6 @@ public class RobotContainer {
     // Filter out bad vision measurements
     // if (estimatesDistance > 1.0) return;
     
-    drivetrain.addVisionMeasurement(visionEstimate, Timer.getFPGATimestamp());
+    drivetrain.addVisionMeasurement(visionEstimate, vision.lastPoseUpdate);
   } 
 }
