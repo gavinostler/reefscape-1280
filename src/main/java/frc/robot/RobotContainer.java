@@ -42,6 +42,7 @@ import frc.robot.controller.XboxController;
 import frc.robot.generated.TunerConstants;
 import frc.robot.state.State;
 import frc.robot.state.Validator;
+import frc.robot.state.State.Elevator;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.GroundIntakeSubsystem;
@@ -244,7 +245,7 @@ public class RobotContainer {
                   groundIntake.disablePulley();
                 }));
     operatorController.rightTrigger().onTrue(shooter.runShootAlgae());
-    operatorController.x().onTrue(runProcessor());
+    operatorController.x().onTrue(runProcessor().unless(() -> elevator.getState() == Elevator.BOTTOM));
 
     // Reset heading
     operatorController
@@ -307,7 +308,7 @@ public class RobotContainer {
                 () ->
                     shooter.setState(
                         State.Shooter.GROUND_INTAKE)), // move shooter to ground intake angle
-            new WaitUntilCommand(shooter::atSetpoint).withTimeout(1.0), // wait until it's set
+            new WaitUntilCommand(shooter::atSetpoint).withTimeout(0.3), // don't wait until it's set
             new InstantCommand(() -> setSafety(true)) // put safety back
             )
         .withInterruptBehavior(InterruptionBehavior.kCancelIncoming); // don't get interrupted
@@ -327,8 +328,7 @@ public class RobotContainer {
                 () ->
                     groundIntake.setState(
                         State.GroundIntake.UP)), // move ground intake up (away from reef)
-            groundIntake.runKickUp(0.4),
-            new WaitUntilCommand(groundIntake::atSetpoint).withTimeout(1.0), // wait until it's set
+            groundIntake.runKickUp(0.3).onlyIf(() -> !groundIntake.atSetpoint()), // don't wait until it's set
             new InstantCommand(() -> setSafety(true)) // put safety back
             )
         .withInterruptBehavior(InterruptionBehavior.kCancelIncoming); // don't get interrupted
@@ -348,8 +348,7 @@ public class RobotContainer {
                 () ->
                     groundIntake.setState(
                         State.GroundIntake.UP)), // move ground intake up (away from reef)
-            groundIntake.runKickUp(0.4),
-            new WaitUntilCommand(groundIntake::atSetpoint).withTimeout(1.0), // wait until it's set
+            groundIntake.runKickUp(0.3).onlyIf(() -> !groundIntake.atSetpoint()), // don't wait until it's set
             new InstantCommand(() -> setSafety(true)) // put safety back
             )
         .withInterruptBehavior(InterruptionBehavior.kCancelIncoming); // don't get interrupted
@@ -361,7 +360,7 @@ public class RobotContainer {
             elevator.runOnce(() -> elevator.setState(State.Elevator.SHOOT)),
             new WaitUntilCommand(elevator::atSetpoint).withTimeout(1.0),
             shooter.runOnce(() -> shooter.setState(State.Shooter.SHOOT)),
-            new WaitUntilCommand(shooter::atSetpoint).withTimeout(1.0),
+            new WaitUntilCommand(shooter::atSetpoint).withTimeout(0.3),
             new InstantCommand(() -> setSafety(true)))
         .withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
   }
@@ -398,7 +397,7 @@ public class RobotContainer {
             groundIntake.runOnce(() -> GroundIntake.intakePID.setSetpoint(0.006)),
             new WaitUntilCommand(groundIntake::atSetpoint).withTimeout(1.0),
             shooter.runOnce(() -> shooter.moveArmAngle(0.0)),
-            new WaitUntilCommand(() -> MathUtil.isNear(0.0, shooter.getArmAngle(), Shooter.ANGLE_TOLERANCE)).withTimeout(2.0),
+            new WaitUntilCommand(() -> MathUtil.isNear(0.0, shooter.getArmAngle(), Shooter.ANGLE_TOLERANCE)).withTimeout(1.5),
             elevator.runOnce(() -> elevator.moveHeight(0.266)),
             new WaitUntilCommand(() -> MathUtil.isNear(0.266, elevator.getHeight(), Shooter.ANGLE_TOLERANCE)).withTimeout(1.0),
             new InstantCommand(() -> setSafety(true))
