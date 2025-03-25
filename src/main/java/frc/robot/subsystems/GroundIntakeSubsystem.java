@@ -125,17 +125,18 @@ public class GroundIntakeSubsystem extends SubsystemBase {
   public Command runKickUp(double seconds) {
     final double VOLTAGE = 10.0;
     return new SequentialCommandGroup(
-        runOnce(
-            () -> {
-              pidEnabled = false;
-              intakeMotor.setVoltage(VOLTAGE);
-              System.out.println("Applied ground intake kick impulse");
-            }),
-        new WaitCommand(seconds),
-        runOnce(
-            () -> {
-              pidEnabled = true;
-            }));
+        // runOnce(
+        //     () -> {
+        //       pidEnabled = false;
+        //       intakeMotor.setVoltage(VOLTAGE);
+        //       System.out.println("Applied ground intake kick impulse");
+        //     }),
+        // new WaitCommand(seconds),
+        // runOnce(
+        //     () -> {
+        //       pidEnabled = true;
+            // })
+            );
   }
 
   @Override

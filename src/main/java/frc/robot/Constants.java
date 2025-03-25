@@ -118,7 +118,7 @@ public final class Constants {
     }
 
     public static final PIDController intakePID = new PIDController(40.0, 0.0, 5.0);
-    public static final ArmFeedforward intakeFf = new ArmFeedforward(1.0, 0.2, 0.0, 1.0);
+    public static final ArmFeedforward intakeFf = new ArmFeedforward(0.0, 0.0, 0.0, 0.0);
 
     static {
       intakePID.setTolerance(ANGLE_TOLERANCE);
@@ -150,7 +150,7 @@ public final class Constants {
     public static final int leftShooterId = 14;
     public static final double SHOOTER_SHOOT_TARGET_RPS = 22.0;
     public static final double SHOOTER_INTAKE_TARGET_RPS = -15.0;
-    public static final double SHOOTER_PROCESSOR_TARGET_RPS = 20.0; // TODO: set processor speed
+    public static final double SHOOTER_PROCESSOR_TARGET_RPS = 17.0; // TODO: set processor speed
     public static final double SHOOTER_GEAR_REDUCTION = 1.0;
     public static final double SHOOTER_CURRENT_LIMIT = 80.0;
 

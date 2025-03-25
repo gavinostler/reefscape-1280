@@ -18,7 +18,6 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.util.sendable.SendableBuilder;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.generated.TunerConstants;
 import java.util.List;
@@ -123,8 +122,9 @@ public class VisionSubsystem extends SubsystemBase {
   private void updateEstimatedRobotPose(PhotonPipelineResult pipeline) {
     final Optional<EstimatedRobotPose> possiblePose = photonPoseEstimator.update(pipeline);
 
-    if (possiblePose.isEmpty()) return;
-    this.estimatedRobotPose = possiblePose.get().estimatedPose.toPose2d().plus(new Transform2d(0,0, new Rotation2d(Math.toRadians(DriverStation.getAlliance().get() == DriverStation.Alliance.Red ? 180 : 0))));
+    if (possiblePose.isEmpty()) {this.estimatedRobotPose = null; return;}
+    final Pose2d possible2dPose = possiblePose.get().estimatedPose.toPose2d();
+    this.estimatedRobotPose = new Pose2d(possible2dPose.getX(), possible2dPose.getY(), drivetrainRobotPose.getRotation());
     this.lastPoseUpdate = pipeline.getTimestampSeconds();
   }
 

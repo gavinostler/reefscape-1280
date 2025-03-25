@@ -372,7 +372,7 @@ public class RobotContainer {
             new InstantCommand(() -> setSafety(false)),
             groundIntake.runOnce(() -> GroundIntake.intakePID.setSetpoint(0.006)),
             new WaitUntilCommand(groundIntake::atSetpoint).withTimeout(1.0),
-            elevator.runOnce(() -> elevator.setState(State.Elevator.L2)),
+            elevator.runOnce(() -> elevator.setState(State.Elevator.GROUND_INTAKE)),
             new WaitUntilCommand(elevator::atSetpoint).withTimeout(2.0),
             shooter.runOnce(() -> shooter.setState(State.Shooter.DOWN)),
             new WaitUntilCommand(shooter::atSetpoint).withTimeout(2.0),
@@ -380,7 +380,7 @@ public class RobotContainer {
                 () -> {
                   shooter.intakeAlgae();
                 }),
-            new WaitCommand(0.45),
+            new WaitCommand(0.7),
             shooter.runOnce(
                     () -> {
                       shooter.disableShooter();
@@ -513,12 +513,12 @@ public class RobotContainer {
    * Intended to enhance autonomous
    */
    public void addVisionMeasurement() {
-     Pose2d visionEstimate = vision.getEstimatedPose2d();
+    Pose2d visionEstimate = vision.getEstimatedPose2d();
     if (visionEstimate == null) return; 
     Pose2d currentEstimate = drivetrain.getState().Pose;
     double estimatesDistance = currentEstimate.getTranslation().getDistance(visionEstimate.getTranslation());
     // Filter out bad vision measurements
-    // if (estimatesDistance > 1.0) return;
+    if (estimatesDistance > 1.0) return;
     
     drivetrain.addVisionMeasurement(visionEstimate, vision.lastPoseUpdate);
   } 
