@@ -179,8 +179,8 @@ public class State {
     Boolean valid = statesValid.get(state);
     if (valid == null) {
       System.out.println("WARNING: Unregistered combination of states - " + state.toString());
-      return true;
+      return false;
     }
-    return true || valid.booleanValue();
+    return valid.booleanValue();
   }
 }
