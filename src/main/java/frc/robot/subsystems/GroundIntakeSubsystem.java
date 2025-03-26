@@ -7,10 +7,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants.GroundIntake;
 import frc.robot.state.State;
 import frc.robot.state.Validator;
@@ -118,23 +115,6 @@ public class GroundIntakeSubsystem extends SubsystemBase {
   public void off() {
     intakeOff();
     disablePulley();
-  }
-
-  public Command runKickUp(double seconds) {
-    final double VOLTAGE = 10.0;
-    return new SequentialCommandGroup(
-        // runOnce(
-        //     () -> {
-        //       pidEnabled = false;
-        //       intakeMotor.setVoltage(VOLTAGE);
-        //       System.out.println("Applied ground intake kick impulse");
-        //     }),
-        // new WaitCommand(seconds),
-        // runOnce(
-        //     () -> {
-        //       pidEnabled = true;
-            // })
-            );
   }
 
   @Override
