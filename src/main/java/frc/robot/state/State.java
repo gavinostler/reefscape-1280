@@ -153,17 +153,6 @@ public class State {
   static {
     assert Elevator.values().length * Shooter.values().length * GroundIntake.values().length
         == statesValid.size();
-    for (RobotState state : statesValid.keySet()) {
-      Boolean valid = statesValid.get(state);
-      if (valid == null || !valid.booleanValue()) continue;
-      if (Validator.positionsValid(
-          state.elevator.height, state.shooter.angle, state.groundIntake == State.GroundIntake.UP))
-        continue;
-      System.out.println(
-          "WARNING: Robot state of "
-              + state.toString()
-              + " is registered as valid but has positions considered invalid");
-    }
   }
 
   /**

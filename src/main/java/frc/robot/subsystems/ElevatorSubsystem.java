@@ -59,9 +59,6 @@ public class ElevatorSubsystem implements Subsystem, Sendable {
 
   public void moveHeight(double height) {
     height = MathUtil.clamp(height, 0.0, 1.0);
-    if (!validator.moveHeightValid(height)) {
-      return;
-    }
     targetHeight = height;
     motor.setControl(heightRequest.withPosition(targetHeight));
   }

@@ -95,12 +95,10 @@ public class GroundIntakeSubsystem extends SubsystemBase {
   }
 
   private void intakeUp() {
-    if (!validator.moveGroundIntakeValid(true)) return;
     moveIntake(GroundIntake.UP_ANGLE);
   }
 
   private void intakeDown() {
-    if (!validator.moveGroundIntakeValid(false)) return;
     moveIntake(GroundIntake.DOWN_ANGLE);
   }
 

@@ -156,7 +156,6 @@ public class ShooterSubsystem implements Subsystem, Sendable {
    * @return boolean if successful
    */
   public void moveArmAngle(double angle) {
-    if (!validator.moveArmAngleValid(angle)) return;
     targetArmAngle = angle;
     armMotor.setControl(armAngleRequest.withPosition(targetArmAngle));
   }
