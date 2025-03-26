@@ -143,10 +143,10 @@ public class ShooterSubsystem implements Subsystem, Sendable {
   }
 
   /**
-   * @return Returns true if shooter angle is within tolerance of the state setpoint
+   * @return Returns true if shooter arm angle is within tolerance of the target angle
    */
   public boolean atSetpoint() {
-    return MathUtil.isNear(state.angle, getArmAngle(), Shooter.ANGLE_TOLERANCE);
+    return MathUtil.isNear(targetArmAngle, getArmAngle(), Shooter.ANGLE_TOLERANCE);
   }
 
   /**

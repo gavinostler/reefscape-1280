@@ -84,10 +84,10 @@ public class ElevatorSubsystem implements Subsystem, Sendable {
   }
 
   /**
-   * @return Returns true if elevator height is within tolerance of the state setpoint
+   * @return Returns true if elevator height is within tolerance of the target height
    */
   public boolean atSetpoint() {
-    return MathUtil.isNear(state.height, getHeight(), Elevator.HEIGHT_TOLERANCE);
+    return MathUtil.isNear(targetHeight, getHeight(), Elevator.HEIGHT_TOLERANCE);
   }
 
   @Override

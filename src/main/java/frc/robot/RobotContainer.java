@@ -384,8 +384,7 @@ public class RobotContainer {
                       shooter.disableShooter();
                       shooter.brakeFeed();
                     }),
-            new WaitUntilCommand(elevator::atSetpoint).withTimeout(1.0),
-                    shooter.runOnce(() -> shooter.setState(State.Shooter.REEF_INTAKE)),
+            shooter.runOnce(() -> shooter.setState(State.Shooter.REEF_INTAKE)),
             new InstantCommand((() -> setSafety(true)))
             )
           .withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
@@ -397,7 +396,7 @@ public class RobotContainer {
             groundIntake.runOnce(() -> GroundIntake.intakePID.setSetpoint(0.006)),
             new WaitUntilCommand(groundIntake::atSetpoint).withTimeout(1.0),
             shooter.runOnce(() -> shooter.moveArmAngle(0.0)),
-            new WaitUntilCommand(() -> MathUtil.isNear(0.0, shooter.getArmAngle(), Shooter.ANGLE_TOLERANCE)).withTimeout(1.0),
+            new WaitUntilCommand(shooter::atSetpoint).withTimeout(1.0),
             elevator.runOnce(() -> elevator.moveHeight(0.266)),
             new InstantCommand(() -> setSafety(true))
             // NOTE: state is out of sync but its quite safe so this can be ignored
