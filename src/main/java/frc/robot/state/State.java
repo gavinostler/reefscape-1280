@@ -28,8 +28,7 @@ public class State {
     SHOOT(Constants.Shooter.SHOOT_ANGLE),
     REEF_INTAKE(Constants.Shooter.REEF_INTAKE_ANGLE),
     GROUND_INTAKE(Constants.Shooter.GROUND_INTAKE_ANGLE),
-    DOWN(-0.26),
-    UP(0.26);
+    DOWN(Constants.Shooter.DOWN_ANGLE);
 
     public final double angle;
 

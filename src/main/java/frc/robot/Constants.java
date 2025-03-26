@@ -144,6 +144,7 @@ public final class Constants {
     public static final double SHOOT_ANGLE = 0.16;
     public static final double REEF_INTAKE_ANGLE = 0.055;
     public static final double GROUND_INTAKE_ANGLE = -0.151;
+    public static final double DOWN_ANGLE = -0.26;
     public static final double ANGLE_TOLERANCE = 0.01;
 
     public static final int rightShooterId = 12;
