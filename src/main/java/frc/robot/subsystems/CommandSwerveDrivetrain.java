@@ -122,7 +122,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    */
   public CommandSwerveDrivetrain(
       SwerveDrivetrainConstants drivetrainConstants, SwerveModuleConstants<?, ?, ?>... modules) {
-    super(drivetrainConstants, modules);
+    super(drivetrainConstants, 0, modules);
     if (Utils.isSimulation()) {
       startSimThread();
     }
@@ -201,7 +201,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
               // PID constants for translation
               new PIDConstants(10, 0, 0),
               // PID constants for rotation
-              new PIDConstants(7, 0, 0)),
+              new PIDConstants(10, 0, 0)),
           config,
           () -> {
             // Boolean supplier that controls when the path will be mirrored for the red alliance

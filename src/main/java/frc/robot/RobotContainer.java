@@ -77,7 +77,7 @@ public class RobotContainer {
               DriveRequestType.Velocity); // Use open-loop control for drive motors
 
   // The robot's subsystems and commands are defined here...
-  public final CommandSwerveDrivetrain drivetrain; // declared later due to NamedCommands
+  public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain(); // declared later due to NamedCommands
   private final Validator validator = new Validator();
   public final ElevatorSubsystem elevator = new ElevatorSubsystem(validator);
   private final ShooterSubsystem shooter = new ShooterSubsystem(validator);
@@ -87,42 +87,49 @@ public class RobotContainer {
       new XboxController(Driver.kDriverControllerPort);
   public final XboxController operatorController =
       driverController; // Aliased to main controller for now, TODO
-  private final VisionSubsystem vision = new VisionSubsystem();
+  public final VisionSubsystem vision = new VisionSubsystem();
   private final Telemetry logger = new Telemetry(MaxSpeed);
   // private final Colors colors = new Colors();
 
   // sendable for choosing autos
-  private final SendableChooser<Command> autoChooser;
+  private SendableChooser<Command> autoChooser;
+
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // NOTE: robot must be in stowed state when initializing because of assumptions
-    validator.elevator = elevator;
-    validator.shooter = shooter;
-    validator.groundIntake = groundIntake;
     // Configure the trigger bindings
     // colors.animateCandle(Colors.Effect.CHROMA);
     registerNamedCommands();
-    drivetrain = TunerConstants.createDrivetrain(); // AFTER NamedCommands are registered
-    configureBindings();
     autoChooser = AutoBuilder.buildAutoChooser("ventura_auto");
     SmartDashboard.putData("Auto Mode", autoChooser);
+
+    // SmartDashboard.putData(CommandScheduler.getInstance());
+
+    configureBindings();
+  }
+
+  public void updateDashboard() {
     SmartDashboard.putData("elevator", elevator);
     SmartDashboard.putData("shooter", shooter);
     SmartDashboard.putData("ground intake", groundIntake);
     SmartDashboard.putData("validator", validator);
-    SmartDashboard.putData("vision", vision);
-
-    SmartDashboard.putData(CommandScheduler.getInstance());
-
-    elevator.setState(elevator.getState());
-    shooter.setState(shooter.getState());
-    groundIntake.setState(groundIntake.getState());
+    SmartDashboard.putData("v", vision);
+    
   }
 
   public void updateVision() {
     vision.operatorForward = drivetrain.getOperatorForwardDirection();
     vision.drivetrainRobotPose = drivetrain.getState().Pose;
+  }
+
+  public void setInitalStates() {
+    validator.elevator = elevator;
+    validator.shooter = shooter;
+    validator.groundIntake = groundIntake;
+    elevator.setState(elevator.getState());
+    shooter.setState(shooter.getState());
+    groundIntake.setState(groundIntake.getState());
   }
 
   /** Register named commands, for use in autonomous */
@@ -191,10 +198,10 @@ public class RobotContainer {
               }
               return drive
                   .withVelocityX(
-                      filterY.calculate(MathUtil.applyDeadband(driverController.getLeftY(), 0.1))
+                      filterY.calculate(MathUtil.applyDeadband(-driverController.getLeftY(), 0.1))
                           * speed)
                   .withVelocityY(
-                      filterX.calculate(MathUtil.applyDeadband(driverController.getLeftX(), 0.1))
+                      filterX.calculate(MathUtil.applyDeadband(-driverController.getLeftX(), 0.1))
                           * speed)
                   .withRotationalRate(
                       filterRotation.calculate(
@@ -202,9 +209,9 @@ public class RobotContainer {
                           * angularRate);
             }));
 
-    driverController
-        .resetHeading()
-        .onTrue(drivetrain.runOnce(() -> drivetrain.resetRotation(Rotation2d.kZero)));
+    // driverController
+    //     .resetHeading()
+    //     .onTrue(drivetrain.runOnce(() -> drivetrain.resetRotation(Rotation2d.kZero)));
 
     drivetrain.registerTelemetry(logger::telemeterize);
 
@@ -214,7 +221,7 @@ public class RobotContainer {
     operatorController.b().onTrue(runL1());
     operatorController.y().onTrue(runL2());
     operatorController.leftBumper().onTrue(runBarge());
-    operatorController.rightBumper().onTrue(vision.run(vision::reefAlign)).onFalse(vision.runOnce(vision::stop));
+    operatorController.rightBumper().onTrue(vision.runOnce(() -> vision.reefAlign())).onFalse(vision.runOnce(() -> {vision.removeDefaultCommand(); vision.stop();}));
     operatorController.povUp().onTrue(elevator.runOnce(() -> elevator.moveState(false)));
     operatorController.povDown().onTrue(elevator.runOnce(() -> elevator.moveState(true)));
 
@@ -258,8 +265,12 @@ public class RobotContainer {
                       x.rotateBy(new Rotation2d(Math.PI))
                           .rotateBy(drivetrain.getOperatorForwardDirection());
                   drivetrain.resetRotation(x);
+                  Pose2d estPose = vision.getEstimatedPose2d();
+                  if (estPose == null) {
+                    return;
+                  }
+                  drivetrain.resetTranslation(estPose.getTranslation());
                 }));
-
 
     // Stow all subsystems
     operatorController.rightStick().onTrue(runStowSubsystems());
@@ -520,6 +531,6 @@ public class RobotContainer {
     // Filter out bad vision measurements
     if (estimatesDistance > 1.0) return;
     
-    drivetrain.addVisionMeasurement(visionEstimate, vision.lastPoseUpdate);
+    drivetrain.addVisionMeasurement(visionEstimate, Timer.getFPGATimestamp());
   } 
 }

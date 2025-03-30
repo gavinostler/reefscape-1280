@@ -28,7 +28,11 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
+
     m_robotContainer = new RobotContainer();
+    m_robotContainer.setInitalStates();
+    m_robotContainer.vision.setDrivetrain(() -> {return m_robotContainer.drivetrain.getState().Pose;});
+    m_robotContainer.updateDashboard();
   }
 
   /**
@@ -86,8 +90,6 @@ public class Robot extends TimedRobot {
     m_robotContainer.elevator.brake();
     m_robotContainer.drivetrain.configNeutralMode(NeutralModeValue.Brake);
     Rotation2d x = m_robotContainer.drivetrain.getState().Pose.getRotation();
-    x =
-        x.rotateBy(new Rotation2d(Math.PI));
     m_robotContainer.drivetrain.resetRotation(x);
   }
 
