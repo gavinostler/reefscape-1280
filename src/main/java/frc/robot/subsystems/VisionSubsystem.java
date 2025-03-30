@@ -172,18 +172,18 @@ public class VisionSubsystem extends SubsystemBase {
   /*
    * Aligns to the nearest reef tag.
    */
-  public Optional<Pose2d> reefAlign() {
+  public void reefAlign() {
     if (latestPipelineResult.isEmpty()) {
           warning = "NO LATEST PIPELINE";
           overrideSwerve = false;
-          return Optional.of(null);
+          return;
         }
     
         // final PhotonTrackedTarget bestTarget = pipeline.get().getBestTarget();
         if (drivetrainRobotPose == null) {
           warning = "NO TARGETS/INVALID ROBOT POSE";
           overrideSwerve = false;
-          return Optional.of(null);
+          return;
         }
         // no pose, obviously
     
@@ -207,7 +207,7 @@ public class VisionSubsystem extends SubsystemBase {
         if (closestTag < 1 || closestTag > 22) {
           warning = "DISABLED BY INVALID ID";
           overrideSwerve = false;
-          return Optional.of(null);
+          return;
         }
     
         final Pose3d desiredTag = this.aprilTagFieldLayout.getTagPose(closestTag).get();
@@ -216,13 +216,13 @@ public class VisionSubsystem extends SubsystemBase {
         overrideSwerve = true;
 
         Command p = AutoBuilder.pathfindToPose(desiredTag2d, new PathConstraints(1.5, 2, Units.degreesToRadians(3000), Units.degreesToRadians(2000)), 0.0).withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
+        // patented D.N.K.R G.A.V.I.N (Do Not Kill Robot General Autonomous Vision Information Networking)
         Command in = AutoBuilder.pathfindToPose(desiredTag2d.plus(new Transform2d(0.6, 0.0, new Rotation2d())), new PathConstraints(1, 2, Units.degreesToRadians(3000), Units.degreesToRadians(2000)), 0.0).withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
 
         cc.cancel();
         cc =  new SequentialCommandGroup(in, p);
         cc.schedule();
   
-        return Optional.of(desiredTag2d);
       }
     
   @Override
