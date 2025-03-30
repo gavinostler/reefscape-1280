@@ -77,29 +77,11 @@ public class ShooterSubsystem implements Subsystem, Sendable {
    * @return the next closest state, or the current state
    */
   private State.Shooter nextState(boolean downward) {
-    State.Shooter next;
-    if (downward) {
-      next =
-          switch (state) {
-            case UP -> State.Shooter.STOW;
-            case STOW -> State.Shooter.SHOOT;
-            case SHOOT -> State.Shooter.REEF_INTAKE;
-            case REEF_INTAKE -> State.Shooter.GROUND_INTAKE;
-            case GROUND_INTAKE -> State.Shooter.DOWN;
-            case DOWN -> State.Shooter.DOWN;
-          };
-    } else {
-      next =
-          switch (state) {
-            case UP -> State.Shooter.UP;
-            case STOW -> State.Shooter.STOW;
-            case SHOOT -> State.Shooter.STOW;
-            case REEF_INTAKE -> State.Shooter.SHOOT;
-            case GROUND_INTAKE -> State.Shooter.REEF_INTAKE;
-            case DOWN -> State.Shooter.GROUND_INTAKE;
-          };
-    }
-    return next;
+    State.Shooter[] values = State.Shooter.values();
+    int index = state.ordinal();
+    index += downward ? 1 : -1;
+    index = MathUtil.clamp(index, 0, values.length - 1);
+    return values[index];
   }
 
   /**
@@ -161,10 +143,10 @@ public class ShooterSubsystem implements Subsystem, Sendable {
   }
 
   /**
-   * @return Returns true if shooter angle is within tolerance of the state setpoint
+   * @return Returns true if shooter arm angle is within tolerance of the target angle
    */
   public boolean atSetpoint() {
-    return MathUtil.isNear(state.angle, getArmAngle(), Shooter.ANGLE_TOLERANCE);
+    return MathUtil.isNear(targetArmAngle, getArmAngle(), Shooter.ANGLE_TOLERANCE);
   }
 
   /**
@@ -174,7 +156,6 @@ public class ShooterSubsystem implements Subsystem, Sendable {
    * @return boolean if successful
    */
   public void moveArmAngle(double angle) {
-    if (!validator.moveArmAngleValid(angle)) return;
     targetArmAngle = angle;
     armMotor.setControl(armAngleRequest.withPosition(targetArmAngle));
   }

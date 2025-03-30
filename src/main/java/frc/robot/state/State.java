@@ -28,8 +28,7 @@ public class State {
     SHOOT(Constants.Shooter.SHOOT_ANGLE),
     REEF_INTAKE(Constants.Shooter.REEF_INTAKE_ANGLE),
     GROUND_INTAKE(Constants.Shooter.GROUND_INTAKE_ANGLE),
-    DOWN(-0.26),
-    UP(0.26);
+    DOWN(Constants.Shooter.DOWN_ANGLE);
 
     public final double angle;
 
@@ -154,17 +153,6 @@ public class State {
   static {
     assert Elevator.values().length * Shooter.values().length * GroundIntake.values().length
         == statesValid.size();
-    for (RobotState state : statesValid.keySet()) {
-      Boolean valid = statesValid.get(state);
-      if (valid == null || !valid.booleanValue()) continue;
-      if (Validator.positionsValid(
-          state.elevator.height, state.shooter.angle, state.groundIntake == State.GroundIntake.UP))
-        continue;
-      System.out.println(
-          "WARNING: Robot state of "
-              + state.toString()
-              + " is registered as valid but has positions considered invalid");
-    }
   }
 
   /**
@@ -180,8 +168,8 @@ public class State {
     Boolean valid = statesValid.get(state);
     if (valid == null) {
       System.out.println("WARNING: Unregistered combination of states - " + state.toString());
-      return true;
+      return false;
     }
-    return true || valid.booleanValue();
+    return valid.booleanValue();
   }
 }
