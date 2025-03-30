@@ -24,9 +24,13 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.generated.TunerConstants;
+
+import java.lang.StackWalker.Option;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -81,6 +85,7 @@ public class VisionSubsystem extends SubsystemBase {
   public double lastPoseUpdate = 0.0;  
   private static int[] reefIds = new int[] {6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22};
   private Supplier<Pose2d> drivetrain;
+  private SequentialCommandGroup cc = new SequentialCommandGroup();
 
 
   public VisionSubsystem() {
@@ -139,6 +144,7 @@ public class VisionSubsystem extends SubsystemBase {
    * Stops the Vision system, preventing it from overriding swerve
    */
   public void stop() {
+    cc.cancel();
     overrideSwerve = false;
   }
 
@@ -166,18 +172,18 @@ public class VisionSubsystem extends SubsystemBase {
   /*
    * Aligns to the nearest reef tag.
    */
-  public void reefAlign() {
+  public Optional<Pose2d> reefAlign() {
     if (latestPipelineResult.isEmpty()) {
           warning = "NO LATEST PIPELINE";
           overrideSwerve = false;
-          return;
+          return Optional.of(null);
         }
     
         // final PhotonTrackedTarget bestTarget = pipeline.get().getBestTarget();
         if (drivetrainRobotPose == null) {
           warning = "NO TARGETS/INVALID ROBOT POSE";
           overrideSwerve = false;
-          return;
+          return Optional.of(null);
         }
         // no pose, obviously
     
@@ -201,7 +207,7 @@ public class VisionSubsystem extends SubsystemBase {
         if (closestTag < 1 || closestTag > 22) {
           warning = "DISABLED BY INVALID ID";
           overrideSwerve = false;
-          return;
+          return Optional.of(null);
         }
     
         final Pose3d desiredTag = this.aprilTagFieldLayout.getTagPose(closestTag).get();
@@ -209,10 +215,14 @@ public class VisionSubsystem extends SubsystemBase {
         final Pose2d desiredTag2d = desiredTag.toPose2d().plus(new Transform2d(0.1, 0.0, new Rotation2d()));
         overrideSwerve = true;
 
-        Command p = AutoBuilder.pathfindToPose(desiredTag2d, new PathConstraints(1.5, 2, Units.degreesToRadians(3000), Units.degreesToRadians(2000)), 0.0).withInterruptBehavior(InterruptionBehavior.kCancelIncoming).until(() -> overrideSwerve == false);
-        p.addRequirements(this);
-        p.schedule();
+        Command p = AutoBuilder.pathfindToPose(desiredTag2d, new PathConstraints(1.5, 2, Units.degreesToRadians(3000), Units.degreesToRadians(2000)), 0.0).withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
+        Command in = AutoBuilder.pathfindToPose(desiredTag2d.plus(new Transform2d(0.6, 0.0, new Rotation2d())), new PathConstraints(1, 2, Units.degreesToRadians(3000), Units.degreesToRadians(2000)), 0.0).withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
+
+        cc.cancel();
+        cc =  new SequentialCommandGroup(in, p);
+        cc.schedule();
   
+        return Optional.of(desiredTag2d);
       }
     
   @Override
