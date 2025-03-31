@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import java.util.HashMap;
+
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
@@ -16,6 +18,11 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 
 /**
@@ -228,8 +235,58 @@ public final class Constants {
   }
 
   public static class Vision {
-    public static final double exitVelocity12V = 6.7056; // m/s
-    public static final double algaeMass = 0.6803886; // kg
-    public static final double bargeHeight = 2.2; // m
+    // Reef
+    public static int[] reefIds = new int[] {
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+    };
+    
+    public static HashMap<Integer, Boolean> reefAlgaeMap = new HashMap<>();
+    static {
+      for (int i = 6; i < 12; i++) {
+        reefAlgaeMap.put(i, i % 2 != 0);
+      }
+      for (int i = 17; i < 23; i++) {
+        reefAlgaeMap.put(i, i % 2 == 0);
+      }
+    }
+    
+    public static Transform2d reefAlign = new Transform2d(0.1, 0.0, new Rotation2d());
+    public static Transform2d reefAlignFar = new Transform2d(0.7, 0.0, new Rotation2d());
+    
+    public static double reefMaxVelocity = 1.5;
+    public static double reefInMaxVelocity = 1;
+    public static double reefMaxAcceleration = 2;
+    
+    public static double reefMaxRotationalRate = Units.degreesToRadians(3000);
+    public static double reefMaxAccelerationRotationalRate = Units.degreesToRadians(2000);
+    
+    // Barge
+    public static HashMap<Alliance, Integer> bargeAllianceMap = new HashMap<>();
+    static {
+      bargeAllianceMap.put(Alliance.Blue, 14);
+      bargeAllianceMap.put(Alliance.Red, 5);
+    }
+    
+    public static Transform2d bargeAlign = new Transform2d(0.8128, 0, new Rotation2d()); // calculated from CAD
+    
+    public static double bargeMaxVelocity = 1;
+    public static double bargeMaxAcceleration = 1;
+    
+    public static double bargeLength = 3.7; // in meters, calculated from CAD
+    
+    // Processor
+    public static int[] processorIds = new int[] {16, 3};
+    
   }
 }

@@ -8,26 +8,29 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
-import java.time.InstantSource;
-
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.path.PathConstraints;
+
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
@@ -36,18 +39,21 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.Driver;
 import frc.robot.Constants.GroundIntake;
 import frc.robot.Constants.Shooter;
+import frc.robot.Constants.Vision;
 // import frc.robot.aesthetic.Colors;
 import frc.robot.controller.AgnosticController;
 import frc.robot.controller.XboxController;
 import frc.robot.generated.TunerConstants;
 import frc.robot.state.State;
-import frc.robot.state.Validator;
 import frc.robot.state.State.Elevator;
+import frc.robot.state.Validator;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.GroundIntakeSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
+import java.time.InstantSource;
+import java.util.Optional;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -57,6 +63,7 @@ import frc.robot.subsystems.VisionSubsystem;
  */
 @SuppressWarnings("unused") // Blah blah
 public class RobotContainer {
+
   private double MaxSpeed =
       TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 0.6; // kSpeedAt12Volts desired top speed
   private double LowMaxSpeed = MaxSpeed / 2; // TODO: set lowered speed for precise alignment
@@ -94,7 +101,6 @@ public class RobotContainer {
   // sendable for choosing autos
   private SendableChooser<Command> autoChooser;
 
-
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // NOTE: robot must be in stowed state when initializing because of assumptions
@@ -103,9 +109,6 @@ public class RobotContainer {
     registerNamedCommands();
     autoChooser = AutoBuilder.buildAutoChooser("ventura_auto");
     SmartDashboard.putData("Auto Mode", autoChooser);
-
-    // SmartDashboard.putData(CommandScheduler.getInstance());
-
     configureBindings();
   }
 
@@ -115,12 +118,6 @@ public class RobotContainer {
     SmartDashboard.putData("ground intake", groundIntake);
     SmartDashboard.putData("validator", validator);
     SmartDashboard.putData("v", vision);
-    
-  }
-
-  public void updateVision() {
-    vision.operatorForward = drivetrain.getOperatorForwardDirection();
-    vision.drivetrainRobotPose = drivetrain.getState().Pose;
   }
 
   public void setInitalStates() {
@@ -137,19 +134,8 @@ public class RobotContainer {
 
     // All shooter commands
     NamedCommands.registerCommand("runShootAlgae", shooter.runShootAlgae());
-    NamedCommands.registerCommand("runIntake", 
-        shooter.runOnce(
-            () -> {
-                shooter.intakeAlgae();
-                groundIntake.enablePulley();
-            }));
-    NamedCommands.registerCommand("stopIntake",
-        shooter.runOnce(
-            () -> {
-                shooter.disableShooter();
-                shooter.brakeFeed();
-                groundIntake.disablePulley();
-            }));
+    NamedCommands.registerCommand("runIntake", intakeOn());
+    NamedCommands.registerCommand("stopIntake",intakeOff());
         
     // State commands
     NamedCommands.registerCommand(
@@ -183,9 +169,6 @@ public class RobotContainer {
     drivetrain.setDefaultCommand(
         drivetrain.applyRequest(
             () -> {
-              if (vision.isOverridingSwerve()) {
-                return vision.drive();
-              } 
               double speed;
               double angularRate;
               double fraction = getSwerveSpeedFraction();
@@ -414,6 +397,23 @@ public class RobotContainer {
             )
         .withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
   }
+  
+  public Command intakeOn() {
+    return shooter.runOnce(
+        () -> {
+            shooter.intakeAlgae();
+            groundIntake.enablePulley();
+        });
+  }
+  
+  public Command intakeOff() {
+    return shooter.runOnce(
+        () -> {
+            shooter.disableShooter();
+            shooter.brakeFeed();
+            groundIntake.disablePulley();
+        });
+  }
 
   public Command runIntake() {
     return new SequentialCommandGroup(
@@ -451,42 +451,127 @@ public class RobotContainer {
         .withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
   }
 
-  // Origin from Blue Alliance bottom-right corner
-  class Field {
-    AprilTagFieldLayout tagLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape);
+  public Command closestReefAlign() {
+    // patented D.N.K.R G.A.V.I.N (Do Not Kill Robot - General Autonomous Vision Information Networking)
+    Optional<Integer> closestTagOptional = vision.getClosestTagId(Vision.reefIds);
+    if (closestTagOptional.isEmpty()) return new Command() {};
 
-    /**
-     * Aligns to the vertical corresponding to the relevant net and side.
-     *
-     * @param alliance Our alliance
-     * @param distance Desired horizontal (X) distance from barge tag in meters
-     */
-    Command alignBarge(Alliance alliance, double distance) {
-      // If we are Blue use the top net (id 14, 4) else use bottom net (id 15, 5)
-      double leftSideTagX =
-          (alliance == Alliance.Blue ? tagLayout.getTagPose(14) : tagLayout.getTagPose(15))
-              .get()
-              .getX();
-      double rightSideTagX =
-          (alliance == Alliance.Blue ? tagLayout.getTagPose(4) : tagLayout.getTagPose(5))
-              .get()
-              .getX();
+    int closestTag = closestTagOptional.get();
+    final Pose2d desiredTag2d = vision.getTagPose2d(closestTag);
+    final boolean isL2 = vision.getIsL2FromTag(closestTag);
+    
 
-      return drivetrain.getAlignToFieldPosition(
-          () -> {
-            var driveTranslation = drivetrain.getState().Pose.getTranslation();
-            if (Math.abs(driveTranslation.getX() - leftSideTagX)
-                < Math.abs(driveTranslation.getX() - rightSideTagX)) {
-              // Left side is closer
-              return new Pose2d(
-                  leftSideTagX - distance, driveTranslation.getY(), new Rotation2d(Math.PI));
-            } else {
-              // Right side is closer
-              return new Pose2d(
-                  rightSideTagX + distance, driveTranslation.getY(), new Rotation2d(0.0));
-            }
-          });
-    }
+    Command align = AutoBuilder.pathfindToPose(
+      desiredTag2d.plus(Vision.reefAlign),
+      new PathConstraints(
+        Vision.reefMaxVelocity,
+        Vision.reefMaxAcceleration,
+        Vision.reefMaxRotationalRate,
+        Vision.reefMaxAccelerationRotationalRate
+      ),
+      0.0
+    );
+    Command far = AutoBuilder.pathfindToPose(
+      desiredTag2d.plus(Vision.reefAlignFar),
+      new PathConstraints(
+        Vision.reefInMaxVelocity,
+        Vision.reefMaxAcceleration,
+        Vision.reefMaxRotationalRate,
+        Vision.reefMaxAccelerationRotationalRate
+      ),
+      0.0
+    );
+
+    return new SequentialCommandGroup(
+      new ParallelCommandGroup(
+        far, // align to tag, but far away so shooter doesnt hit
+        isL2 ? runL2() : runL1() // move to L1/L2 based on tag ID
+      ), 
+      intakeOn(), // self explainatory
+      align, // go in so shooter intakes ball
+      new ParallelCommandGroup( // parallel to not rip ball apart
+        far, // move out
+        new SequentialCommandGroup(
+          new WaitCommand(0.2), // wait
+          intakeOff() // intake off
+        )
+      )
+    );
+  }
+  
+  public Command closestProcessorAlign() {
+    // patented D.N.K.R G.A.V.I.N (Do Not Kill Robot - General Autonomous Vision Information Networking)
+    Optional<Integer> closestTagOptional = vision.getClosestTagId(Vision.processorIds);
+    if (closestTagOptional.isEmpty()) return new Command() {};
+
+    int closestTag = closestTagOptional.get();
+    final Pose2d desiredTag2d = vision.getTagPose2d(closestTag);
+    
+
+    Command align = AutoBuilder.pathfindToPose(
+      desiredTag2d.plus(Vision.reefAlign),
+      new PathConstraints(
+        Vision.reefMaxVelocity,
+        Vision.reefMaxAcceleration,
+        Vision.reefMaxRotationalRate,
+        Vision.reefMaxAccelerationRotationalRate
+      ),
+      0.0
+    );
+    Command far = AutoBuilder.pathfindToPose(
+      desiredTag2d.plus(Vision.reefAlignFar),
+      new PathConstraints(
+        Vision.reefInMaxVelocity,
+        Vision.reefMaxAcceleration,
+        Vision.reefMaxRotationalRate,
+        Vision.reefMaxAccelerationRotationalRate
+      ),
+      0.0
+    );
+
+    return new SequentialCommandGroup(
+      new ParallelCommandGroup(
+        far, // align to tag, but far away so shooter doesnt hit
+        runProcessor() // to processor thing
+      ), 
+      align, // go in so shooter intakes ball
+      shooter.runShootAlgae(), // shoot algae in
+      far // leave lol
+    );
+  }
+  
+  /*
+   * Aligns to the barge tag along a line.
+   */
+  public Command closestBargeAlign() {
+    // patented D.N.K.R G.A.V.I.N (Do Not Kill Robot - General Autonomous Vision Information Networking)
+
+    int closestTag = Vision.bargeAllianceMap.get(DriverStation.getAlliance().get());
+    final Pose2d desiredTag2d = vision.getTagPose2d(closestTag).plus(Vision.bargeAlign);
+    final double poseY = desiredTag2d.getY() - drivetrain.getState().Pose.getY();
+    
+    if (!vision.withinBarge(poseY)) return new Command() {}; // If out of barge length, do not align 
+    
+    final Pose2d desiredPosition = desiredTag2d.plus(new Transform2d(0, poseY, new Rotation2d())); // Transform so robot is along line
+
+    Command align = AutoBuilder.pathfindToPose(
+      desiredTag2d,
+      new PathConstraints(
+        Vision.bargeMaxVelocity,
+        Vision.bargeMaxAcceleration,
+        Vision.reefMaxRotationalRate,
+        Vision.reefMaxAccelerationRotationalRate
+      ),
+      0.0
+    );
+
+    return new SequentialCommandGroup(
+      new ParallelCommandGroup(
+        align, // align to tag
+        runBarge() // go to barge shooting position
+      ), 
+      shooter.runShootAlgae() // shoot yippee!!
+    );
   }
 
   public void setSafety(boolean state) {
@@ -513,7 +598,6 @@ public class RobotContainer {
     return speedFraction;
   }
 
-
   /**
    * Incorporate vision estimates into drivetrain pose estimates
    * Use only while vision is running
@@ -528,5 +612,5 @@ public class RobotContainer {
     if (estimatesDistance > 1.0) return;
     
     drivetrain.addVisionMeasurement(visionEstimate, Timer.getFPGATimestamp());
-  } 
+  }
 }

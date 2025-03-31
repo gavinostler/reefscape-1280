@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
  * project.
  */
 public class Robot extends TimedRobot {
+
   private RobotContainer m_robotContainer;
 
   /**
@@ -31,7 +32,9 @@ public class Robot extends TimedRobot {
 
     m_robotContainer = new RobotContainer();
     m_robotContainer.setInitalStates();
-    m_robotContainer.vision.setDrivetrain(() -> {return m_robotContainer.drivetrain.getState().Pose;});
+    m_robotContainer.vision.setDrivetrain(() -> {
+      return m_robotContainer.drivetrain.getState().Pose;
+    });
     m_robotContainer.updateDashboard();
   }
 
@@ -49,7 +52,6 @@ public class Robot extends TimedRobot {
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
-    m_robotContainer.updateVision();
   }
 
   /** This function is called once each time the robot enters Disabled mode. */
