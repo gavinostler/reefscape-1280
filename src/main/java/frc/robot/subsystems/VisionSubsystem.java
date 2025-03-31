@@ -13,6 +13,7 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -43,9 +44,16 @@ public class VisionSubsystem extends SubsystemBase {
   private Pose2d estimatedRobotPose;
   private Optional<PhotonPipelineResult> latestPipelineResult;
   public double lastPoseUpdate = 0.0; // estimated time the frame was taken, in the Time Sync Server's time base (nt::Now). Currently unused, but should be used lmao
+  private SendableChooser<Mode> chooser = new SendableChooser<>();
 
   private Supplier<Pose2d> drivetrain;
   private SequentialCommandGroup cc = new SequentialCommandGroup();
+
+  public enum Mode {
+    REEF,
+    PROCESSOR,
+    BARGE,
+  }
 
   public VisionSubsystem() {
     photonPoseEstimator = new PhotonPoseEstimator(
@@ -150,6 +158,10 @@ public class VisionSubsystem extends SubsystemBase {
     return Optional.of(closestTag);
   }
 
+  public Mode getMode() {
+    return chooser.getSelected();
+  }
+
   public Pose2d getTagPose2d(int tagId) {
     return this.aprilTagFieldLayout.getTagPose(tagId).get().toPose2d();
   }
@@ -205,6 +217,10 @@ public class VisionSubsystem extends SubsystemBase {
   @Override
   public void initSendable(SendableBuilder builder) {
     builder.setSmartDashboardType("Vision");
+
+    chooser.setDefaultOption("Reef", Mode.REEF);
+    chooser.addOption("Barge", Mode.BARGE);
+    chooser.addOption("Processor", Mode.PROCESSOR);
 
     builder.addStringProperty("Last Warning", () -> warning, null);
     builder.addStringProperty(

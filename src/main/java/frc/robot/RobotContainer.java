@@ -52,6 +52,8 @@ import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.GroundIntakeSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
+import frc.robot.subsystems.VisionSubsystem.Mode;
+
 import java.time.InstantSource;
 import java.util.Optional;
 
@@ -204,7 +206,20 @@ public class RobotContainer {
     operatorController.b().onTrue(runL1());
     operatorController.y().onTrue(runL2());
     operatorController.leftBumper().onTrue(runBarge());
-    operatorController.rightBumper().onTrue(vision.runOnce(() -> vision.reefAlign())).onFalse(vision.runOnce(() -> {vision.removeDefaultCommand(); vision.stop();}));
+    // operatorController.rightBumper().onTrue(vision.runOnce(() -> vision.reefAlign())).onFalse(vision.runOnce(() -> {vision.removeDefaultCommand(); vision.stop();}));
+    operatorController.rightBumper().onTrue(vision.runOnce(() -> {
+      switch (vision.getMode()) {
+        case BARGE:
+          closestBargeAlign();
+          break;
+        case REEF:
+          closestReefAlign();
+          break;
+        case PROCESSOR:
+          closestProcessorAlign();
+          break;
+      }
+    }));
     operatorController.povUp().onTrue(elevator.runOnce(() -> elevator.moveState(false)));
     operatorController.povDown().onTrue(elevator.runOnce(() -> elevator.moveState(true)));
 
