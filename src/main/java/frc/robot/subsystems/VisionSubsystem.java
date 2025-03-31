@@ -14,6 +14,7 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -221,6 +222,8 @@ public class VisionSubsystem extends SubsystemBase {
     chooser.setDefaultOption("Reef", Mode.REEF);
     chooser.addOption("Barge", Mode.BARGE);
     chooser.addOption("Processor", Mode.PROCESSOR);
+
+    SmartDashboard.putData("Vision Mode", chooser);
 
     builder.addStringProperty("Last Warning", () -> warning, null);
     builder.addStringProperty(
