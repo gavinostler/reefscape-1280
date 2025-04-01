@@ -479,7 +479,7 @@ public class RobotContainer {
     
 
     Command align = AutoBuilder.pathfindToPose(
-      desiredTag2d.plus(Vision.reefAlign),
+      desiredTag2d.transformBy(Vision.reefAlign),
       new PathConstraints(
         Vision.reefMaxVelocity,
         Vision.reefMaxAcceleration,
@@ -582,12 +582,12 @@ public class RobotContainer {
     // patented D.N.K.R G.A.V.I.N (Do Not Kill Robot - General Autonomous Vision Information Networking)
 
     int closestTag = Vision.bargeAllianceMap.get(DriverStation.getAlliance().get());
-    final Pose2d desiredTag2d = vision.getTagPose2d(closestTag).plus(Vision.bargeAlign);
+    final Pose2d desiredTag2d = vision.getTagPose2d(closestTag).transformBy(Vision.bargeAlign);
     final double poseY = desiredTag2d.getY() - drivetrain.getState().Pose.getY();
     
     if (!vision.withinBarge(poseY)) return new Command() {}; // If out of barge length, do not align 
     
-    final Pose2d desiredPosition = desiredTag2d.plus(new Transform2d(0, poseY, new Rotation2d())); // Transform so robot is along line
+    final Pose2d desiredPosition = desiredTag2d.transformBy(new Transform2d(0, poseY, new Rotation2d())); // Transform so robot is along line
 
     Command align = AutoBuilder.pathfindToPose(
       desiredTag2d,
