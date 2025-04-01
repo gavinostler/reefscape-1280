@@ -130,7 +130,7 @@ public class VisionSubsystem extends SubsystemBase {
   }
 
   public Optional<Integer> getClosestTagId(int[] tagList) {
-    if (latestPipelineResult.isEmpty()) {
+    if (latestPipelineResult == null || latestPipelineResult.isEmpty()) {
       warning = "NO LATEST PIPELINE";
       return Optional.empty();
     }
@@ -184,7 +184,7 @@ public class VisionSubsystem extends SubsystemBase {
     if (closestTagOptional.isEmpty()) return;
 
     int closestTag = closestTagOptional.get();
-    final Pose2d desiredTag2d = getTagPose2d(closestTag).plus(
+    final Pose2d desiredTag2d = getTagPose2d(closestTag).transformBy(
       new Transform2d(0.1, 0.0, new Rotation2d())
     );
 
@@ -200,7 +200,7 @@ public class VisionSubsystem extends SubsystemBase {
     ).withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
     // patented D.N.K.R G.A.V.I.N (Do Not Kill Robot - General Autonomous Vision Information Networking)
     Command in = AutoBuilder.pathfindToPose(
-      desiredTag2d.plus(new Transform2d(0.6, 0.0, new Rotation2d())),
+      desiredTag2d.transformBy(new Transform2d(0.6, 0.0, new Rotation2d())),
       new PathConstraints(
         1,
         2,

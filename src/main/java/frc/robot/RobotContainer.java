@@ -29,6 +29,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -55,7 +56,10 @@ import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.subsystems.VisionSubsystem.Mode;
 
 import java.time.InstantSource;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -207,19 +211,12 @@ public class RobotContainer {
     operatorController.y().onTrue(runL2());
     operatorController.leftBumper().onTrue(runBarge());
     // operatorController.rightBumper().onTrue(vision.runOnce(() -> vision.reefAlign())).onFalse(vision.runOnce(() -> {vision.removeDefaultCommand(); vision.stop();}));
-    operatorController.rightBumper().onTrue(vision.runOnce(() -> {
-      switch (vision.getMode()) {
-        case BARGE:
-          closestBargeAlign();
-          break;
-        case REEF:
-          closestReefAlign();
-          break;
-        case PROCESSOR:
-          closestProcessorAlign();
-          break;
-      }
-    }));
+    operatorController.rightBumper().onTrue(Commands.defer(() -> {
+      return switch (vision.getMode()) {
+        case BARGE -> closestBargeAlign();
+        case REEF -> closestReefAlign();
+        case PROCESSOR -> closestProcessorAlign();
+      };}, new HashSet<>(Arrays.asList(vision))));
     operatorController.povUp().onTrue(elevator.runOnce(() -> elevator.moveState(false)));
     operatorController.povDown().onTrue(elevator.runOnce(() -> elevator.moveState(true)));
 
@@ -486,8 +483,12 @@ public class RobotContainer {
       ),
       0.0
     );
-    Command far = AutoBuilder.pathfindToPose(
-      desiredTag2d.plus(Vision.reefAlignFar),
+
+
+    return new SequentialCommandGroup(
+      new ParallelCommandGroup(
+        AutoBuilder.pathfindToPose(
+      desiredTag2d.transformBy(Vision.reefAlignFar),
       new PathConstraints(
         Vision.reefInMaxVelocity,
         Vision.reefMaxAcceleration,
@@ -495,17 +496,22 @@ public class RobotContainer {
         Vision.reefMaxAccelerationRotationalRate
       ),
       0.0
-    );
-
-    return new SequentialCommandGroup(
-      new ParallelCommandGroup(
-        far, // align to tag, but far away so shooter doesnt hit
+    ), // align to tag, but far away so shooter doesnt hit
         isL2 ? runL2() : runL1() // move to L1/L2 based on tag ID
       ), 
       intakeOn(), // self explainatory
       align, // go in so shooter intakes ball
       new ParallelCommandGroup( // parallel to not rip ball apart
-        far, // move out
+      AutoBuilder.pathfindToPose(
+        desiredTag2d.transformBy(Vision.reefAlignFar),
+        new PathConstraints(
+          Vision.reefInMaxVelocity,
+          Vision.reefMaxAcceleration,
+          Vision.reefMaxRotationalRate,
+          Vision.reefMaxAccelerationRotationalRate
+        ),
+        0.0
+      ), // move out
         new SequentialCommandGroup(
           new WaitCommand(0.2), // wait
           intakeOff() // intake off
@@ -524,7 +530,7 @@ public class RobotContainer {
     
 
     Command align = AutoBuilder.pathfindToPose(
-      desiredTag2d.plus(Vision.reefAlign),
+      desiredTag2d.transformBy(Vision.reefAlign),
       new PathConstraints(
         Vision.reefMaxVelocity,
         Vision.reefMaxAcceleration,
@@ -533,8 +539,12 @@ public class RobotContainer {
       ),
       0.0
     );
-    Command far = AutoBuilder.pathfindToPose(
-      desiredTag2d.plus(Vision.reefAlignFar),
+
+
+    return new SequentialCommandGroup(
+      new ParallelCommandGroup(
+        AutoBuilder.pathfindToPose(
+      desiredTag2d.transformBy(Vision.reefAlignFar),
       new PathConstraints(
         Vision.reefInMaxVelocity,
         Vision.reefMaxAcceleration,
@@ -542,16 +552,21 @@ public class RobotContainer {
         Vision.reefMaxAccelerationRotationalRate
       ),
       0.0
-    );
-
-    return new SequentialCommandGroup(
-      new ParallelCommandGroup(
-        far, // align to tag, but far away so shooter doesnt hit
+    ), // align to tag, but far away so shooter doesnt hit
         runProcessor() // to processor thing
       ), 
       align, // go in so shooter intakes ball
       shooter.runShootAlgae(), // shoot algae in
-      far // leave lol
+      AutoBuilder.pathfindToPose(
+      desiredTag2d.transformBy(Vision.reefAlignFar),
+      new PathConstraints(
+        Vision.reefInMaxVelocity,
+        Vision.reefMaxAcceleration,
+        Vision.reefMaxRotationalRate,
+        Vision.reefMaxAccelerationRotationalRate
+      ),
+      0.0
+    ) // leave lol
     );
   }
   
