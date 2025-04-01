@@ -517,7 +517,7 @@ public class RobotContainer {
           intakeOff() // intake off
         )
       )
-    );
+    ).withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
   }
   
   public Command closestProcessorAlign() {
@@ -567,7 +567,7 @@ public class RobotContainer {
       ),
       0.0
     ) // leave lol
-    );
+    ).withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
   }
   
   /*
@@ -601,7 +601,7 @@ public class RobotContainer {
         runBarge() // go to barge shooting position
       ), 
       shooter.runShootAlgae() // shoot yippee!!
-    );
+    ).withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
   }
 
   public void setSafety(boolean state) {
