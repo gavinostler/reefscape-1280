@@ -74,6 +74,8 @@ public class RobotContainer {
       TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 0.6; // kSpeedAt12Volts desired top speed
   private double LowMaxSpeed = MaxSpeed / 2; // TODO: set lowered speed for precise alignment
   private boolean loweredSpeed = false;
+  
+  private Command lastVisionCommand;
 
   private double MaxAngularRate =
       RotationsPerSecond.of(1.5).in(RadiansPerSecond); // 3/4 of a rotation per second max
@@ -212,11 +214,14 @@ public class RobotContainer {
     operatorController.leftBumper().onTrue(runBarge());
     // operatorController.rightBumper().onTrue(vision.runOnce(() -> vision.reefAlign())).onFalse(vision.runOnce(() -> {vision.removeDefaultCommand(); vision.stop();}));
     operatorController.rightBumper().onTrue(Commands.defer(() -> {
-      return switch (vision.getMode()) {
+      Command newCommand = switch (vision.getMode()) {
         case BARGE -> closestBargeAlign();
         case REEF -> closestReefAlign();
         case PROCESSOR -> closestProcessorAlign();
-      };}, new HashSet<>(Arrays.asList(vision))));
+      };
+      lastVisionCommand = newCommand;
+      return newCommand;
+    }, new HashSet<>(Arrays.asList(vision)))).onFalse(vision.runOnce(() -> {lastVisionCommand.cancel(); lastVisionCommand = null;}));
     operatorController.povUp().onTrue(elevator.runOnce(() -> elevator.moveState(false)));
     operatorController.povDown().onTrue(elevator.runOnce(() -> elevator.moveState(true)));
 
@@ -476,7 +481,7 @@ public class RobotContainer {
     
 
     Command align = AutoBuilder.pathfindToPose(
-      desiredTag2d.plus(Vision.reefAlign),
+      desiredTag2d.transformBy(Vision.reefAlign),
       new PathConstraints(
         Vision.reefMaxVelocity,
         Vision.reefMaxAcceleration,
@@ -519,7 +524,7 @@ public class RobotContainer {
           intakeOff() // intake off
         )
       )
-    );
+    ).withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
   }
   
   public Command closestProcessorAlign() {
@@ -569,7 +574,7 @@ public class RobotContainer {
       ),
       0.0
     ) // leave lol
-    );
+    ).withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
   }
   
   /*
@@ -579,12 +584,12 @@ public class RobotContainer {
     // patented D.N.K.R G.A.V.I.N (Do Not Kill Robot - General Autonomous Vision Information Networking)
 
     int closestTag = Vision.bargeAllianceMap.get(DriverStation.getAlliance().get());
-    final Pose2d desiredTag2d = vision.getTagPose2d(closestTag).plus(Vision.bargeAlign);
+    final Pose2d desiredTag2d = vision.getTagPose2d(closestTag).transformBy(Vision.bargeAlign);
     final double poseY = desiredTag2d.getY() - drivetrain.getState().Pose.getY();
     
     if (!vision.withinBarge(poseY)) return new Command() {}; // If out of barge length, do not align 
     
-    final Pose2d desiredPosition = desiredTag2d.plus(new Transform2d(0, poseY, new Rotation2d())); // Transform so robot is along line
+    final Pose2d desiredPosition = desiredTag2d.transformBy(new Transform2d(0, poseY, new Rotation2d())); // Transform so robot is along line
 
     Command align = AutoBuilder.pathfindToPose(
       desiredTag2d,
@@ -603,7 +608,7 @@ public class RobotContainer {
         runBarge() // go to barge shooting position
       ), 
       shooter.runShootAlgae() // shoot yippee!!
-    );
+    ).withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
   }
 
   public void setSafety(boolean state) {
