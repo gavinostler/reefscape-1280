@@ -131,7 +131,7 @@ public class GroundIntakeSubsystem extends SubsystemBase {
   public void initSendable(SendableBuilder builder) {
     builder.setSmartDashboardType("Ground Intake");
     builder.addDoubleProperty(
-        "intake voltage", () -> intakeMotor.getAppliedOutput(), intakeMotor::setVoltage);
+        "intake current", () -> intakeMotor.getOutputCurrent(), null);
     builder.addDoubleProperty("angle", this::getAngle, null);
     builder.addDoubleProperty("setpoint", GroundIntake.intakePID::getSetpoint, null);
     builder.addStringProperty(

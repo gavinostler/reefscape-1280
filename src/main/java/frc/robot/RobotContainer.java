@@ -167,7 +167,7 @@ public class RobotContainer {
 
     // Driver Controls
     // TODO: way to do precise movement near reef
-    int moveTaps = 20;
+    int moveTaps = 10;
     int rotationTaps = 10;
     LinearFilter filterX = LinearFilter.movingAverage(moveTaps);
     LinearFilter filterY = LinearFilter.movingAverage(moveTaps);
@@ -448,10 +448,12 @@ public class RobotContainer {
   public Command runStowSubsystems() {
     return new SequentialCommandGroup(
             new InstantCommand(() -> setSafety(false)),
+            shooter.runOnce(() -> shooter.disableShooterAndFeed()),
             groundIntake.runOnce(
-                () ->
+                () -> {
+                    groundIntake.disablePulley();
                     groundIntake.setState(
-                        State.GroundIntake.DOWN)), // move ground intake out of the way
+                        State.GroundIntake.DOWN); } ), // move ground intake out of the way
             new WaitUntilCommand(groundIntake::atSetpoint).withTimeout(1.0), // wait until it's set
             shooter.runOnce(() -> shooter.setState(State.Shooter.STOW)), // stow shooter
             new WaitUntilCommand(shooter::atSetpoint).withTimeout(3.0), // wait until it's set
