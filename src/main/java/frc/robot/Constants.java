@@ -114,7 +114,7 @@ public final class Constants {
     public static final boolean REVERSE_ENCODER = true;
 
     public static final int intakeId = 19;
-    public static final int INTAKE_CURRENT_LIMIT = 30;
+    public static final int INTAKE_CURRENT_LIMIT = 20;
 
     public static final SparkMaxConfig intakeConfig = new SparkMaxConfig();
 
@@ -123,8 +123,8 @@ public final class Constants {
       intakeConfig.smartCurrentLimit(INTAKE_CURRENT_LIMIT);
     }
 
-    public static final PIDController intakePID = new PIDController(40.0, 0.0, 5.0);
-    public static final ArmFeedforward intakeFf = new ArmFeedforward(0.0, 0.0, 0.0, 0.0);
+    public static final PIDController intakePID = new PIDController(20.0, 0.0, 3.0);
+    public static final ArmFeedforward intakeFf = new ArmFeedforward(0.0, 1.0, 0.0, 0.0);
 
     static {
       intakePID.setTolerance(ANGLE_TOLERANCE);
@@ -215,7 +215,7 @@ public final class Constants {
           InvertedValue.CounterClockwise_Positive; // positive should make it go up
       // Assuming CANcoder is after gear reduction, and encoder is zeroed at horizontal
       armConfigs.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
-      armConfigs.Slot0.kG = 0.046;
+      armConfigs.Slot0.kG = 0.1;
       armConfigs.Slot0.kS = 0.0;
       armConfigs.Slot0.kV = 0.0;
       armConfigs.Slot0.kA = 0.0;
