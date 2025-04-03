@@ -9,7 +9,7 @@
       "prevControl": null,
       "nextControl": {
         "x": 2.5092893835616437,
-        "y": 7.593600171232876
+        "y": 7.593600171232877
       },
       "isLocked": false,
       "linkedName": "s4"
@@ -41,7 +41,7 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 3.0,
+    "velocity": 0.0,
     "rotation": 180.0
   },
   "reversed": false,
