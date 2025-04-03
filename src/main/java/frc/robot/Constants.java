@@ -103,7 +103,7 @@ public final class Constants {
   }
 
   public static class GroundIntake {
-    public static final double UP_ANGLE = 0.22;
+    public static final double UP_ANGLE = 0.2;
     public static final double DOWN_ANGLE = 0.084;
 
     public static final int encoderChannelA = 3;
@@ -260,8 +260,8 @@ public final class Constants {
       }
     }
     
-    public static Transform2d reefAlign = new Transform2d(0.1, 0.0, new Rotation2d());
-    public static Transform2d reefAlignFar = new Transform2d(0.7, 0.0, new Rotation2d());
+    public static Transform2d reefAlign = new Transform2d(0.1+0.4, 0.0, new Rotation2d());
+    public static Transform2d reefAlignFar = new Transform2d(0.7+0.4, 0.0, new Rotation2d());
     
     public static double reefMaxVelocity = 1.5;
     public static double reefInMaxVelocity = 1;
@@ -277,7 +277,7 @@ public final class Constants {
       bargeAllianceMap.put(Alliance.Red, 5);
     }
     
-    public static Transform2d bargeAlign = new Transform2d(0.8128, 0, new Rotation2d()); // calculated from CAD
+    public static Transform2d bargeAlign = new Transform2d(0.8128+0.4, 0, new Rotation2d()); // calculated from CAD
     
     public static double bargeMaxVelocity = 1;
     public static double bargeMaxAcceleration = 1;
@@ -286,6 +286,9 @@ public final class Constants {
     
     // Processor
     public static int[] processorIds = new int[] {16, 3};
+
+    public static Transform2d processorAlign = new Transform2d(0.4+0.4, 0.0, new Rotation2d());
+    public static Transform2d processorAlignFar = new Transform2d(1.1+0.4, 0.0, new Rotation2d());
     
   }
 }
