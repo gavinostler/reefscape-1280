@@ -152,6 +152,8 @@ public class RobotContainer {
         "runL2", runL2());
     NamedCommands.registerCommand(
         "runBarge", runBarge());
+      NamedCommands.registerCommand(
+        "runProcessor", runProcessor());
 
     // Stow after auto
     NamedCommands.registerCommand("runStowSubsystems", runStowSubsystems());
