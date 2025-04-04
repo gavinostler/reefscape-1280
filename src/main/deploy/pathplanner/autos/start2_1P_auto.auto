@@ -59,21 +59,15 @@
           }
         },
         {
-          "type": "wait",
+          "type": "path",
           "data": {
-            "waitTime": 0.3
+            "pathName": "B2_back"
           }
         },
         {
           "type": "named",
           "data": {
             "name": "runStowSubsystems"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "B2_back"
           }
         }
       ]
