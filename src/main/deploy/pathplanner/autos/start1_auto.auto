@@ -11,12 +11,6 @@
           }
         },
         {
-          "type": "named",
-          "data": {
-            "name": "runIntake"
-          }
-        },
-        {
           "type": "path",
           "data": {
             "pathName": "h1_intakeA_s6_L3"
@@ -31,19 +25,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "a_s6_L3_shootB1"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "stopIntake"
+            "pathName": "a_s6_L3_shootB2"
           }
         },
         {
           "type": "named",
           "data": {
             "name": "runBarge"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "stopIntake"
           }
         },
         {
@@ -61,7 +55,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "B1_back"
+            "pathName": "B2_back"
           }
         },
         {

@@ -11,12 +11,6 @@
           }
         },
         {
-          "type": "named",
-          "data": {
-            "name": "runIntake"
-          }
-        },
-        {
           "type": "path",
           "data": {
             "pathName": "h3_intakeA_s1_L2"
@@ -37,13 +31,13 @@
         {
           "type": "named",
           "data": {
-            "name": "stopIntake"
+            "name": "runBarge"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "runBarge"
+            "name": "stopIntake"
           }
         },
         {
