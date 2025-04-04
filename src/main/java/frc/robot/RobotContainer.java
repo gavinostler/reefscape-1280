@@ -39,6 +39,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.Driver;
 import frc.robot.Constants.GroundIntake;
+import frc.robot.Constants.Operator;
 import frc.robot.Constants.Shooter;
 import frc.robot.Constants.Vision;
 // import frc.robot.aesthetic.Colors;
@@ -102,6 +103,8 @@ public class RobotContainer {
       new XboxController(Driver.kDriverControllerPort);
   public final XboxController operatorController =
       driverController; // Aliased to main controller for now, TODO
+  private final XboxController visionController =
+      new XboxController(Operator.kOperatorControllerPort);
   public final VisionSubsystem vision = new VisionSubsystem();
   private final Telemetry logger = new Telemetry(MaxSpeed);
   // private final Colors colors = new Colors();
@@ -191,10 +194,10 @@ public class RobotContainer {
               }
               return drive
                   .withVelocityX(
-                      filterY.calculate(MathUtil.applyDeadband(-driverController.getLeftY(), 0.1))
+                      filterY.calculate(MathUtil.applyDeadband(driverController.getLeftY() * (DriverStation.getAlliance().get() == Alliance.Red ? 1 : -1) , 0.1))
                           * speed)
                   .withVelocityY(
-                      filterX.calculate(MathUtil.applyDeadband(-driverController.getLeftX(), 0.1))
+                      filterX.calculate(MathUtil.applyDeadband(driverController.getLeftX() * (DriverStation.getAlliance().get() == Alliance.Red ? 1 : -1), 0.1))
                           * speed)
                   .withRotationalRate(
                       filterRotation.calculate(
@@ -539,7 +542,7 @@ public class RobotContainer {
     
 
     Command align = AutoBuilder.pathfindToPose(
-      desiredTag2d.transformBy(Vision.reefAlign),
+      desiredTag2d.transformBy(Vision.processorAlign),
       new PathConstraints(
         Vision.reefMaxVelocity,
         Vision.reefMaxAcceleration,
@@ -553,7 +556,7 @@ public class RobotContainer {
     return new SequentialCommandGroup(
       new ParallelCommandGroup(
         AutoBuilder.pathfindToPose(
-      desiredTag2d.transformBy(Vision.reefAlignFar),
+      desiredTag2d.transformBy(Vision.processorAlignFar),
       new PathConstraints(
         Vision.reefInMaxVelocity,
         Vision.reefMaxAcceleration,
@@ -567,7 +570,7 @@ public class RobotContainer {
       align, // go in so shooter intakes ball
       shooter.runShootAlgae(), // shoot algae in
       AutoBuilder.pathfindToPose(
-      desiredTag2d.transformBy(Vision.reefAlignFar),
+      desiredTag2d.transformBy(Vision.processorAlignFar),
       new PathConstraints(
         Vision.reefInMaxVelocity,
         Vision.reefMaxAcceleration,
@@ -650,6 +653,6 @@ public class RobotContainer {
     // Filter out bad vision measurements
     if (estimatesDistance > 1.0) return;
     
-    drivetrain.addVisionMeasurement(visionEstimate, Timer.getFPGATimestamp());
+    drivetrain.addVisionMeasurement(visionEstimate, vision.lastPoseUpdate);
   }
 }
