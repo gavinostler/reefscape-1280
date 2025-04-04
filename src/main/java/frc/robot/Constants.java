@@ -61,10 +61,10 @@ public final class Constants {
   public static class Elevator {
     public static final double TOP_HEIGHT = 1.0;
     public static final double SHOOT_HEIGHT = 0.92; // TODO
-    public static final double L2_HEIGHT = 0.70;
+    public static final double L2_HEIGHT = 0.675;
     public static final double GROUND_INTAKE_HEIGHT = 0.527;
-    public static final double L1_HEIGHT = 0.427;
-    public static final double BOTTOM_HEIGHT = 0.0;
+    public static final double L1_HEIGHT = 0.70;
+    public static final double BOTTOM_HEIGHT = 0.02;
     public static final double HEIGHT_TOLERANCE = 0.03;
 
     public static final int motorId = 18;
@@ -104,7 +104,7 @@ public final class Constants {
 
   public static class GroundIntake {
     public static final double UP_ANGLE = 0.2;
-    public static final double DOWN_ANGLE = 0.084;
+    public static final double DOWN_ANGLE = 0.075;
 
     public static final int encoderChannelA = 3;
     public static final int encoderChannelB = 4;
@@ -148,8 +148,9 @@ public final class Constants {
 
     public static final double STOW_ANGLE = 0.22;
     public static final double SHOOT_ANGLE = 0.16;
-    public static final double REEF_INTAKE_ANGLE = 0.055;
-    public static final double GROUND_INTAKE_ANGLE = -0.151;
+    public static final double L2_INTAKE_ANGLE = 0.055;
+    public static final double L1_INTAKE_ANGLE = -0.069;
+    public static final double GROUND_INTAKE_ANGLE = -0.171;
     public static final double DOWN_ANGLE = -0.26;
     public static final double ANGLE_TOLERANCE = 0.01;
 
@@ -261,7 +262,7 @@ public final class Constants {
     }
     
     public static Transform2d reefAlign = new Transform2d(0.1+0.4, 0.0, new Rotation2d());
-    public static Transform2d reefAlignFar = new Transform2d(0.7+0.4, 0.0, new Rotation2d());
+    public static Transform2d reefAlignFar = new Transform2d(0.7+0.5, 0.0, new Rotation2d());
     
     public static double reefMaxVelocity = 1.5;
     public static double reefInMaxVelocity = 1;

@@ -44,6 +44,7 @@ import frc.robot.Constants.Shooter;
 import frc.robot.Constants.Vision;
 // import frc.robot.aesthetic.Colors;
 import frc.robot.controller.AgnosticController;
+import frc.robot.controller.PS4Controller;
 import frc.robot.controller.XboxController;
 import frc.robot.generated.TunerConstants;
 import frc.robot.state.State;
@@ -103,8 +104,8 @@ public class RobotContainer {
       new XboxController(Driver.kDriverControllerPort);
   public final XboxController operatorController =
       driverController; // Aliased to main controller for now, TODO
-  private final XboxController visionController =
-      new XboxController(Operator.kOperatorControllerPort);
+  private final PS4Controller visionController =
+      new PS4Controller(Operator.kOperatorControllerPort);
   public final VisionSubsystem vision = new VisionSubsystem();
   private final Telemetry logger = new Telemetry(MaxSpeed);
   // private final Colors colors = new Colors();
@@ -256,8 +257,20 @@ public class RobotContainer {
                   shooter.brakeFeed();
                   groundIntake.disablePulley();
                 }));
-    operatorController.rightTrigger().onTrue(shooter.runShootAlgae());
+    operatorController.rightTrigger().onTrue(shooter.runShootAlgae()).onTrue(groundIntake.runOnce(() -> 
+      groundIntake.enablePulley()
+    ).onlyIf(() -> Math.abs(shooter.getArmAngle()) < 0.05 )).onFalse(groundIntake.runOnce(() -> groundIntake.disablePulley()));
     operatorController.x().onTrue(runProcessor().unless(() -> elevator.getState() == Elevator.BOTTOM));
+
+    visionController.rightBumper().onTrue(vision.runOnce(() -> vision.cycleMode(false)));
+    visionController.leftBumper().onTrue(vision.runOnce(() -> vision.cycleMode(true)));
+    visionController.povUp().onTrue(groundIntake.runOnce(() -> {
+      GroundIntake.intakePID.setSetpoint(groundIntake.getAngle() + 0.06);
+    }));
+    visionController.povDown().onTrue(groundIntake.runOnce(() -> {
+      GroundIntake.intakePID.setSetpoint(groundIntake.getAngle() - 0.06);
+    }));
+    visionController.a().onTrue(groundIntake.runOnce(() -> groundIntake.resetEncoder()));
 
     // Reset heading
     operatorController
@@ -335,7 +348,7 @@ public class RobotContainer {
             new InstantCommand(() -> setSafety(false)), // we don't need safety for this
             new SequentialCommandGroup(
               shooter.runOnce(() -> shooter.setState(State.Shooter.REEF_INTAKE)), // move arm out of way if needed
-              new WaitUntilCommand(shooter::atSetpoint).withTimeout(2.0)
+              new WaitUntilCommand(shooter::atSetpoint).withTimeout(2.5)
             ).onlyIf(() -> shooter.getArmAngle() < 0.1),
             elevator.runOnce(
               () -> elevator.setState(State.Elevator.L1)), // move elevator to L1 position
@@ -346,7 +359,7 @@ public class RobotContainer {
             shooter.runOnce(
                 () ->
                     shooter.setState(State.Shooter.REEF_INTAKE)), // move shooter to L1 intake angle
-            new WaitUntilCommand(shooter::atSetpoint).withTimeout(1.0), // wait until it's set
+            new WaitUntilCommand(shooter::atSetpoint).withTimeout(1.5), // wait until it's set
             new InstantCommand(() -> setSafety(true)) // put safety back
             )
         .withInterruptBehavior(InterruptionBehavior.kCancelIncoming); // don't get interrupted
@@ -364,7 +377,8 @@ public class RobotContainer {
             new WaitUntilCommand(elevator::atSetpoint).withTimeout(2.0), // wait until it's set
             shooter.runOnce(
                 () ->
-                    shooter.setState(State.Shooter.REEF_INTAKE)), // move shooter to L1 intake angle
+                    shooter.setState(State.Shooter.REEF_L2_INTAKE)), // move shooter to L1 intake angle
+            new WaitUntilCommand(shooter::atSetpoint).withTimeout(1.5), // wait until it's set
             new InstantCommand(() -> setSafety(true)) // put safety back
             )
         .withInterruptBehavior(InterruptionBehavior.kCancelIncoming); // don't get interrupted
@@ -524,8 +538,9 @@ public class RobotContainer {
         ),
         0.0
       ), // move out
+      shooter.runOnce(() -> shooter.moveArmAngle(0.1)),
         new SequentialCommandGroup(
-          new WaitCommand(0.2), // wait
+          new WaitCommand(1), // wait
           intakeOff() // intake off
         )
       )

@@ -12,6 +12,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.Vision;
+
+import java.util.HashMap;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -35,6 +37,7 @@ public class VisionSubsystem extends SubsystemBase {
   private Pose2d estimatedRobotPose;
   public double lastPoseUpdate = 0.0; // estimated time the frame was taken, in the Time Sync Server's time base (nt::Now). Currently unused, but should be used lmao
   private SendableChooser<Mode> chooser = new SendableChooser<>();
+  private Mode currentMode = Mode.REEF;
 
   private Supplier<Pose2d> drivetrain;
 
@@ -49,6 +52,26 @@ public class VisionSubsystem extends SubsystemBase {
 
   public void setDrivetrain(Supplier<Pose2d> dr) {
     drivetrain = dr;
+  }
+
+  public Mode getNextMode(boolean reverse) {
+    return reverse ? switch (getMode()) {
+      case REEF -> Mode.REEF;
+      case PROCESSOR -> Mode.REEF;
+      case BARGE -> Mode.PROCESSOR;
+    } : switch (getMode()) {
+      case REEF -> Mode.PROCESSOR;
+      case PROCESSOR -> Mode.BARGE;
+      case BARGE -> Mode.BARGE;
+    };
+  }
+
+  public void cycleMode(boolean reverse) {
+    setMode(getNextMode(reverse));
+  }
+
+  public void setMode(Mode mode) {
+    currentMode = mode;
   }
 
   @Override
@@ -102,7 +125,7 @@ public class VisionSubsystem extends SubsystemBase {
   }
 
   public Mode getMode() {
-    return chooser.getSelected();
+    return currentMode;
   }
 
   public Pose2d getTagPose2d(int tagId) {
@@ -124,8 +147,13 @@ public class VisionSubsystem extends SubsystemBase {
     chooser.setDefaultOption("Reef", Mode.REEF);
     chooser.addOption("Barge", Mode.BARGE);
     chooser.addOption("Processor", Mode.PROCESSOR);
+    chooser.onChange((Mode newMode) -> {
+      setMode(newMode);
+    });
 
-    SmartDashboard.putData("Vision Mode", chooser);
+    SmartDashboard.putData("Vision Mode Chooser", chooser);
+
+    builder.addStringProperty("Current Vision Mode", () -> getMode().toString(), null);
 
     builder.addStringProperty("Last Warning", () -> warning, null);
     builder.addStringProperty(
