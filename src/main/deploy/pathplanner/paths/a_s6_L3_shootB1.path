@@ -34,7 +34,7 @@
   "eventMarkers": [
     {
       "name": "stopIntake",
-      "waypointRelativePos": 0.0,
+      "waypointRelativePos": 0.33520809898762677,
       "endWaypointRelativePos": null,
       "command": null
     }
