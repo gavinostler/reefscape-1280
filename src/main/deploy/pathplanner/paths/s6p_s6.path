@@ -3,16 +3,16 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.2,
-        "y": 7.248009417808219
+        "x": 5.5940625,
+        "y": 5.884701704545454
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.312869319421266,
-        "y": 7.4710800719368615
+        "x": 5.688557146938875,
+        "y": 6.116155288876951
       },
       "isLocked": false,
-      "linkedName": "h1"
+      "linkedName": "s6p"
     },
     {
       "anchor": {
@@ -20,8 +20,8 @@
         "y": 5.069051878354204
       },
       "prevControl": {
-        "x": 5.941429016189293,
-        "y": 7.143142787445113
+        "x": 5.514691065439749,
+        "y": 5.688107563539783
       },
       "nextControl": null,
       "isLocked": false,
@@ -45,14 +45,7 @@
     }
   ],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "runIntake",
-      "waypointRelativePos": 0.8033898305084749,
-      "endWaypointRelativePos": null,
-      "command": null
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 2.0,
     "maxAcceleration": 3.0,
@@ -69,7 +62,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 61.0040404858816
   },
   "useDefaultConstraints": true
 }

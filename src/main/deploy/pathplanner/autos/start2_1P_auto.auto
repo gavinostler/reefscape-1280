@@ -5,15 +5,28 @@
     "data": {
       "commands": [
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "runL2"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "runL2"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "h2_intakeA_s6p_L3"
+                }
+              }
+            ]
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "h2_intakeA_s6_L3"
+            "pathName": "s6p_s6"
           }
         },
         {
