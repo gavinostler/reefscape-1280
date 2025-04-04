@@ -194,10 +194,10 @@ public class RobotContainer {
               }
               return drive
                   .withVelocityX(
-                      filterY.calculate(MathUtil.applyDeadband(-driverController.getLeftY(), 0.1))
+                      filterY.calculate(MathUtil.applyDeadband(driverController.getLeftY() * (DriverStation.getAlliance().get() == Alliance.Red ? 1 : -1) , 0.1))
                           * speed)
                   .withVelocityY(
-                      filterX.calculate(MathUtil.applyDeadband(-driverController.getLeftX(), 0.1))
+                      filterX.calculate(MathUtil.applyDeadband(driverController.getLeftX() * (DriverStation.getAlliance().get() == Alliance.Red ? 1 : -1), 0.1))
                           * speed)
                   .withRotationalRate(
                       filterRotation.calculate(
