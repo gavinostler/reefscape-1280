@@ -73,7 +73,7 @@ import java.util.function.Supplier;
 public class RobotContainer {
 
   private double MaxSpeed =
-      TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 0.6; // kSpeedAt12Volts desired top speed
+      TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 0.15; // kSpeedAt12Volts desired top speed
   private double LowMaxSpeed = MaxSpeed / 2; // TODO: set lowered speed for precise alignment
   private boolean loweredSpeed = false;
   
@@ -108,6 +108,7 @@ public class RobotContainer {
       new PS4Controller(Operator.kOperatorControllerPort);
   public final VisionSubsystem vision = new VisionSubsystem();
   private final Telemetry logger = new Telemetry(MaxSpeed);
+  private double visionFlip = -1;
   // private final Colors colors = new Colors();
 
   // sendable for choosing autos
@@ -195,10 +196,10 @@ public class RobotContainer {
               }
               return drive
                   .withVelocityX(
-                      filterY.calculate(MathUtil.applyDeadband(driverController.getLeftY() * (DriverStation.getAlliance().get() == Alliance.Red ? 1 : -1) , 0.1))
+                      filterY.calculate(MathUtil.applyDeadband(driverController.getLeftY() * (DriverStation.getAlliance().get() == Alliance.Red ? -visionFlip : visionFlip) , 0.1))
                           * speed)
                   .withVelocityY(
-                      filterX.calculate(MathUtil.applyDeadband(driverController.getLeftX() * (DriverStation.getAlliance().get() == Alliance.Red ? 1 : -1), 0.1))
+                      filterX.calculate(MathUtil.applyDeadband(driverController.getLeftX() * (DriverStation.getAlliance().get() == Alliance.Red ? -visionFlip : visionFlip), 0.1))
                           * speed)
                   .withRotationalRate(
                       filterRotation.calculate(
@@ -271,6 +272,7 @@ public class RobotContainer {
       GroundIntake.intakePID.setSetpoint(groundIntake.getAngle() - 0.06);
     }));
     visionController.a().onTrue(groundIntake.runOnce(() -> groundIntake.resetEncoder()));
+    visionController.y().onTrue(vision.runOnce(() -> {visionFlip = -visionFlip;}));
 
     // Reset heading
     operatorController
@@ -538,9 +540,10 @@ public class RobotContainer {
         ),
         0.0
       ), // move out
-      shooter.runOnce(() -> shooter.moveArmAngle(0.1)),
         new SequentialCommandGroup(
-          new WaitCommand(1), // wait
+          new WaitCommand(0.5), // wait
+          shooter.runOnce(() -> shooter.moveArmAngle(0.1)),
+          new WaitCommand(0.5),
           intakeOff() // intake off
         )
       )

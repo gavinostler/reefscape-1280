@@ -7,13 +7,17 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.Vision;
 
-import java.util.HashMap;
+import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meters;
+
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -23,15 +27,15 @@ public class VisionSubsystem extends SubsystemBase {
   private String warning = "";
 
   private AprilTagFieldLayout aprilTagFieldLayout =
-    AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape);
+    AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
   Camera[] cameras = {
     new Camera("front", aprilTagFieldLayout, new Transform3d(
-      new Translation3d(0.31, 0.127, 0.5),
-      new Rotation3d(0, Math.toRadians(0), Math.toRadians(0))
+      new Translation3d(Units.inchesToMeters(13.5), Units.inchesToMeters(5.5), Units.inchesToMeters(8)),
+      new Rotation3d(0, Math.toRadians(20), Math.toRadians(0))
     )),
     new Camera("back", aprilTagFieldLayout, new Transform3d(
-      new Translation3d(-0.42, -0.127, 0.5),
-      new Rotation3d(0, Math.toRadians(0), Math.toRadians(180))
+      new Translation3d(-Units.inchesToMeters(13.5), -Units.inchesToMeters(5.5), 0.5),
+      new Rotation3d(0, Math.toRadians(20), Math.toRadians(180))
     ))
   };
   private Pose2d estimatedRobotPose;
@@ -40,6 +44,7 @@ public class VisionSubsystem extends SubsystemBase {
   private Mode currentMode = Mode.REEF;
 
   private Supplier<Pose2d> drivetrain;
+  private Field2d fieldview = new Field2d();
 
   public enum Mode {
     REEF,
@@ -85,6 +90,7 @@ public class VisionSubsystem extends SubsystemBase {
       }
       newEstimatedPose = estPose.get();
       newLatencyTime = camera.getLatencyTime();
+      fieldview.setRobotPose(newEstimatedPose);
     }
 
     this.estimatedRobotPose = newEstimatedPose;
@@ -152,6 +158,7 @@ public class VisionSubsystem extends SubsystemBase {
     });
 
     SmartDashboard.putData("Vision Mode Chooser", chooser);
+    SmartDashboard.putData("Vision Field", fieldview);
 
     builder.addStringProperty("Current Vision Mode", () -> getMode().toString(), null);
 
