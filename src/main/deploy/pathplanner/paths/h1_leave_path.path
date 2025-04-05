@@ -16,16 +16,16 @@
     },
     {
       "anchor": {
-        "x": 6.1624431818181815,
-        "y": 6.917444349315068
+        "x": 6.192357954545455,
+        "y": 7.248009417808219
       },
       "prevControl": {
-        "x": 6.643265099626401,
-        "y": 6.872367294520547
+        "x": 6.673179872353674,
+        "y": 7.202932363013698
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "ventura_end"
+      "linkedName": null
     }
   ],
   "rotationTargets": [],
