@@ -5,9 +5,22 @@
     "data": {
       "commands": [
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "runL2"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "runL2"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "h1.5_L_intakeA_s5p_L2"
+                }
+              }
+            ]
           }
         },
         {
@@ -19,13 +32,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "h1.5_L_intakeA_s5_L2"
+            "pathName": "s5p_s5"
           }
         },
         {
           "type": "wait",
           "data": {
-            "waitTime": 0.8
+            "waitTime": 0.5
           }
         },
         {
@@ -41,15 +54,15 @@
           }
         },
         {
-          "type": "named",
-          "data": {
-            "name": "runBarge"
-          }
-        },
-        {
           "type": "wait",
           "data": {
             "waitTime": 0.3
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "runBarge"
           }
         },
         {
@@ -65,15 +78,22 @@
           }
         },
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "B1_back"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "runStowSubsystems"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "runStowSubsystems"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "B1_back"
+                }
+              }
+            ]
           }
         }
       ]
