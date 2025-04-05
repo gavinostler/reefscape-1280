@@ -24,6 +24,7 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -73,7 +74,7 @@ import java.util.function.Supplier;
 public class RobotContainer {
 
   private double MaxSpeed =
-      TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 0.6; // kSpeedAt12Volts desired top speed
+      TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 0.15; // kSpeedAt12Volts desired top speed
   private double LowMaxSpeed = MaxSpeed / 2; // TODO: set lowered speed for precise alignment
   private boolean loweredSpeed = false;
   
@@ -100,6 +101,7 @@ public class RobotContainer {
   private final ShooterSubsystem shooter = new ShooterSubsystem(validator);
   private final GroundIntakeSubsystem groundIntake = new GroundIntakeSubsystem(validator);
   private final AgnosticController dummy =  new AgnosticController(Driver.kDriverControllerPort);
+  private final Field2d fieldMap = new Field2d();
   private final XboxController driverController =
       new XboxController(Driver.kDriverControllerPort);
   public final XboxController operatorController =
@@ -108,6 +110,7 @@ public class RobotContainer {
       new PS4Controller(Operator.kOperatorControllerPort);
   public final VisionSubsystem vision = new VisionSubsystem();
   private final Telemetry logger = new Telemetry(MaxSpeed);
+  private double visionFlip = -1;
   // private final Colors colors = new Colors();
 
   // sendable for choosing autos
@@ -130,6 +133,7 @@ public class RobotContainer {
     SmartDashboard.putData("ground intake", groundIntake);
     SmartDashboard.putData("validator", validator);
     SmartDashboard.putData("v", vision);
+    SmartDashboard.putData("Field Map", fieldMap);
   }
 
   public void setInitalStates() {
@@ -195,10 +199,10 @@ public class RobotContainer {
               }
               return drive
                   .withVelocityX(
-                      filterY.calculate(MathUtil.applyDeadband(driverController.getLeftY() * (DriverStation.getAlliance().get() == Alliance.Red ? 1 : -1) , 0.1))
+                      filterY.calculate(MathUtil.applyDeadband(driverController.getLeftY() * (DriverStation.getAlliance().get() == Alliance.Red ? -visionFlip : visionFlip) , 0.1))
                           * speed)
                   .withVelocityY(
-                      filterX.calculate(MathUtil.applyDeadband(driverController.getLeftX() * (DriverStation.getAlliance().get() == Alliance.Red ? 1 : -1), 0.1))
+                      filterX.calculate(MathUtil.applyDeadband(driverController.getLeftX() * (DriverStation.getAlliance().get() == Alliance.Red ? -visionFlip : visionFlip), 0.1))
                           * speed)
                   .withRotationalRate(
                       filterRotation.calculate(
@@ -271,6 +275,7 @@ public class RobotContainer {
       GroundIntake.intakePID.setSetpoint(groundIntake.getAngle() - 0.06);
     }));
     visionController.a().onTrue(groundIntake.runOnce(() -> groundIntake.resetEncoder()));
+    visionController.y().onTrue(vision.runOnce(() -> {visionFlip = -visionFlip;}));
 
     // Reset heading
     operatorController
@@ -538,9 +543,10 @@ public class RobotContainer {
         ),
         0.0
       ), // move out
-      shooter.runOnce(() -> shooter.moveArmAngle(0.1)),
         new SequentialCommandGroup(
-          new WaitCommand(1), // wait
+          new WaitCommand(0.5), // wait
+          shooter.runOnce(() -> shooter.moveArmAngle(0.1)),
+          new WaitCommand(0.5),
           intakeOff() // intake off
         )
       )
@@ -605,14 +611,14 @@ public class RobotContainer {
 
     int closestTag = Vision.bargeAllianceMap.get(DriverStation.getAlliance().get());
     final Pose2d desiredTag2d = vision.getTagPose2d(closestTag).transformBy(Vision.bargeAlign);
-    final double poseY = desiredTag2d.getY() - drivetrain.getState().Pose.getY();
+    final double poseY = drivetrain.getState().Pose.getY() - desiredTag2d.getY();
     
     if (!vision.withinBarge(poseY)) return new Command() {}; // If out of barge length, do not align 
-    
-    final Pose2d desiredPosition = desiredTag2d.transformBy(new Transform2d(0, poseY, new Rotation2d())); // Transform so robot is along line
+
+    final Pose2d desiredPosition = desiredTag2d.transformBy(new Transform2d(0, poseY * (DriverStation.getAlliance().get() == Alliance.Red ? 1 : -1), new Rotation2d())); // Transform so robot is along line
 
     Command align = AutoBuilder.pathfindToPose(
-      desiredTag2d,
+      desiredPosition,
       new PathConstraints(
         Vision.bargeMaxVelocity,
         Vision.bargeMaxAcceleration,
@@ -633,6 +639,10 @@ public class RobotContainer {
 
   public void setSafety(boolean state) {
     Validator.safetyEnabled = state;
+  }
+
+  public void updateDrivetrainPose() {
+    fieldMap.setRobotPose(drivetrain.getState().Pose);
   }
 
   private double getSwerveSpeedFraction() {

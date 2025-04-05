@@ -7,7 +7,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import java.util.List;
 import java.util.Optional;
 import org.photonvision.EstimatedRobotPose;
@@ -19,7 +18,6 @@ import org.photonvision.targeting.PhotonPipelineResult;
 public class Camera {
 
   private PhotonCamera camera;
-  private Transform3d robotToCameraPose;
   private PhotonPoseEstimator poseEstimator;
   private Pose3d lastVisionPose;
   private double lastPoseUpdate;
@@ -30,11 +28,10 @@ public class Camera {
     Transform3d robotToCameraPose
   ) {
     this.camera = new PhotonCamera(cameraName);
-    this.robotToCameraPose = robotToCameraPose;
     this.poseEstimator = new PhotonPoseEstimator(
       field,
       PoseStrategy.LOWEST_AMBIGUITY,
-      this.robotToCameraPose
+      robotToCameraPose
     );
   }
 
@@ -79,7 +76,7 @@ public class Camera {
     return Optional.of(
       possible2dPose.transformBy(
         new Transform2d(
-          new Translation2d(),
+          new Translation2d(0,0),
           new Rotation2d(Math.toRadians(180))
         )
       )
