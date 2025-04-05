@@ -24,6 +24,12 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "runIntake"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "s6p_s6"
