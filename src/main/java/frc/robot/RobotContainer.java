@@ -474,6 +474,29 @@ public class RobotContainer {
             new InstantCommand(() -> setSafety(true)))
         .withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
   }
+  
+  /** 
+   * kill me (for legal reasons this is a joke)
+   * uses {@link frc.robot.Constants.Vision} for tolerance
+   * direct align can and will break :)
+   */
+  public Command chooseDriveToPose(Pose2d targetPose, PathConstraints constraints) {
+    double distance =
+      drivetrain.getState().Pose.getTranslation().getDistance(targetPose.getTranslation());
+  
+    if (distance < Vision.directTolerance) {
+      // close enough-> use PID‐based align
+      return drivetrain.getAlignToFieldPosition(() -> targetPose);
+    } else {
+      // farther away -> use PathPlanner
+      return AutoBuilder.pathfindToPose(
+        targetPose,
+        constraints,
+        0.0
+      );
+    }
+  }
+
 
   public Command closestReefAlign() {
     // patented D.N.K.R G.A.V.I.N (Do Not Kill Robot - General Autonomous Vision Information Networking)

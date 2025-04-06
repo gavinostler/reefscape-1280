@@ -234,6 +234,9 @@ public final class Constants {
   }
 
   public static class Vision {
+    // General Vision
+    public static double directTolerance = 0.4;
+    
     // Reef
     public static int[] reefIds = new int[] {
       6,
