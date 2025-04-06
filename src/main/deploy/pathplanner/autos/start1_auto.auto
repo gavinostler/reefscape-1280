@@ -5,9 +5,22 @@
     "data": {
       "commands": [
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "runL2"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "runL2"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "h1_intakeA_s6p_L3"
+                }
+              }
+            ]
           }
         },
         {
@@ -19,25 +32,31 @@
         {
           "type": "path",
           "data": {
-            "pathName": "h1_intakeA_s6_L3"
+            "pathName": "s6p_s6"
           }
         },
         {
           "type": "wait",
           "data": {
-            "waitTime": 0.8
+            "waitTime": 0.5
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "a_s6_L3_shootB1"
+            "pathName": "a_s6_L3_shootB2"
           }
         },
         {
           "type": "named",
           "data": {
             "name": "runBarge"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "stopIntake"
           }
         },
         {
@@ -53,15 +72,22 @@
           }
         },
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "B1_back"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "runStowSubsystems"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "B2_back"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "runStowSubsystems"
+                }
+              }
+            ]
           }
         }
       ]

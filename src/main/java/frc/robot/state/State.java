@@ -26,7 +26,8 @@ public class State {
     // Highest to lowest
     STOW(Constants.Shooter.STOW_ANGLE),
     SHOOT(Constants.Shooter.SHOOT_ANGLE),
-    REEF_INTAKE(Constants.Shooter.REEF_INTAKE_ANGLE),
+    REEF_INTAKE(Constants.Shooter.L1_INTAKE_ANGLE),
+    REEF_L2_INTAKE(Constants.Shooter.L2_INTAKE_ANGLE),
     GROUND_INTAKE(Constants.Shooter.GROUND_INTAKE_ANGLE),
     DOWN(Constants.Shooter.DOWN_ANGLE);
 
@@ -105,6 +106,8 @@ public class State {
           put(new RobotState(Elevator.SHOOT, Shooter.REEF_INTAKE, GroundIntake.UP), true);
           put(new RobotState(Elevator.SHOOT, Shooter.GROUND_INTAKE, GroundIntake.DOWN), true);
           put(new RobotState(Elevator.SHOOT, Shooter.GROUND_INTAKE, GroundIntake.UP), true);
+          put(new RobotState(Elevator.TOP, Shooter.REEF_L2_INTAKE, GroundIntake.DOWN), true);
+          put(new RobotState(Elevator.TOP, Shooter.REEF_L2_INTAKE, GroundIntake.UP), true);
 
           put(new RobotState(Elevator.L2, Shooter.STOW, GroundIntake.DOWN), true);
           put(new RobotState(Elevator.L2, Shooter.STOW, GroundIntake.UP), true);
@@ -114,6 +117,8 @@ public class State {
           put(new RobotState(Elevator.L2, Shooter.REEF_INTAKE, GroundIntake.UP), true);
           put(new RobotState(Elevator.L2, Shooter.GROUND_INTAKE, GroundIntake.DOWN), true);
           put(new RobotState(Elevator.L2, Shooter.GROUND_INTAKE, GroundIntake.UP), true);
+          put(new RobotState(Elevator.L2, Shooter.REEF_L2_INTAKE, GroundIntake.DOWN), true);
+          put(new RobotState(Elevator.L2, Shooter.REEF_L2_INTAKE, GroundIntake.UP), true);
           // Above here, all robot states are always valid as the elevator is high enough
 
           put(new RobotState(Elevator.GROUND_INTAKE, Shooter.STOW, GroundIntake.DOWN), true);
@@ -122,6 +127,8 @@ public class State {
           put(new RobotState(Elevator.GROUND_INTAKE, Shooter.SHOOT, GroundIntake.UP), true);
           put(new RobotState(Elevator.GROUND_INTAKE, Shooter.REEF_INTAKE, GroundIntake.DOWN), true);
           put(new RobotState(Elevator.GROUND_INTAKE, Shooter.REEF_INTAKE, GroundIntake.UP), true);
+          put(new RobotState(Elevator.GROUND_INTAKE, Shooter.REEF_L2_INTAKE, GroundIntake.DOWN), true);
+          put(new RobotState(Elevator.GROUND_INTAKE, Shooter.REEF_L2_INTAKE, GroundIntake.UP), true);
           // ground intake
           put(
               new RobotState(Elevator.GROUND_INTAKE, Shooter.GROUND_INTAKE, GroundIntake.DOWN),
@@ -136,6 +143,8 @@ public class State {
           put(new RobotState(Elevator.L1, Shooter.SHOOT, GroundIntake.UP), true);
           put(new RobotState(Elevator.L1, Shooter.REEF_INTAKE, GroundIntake.DOWN), true);
           put(new RobotState(Elevator.L1, Shooter.REEF_INTAKE, GroundIntake.UP), true);
+          put(new RobotState(Elevator.L1, Shooter.REEF_L2_INTAKE, GroundIntake.DOWN), true);
+          put(new RobotState(Elevator.L1, Shooter.REEF_L2_INTAKE, GroundIntake.UP), true);
           put(new RobotState(Elevator.L1, Shooter.GROUND_INTAKE, GroundIntake.DOWN), false);
           put(new RobotState(Elevator.L1, Shooter.GROUND_INTAKE, GroundIntake.UP), false);
 
@@ -147,6 +156,8 @@ public class State {
           put(new RobotState(Elevator.BOTTOM, Shooter.REEF_INTAKE, GroundIntake.UP), false);
           put(new RobotState(Elevator.BOTTOM, Shooter.GROUND_INTAKE, GroundIntake.DOWN), false);
           put(new RobotState(Elevator.BOTTOM, Shooter.GROUND_INTAKE, GroundIntake.UP), false);
+          put(new RobotState(Elevator.BOTTOM, Shooter.REEF_L2_INTAKE, GroundIntake.DOWN), false);
+          put(new RobotState(Elevator.BOTTOM, Shooter.REEF_L2_INTAKE, GroundIntake.UP), false);
         }
       };
 

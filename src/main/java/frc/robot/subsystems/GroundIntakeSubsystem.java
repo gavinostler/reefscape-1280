@@ -31,6 +31,10 @@ public class GroundIntakeSubsystem extends SubsystemBase {
     intakeMotor.configure(
         GroundIntake.intakeConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
+    resetEncoder();
+  }
+
+  public void resetEncoder() {
     encoder.reset();
     encoder.setDistancePerPulse(GroundIntake.DISTANCE_PER_PULSE);
     encoder.setReverseDirection(GroundIntake.REVERSE_ENCODER);
@@ -106,6 +110,10 @@ public class GroundIntakeSubsystem extends SubsystemBase {
 
   public void enablePulley() {
     pulleyMotor.setVoltage(GroundIntake.PULLEY_VOLTAGE);
+  }
+
+  public void enablePulleyReverse() {
+    pulleyMotor.setVoltage(-GroundIntake.PULLEY_VOLTAGE);
   }
 
   public void disablePulley() {

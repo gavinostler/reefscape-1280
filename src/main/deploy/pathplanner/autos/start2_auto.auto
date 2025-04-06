@@ -5,15 +5,22 @@
     "data": {
       "commands": [
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "runL2"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 1.0
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "runL2"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "h2_intakeA_s6p_L3"
+                }
+              }
+            ]
           }
         },
         {
@@ -25,25 +32,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "h2_intakeA_s6_L3"
+            "pathName": "s6p_s6"
           }
         },
         {
           "type": "wait",
           "data": {
-            "waitTime": 2.0
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "stopIntake"
+            "waitTime": 0.5
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "a_s6_L3_shootB3"
+            "pathName": "a_s6_L3_shootB2"
           }
         },
         {
@@ -53,9 +54,15 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "stopIntake"
+          }
+        },
+        {
           "type": "wait",
           "data": {
-            "waitTime": 1.0
+            "waitTime": 0.3
           }
         },
         {
@@ -65,21 +72,22 @@
           }
         },
         {
-          "type": "wait",
+          "type": "parallel",
           "data": {
-            "waitTime": 1.0
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "runStowSubsystems"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "B3_back"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "B2_back"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "runStowSubsystems"
+                }
+              }
+            ]
           }
         }
       ]

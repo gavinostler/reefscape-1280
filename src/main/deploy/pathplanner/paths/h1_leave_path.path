@@ -16,16 +16,16 @@
     },
     {
       "anchor": {
-        "x": 6.430993150684932,
-        "y": 7.248
+        "x": 6.192357954545455,
+        "y": 7.248009417808219
       },
       "prevControl": {
-        "x": 6.911815068493151,
-        "y": 7.202922945205479
+        "x": 6.673179872353674,
+        "y": 7.202932363013698
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "ventura_end"
+      "linkedName": null
     }
   ],
   "rotationTargets": [],
@@ -33,7 +33,7 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 1.5,
+    "maxVelocity": 2.0,
     "maxAcceleration": 3.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,

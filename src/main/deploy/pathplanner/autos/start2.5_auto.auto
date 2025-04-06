@@ -5,9 +5,22 @@
     "data": {
       "commands": [
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "runL1"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "runL2"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "h2.5_intakeA_s6p_L3"
+                }
+              }
+            ]
           }
         },
         {
@@ -19,31 +32,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "h6_intakeA_s2_L3"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.8
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "a_s2_L3_P"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "stopIntake"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "runProcessor"
+            "pathName": "s6p_s6"
           }
         },
         {
@@ -55,7 +44,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "P_shootP"
+            "pathName": "a_s6_L3_shootB2.5"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "runBarge"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "stopIntake"
           }
         },
         {
@@ -71,21 +72,22 @@
           }
         },
         {
-          "type": "wait",
+          "type": "parallel",
           "data": {
-            "waitTime": 0.3
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "shootP_P"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "runStowSubsystems"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "B2.5_back"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "runStowSubsystems"
+                }
+              }
+            ]
           }
         }
       ]

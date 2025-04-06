@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 6.430993150684932,
-        "y": 7.248
+        "x": 6.1624431818181815,
+        "y": 6.917444349315068
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.430993150684932,
-        "y": 7.248
+        "x": 7.1624431818181815,
+        "y": 6.917444349315068
       },
       "isLocked": false,
       "linkedName": "ventura_end"
@@ -33,7 +33,7 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 1.5,
+    "maxVelocity": 2.0,
     "maxAcceleration": 3.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,

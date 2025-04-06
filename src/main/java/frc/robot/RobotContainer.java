@@ -24,6 +24,7 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -44,6 +45,7 @@ import frc.robot.Constants.Shooter;
 import frc.robot.Constants.Vision;
 // import frc.robot.aesthetic.Colors;
 import frc.robot.controller.AgnosticController;
+import frc.robot.controller.PS4Controller;
 import frc.robot.controller.XboxController;
 import frc.robot.generated.TunerConstants;
 import frc.robot.state.State;
@@ -72,7 +74,7 @@ import java.util.function.Supplier;
 public class RobotContainer {
 
   private double MaxSpeed =
-      TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 0.6; // kSpeedAt12Volts desired top speed
+      TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 0.15; // kSpeedAt12Volts desired top speed
   private double LowMaxSpeed = MaxSpeed / 2; // TODO: set lowered speed for precise alignment
   private boolean loweredSpeed = false;
   
@@ -99,14 +101,16 @@ public class RobotContainer {
   private final ShooterSubsystem shooter = new ShooterSubsystem(validator);
   private final GroundIntakeSubsystem groundIntake = new GroundIntakeSubsystem(validator);
   private final AgnosticController dummy =  new AgnosticController(Driver.kDriverControllerPort);
+  private final Field2d fieldMap = new Field2d();
   private final XboxController driverController =
       new XboxController(Driver.kDriverControllerPort);
   public final XboxController operatorController =
       driverController; // Aliased to main controller for now, TODO
-  private final XboxController visionController =
-      new XboxController(Operator.kOperatorControllerPort);
+  private final PS4Controller visionController =
+      new PS4Controller(Operator.kOperatorControllerPort);
   public final VisionSubsystem vision = new VisionSubsystem();
   private final Telemetry logger = new Telemetry(MaxSpeed);
+  private double visionFlip = -1;
   // private final Colors colors = new Colors();
 
   // sendable for choosing autos
@@ -129,6 +133,7 @@ public class RobotContainer {
     SmartDashboard.putData("ground intake", groundIntake);
     SmartDashboard.putData("validator", validator);
     SmartDashboard.putData("v", vision);
+    SmartDashboard.putData("Field Map", fieldMap);
   }
 
   public void setInitalStates() {
@@ -194,10 +199,10 @@ public class RobotContainer {
               }
               return drive
                   .withVelocityX(
-                      filterY.calculate(MathUtil.applyDeadband(driverController.getLeftY() * (DriverStation.getAlliance().get() == Alliance.Red ? 1 : -1) , 0.1))
+                      filterY.calculate(MathUtil.applyDeadband(driverController.getLeftY() * (DriverStation.getAlliance().get() == Alliance.Red ? -visionFlip : visionFlip) , 0.1))
                           * speed)
                   .withVelocityY(
-                      filterX.calculate(MathUtil.applyDeadband(driverController.getLeftX() * (DriverStation.getAlliance().get() == Alliance.Red ? 1 : -1), 0.1))
+                      filterX.calculate(MathUtil.applyDeadband(driverController.getLeftX() * (DriverStation.getAlliance().get() == Alliance.Red ? -visionFlip : visionFlip), 0.1))
                           * speed)
                   .withRotationalRate(
                       filterRotation.calculate(
@@ -256,8 +261,21 @@ public class RobotContainer {
                   shooter.brakeFeed();
                   groundIntake.disablePulley();
                 }));
-    operatorController.rightTrigger().onTrue(shooter.runShootAlgae());
+    operatorController.rightTrigger().onTrue(shooter.runShootAlgae()).onTrue(groundIntake.runOnce(() -> 
+      groundIntake.enablePulley()
+    ).onlyIf(() -> Math.abs(shooter.getArmAngle()) < 0.05 )).onFalse(groundIntake.runOnce(() -> groundIntake.disablePulley()));
     operatorController.x().onTrue(runProcessor().unless(() -> elevator.getState() == Elevator.BOTTOM));
+
+    visionController.rightBumper().onTrue(vision.runOnce(() -> vision.cycleMode(false)));
+    visionController.leftBumper().onTrue(vision.runOnce(() -> vision.cycleMode(true)));
+    visionController.povUp().onTrue(groundIntake.runOnce(() -> {
+      GroundIntake.intakePID.setSetpoint(groundIntake.getAngle() + 0.06);
+    }));
+    visionController.povDown().onTrue(groundIntake.runOnce(() -> {
+      GroundIntake.intakePID.setSetpoint(groundIntake.getAngle() - 0.06);
+    }));
+    visionController.a().onTrue(groundIntake.runOnce(() -> groundIntake.resetEncoder()));
+    visionController.y().onTrue(vision.runOnce(() -> {visionFlip = -visionFlip;}));
 
     // Reset heading
     operatorController
@@ -335,7 +353,7 @@ public class RobotContainer {
             new InstantCommand(() -> setSafety(false)), // we don't need safety for this
             new SequentialCommandGroup(
               shooter.runOnce(() -> shooter.setState(State.Shooter.REEF_INTAKE)), // move arm out of way if needed
-              new WaitUntilCommand(shooter::atSetpoint).withTimeout(2.0)
+              new WaitUntilCommand(shooter::atSetpoint).withTimeout(2.5)
             ).onlyIf(() -> shooter.getArmAngle() < 0.1),
             elevator.runOnce(
               () -> elevator.setState(State.Elevator.L1)), // move elevator to L1 position
@@ -346,7 +364,7 @@ public class RobotContainer {
             shooter.runOnce(
                 () ->
                     shooter.setState(State.Shooter.REEF_INTAKE)), // move shooter to L1 intake angle
-            new WaitUntilCommand(shooter::atSetpoint).withTimeout(1.0), // wait until it's set
+            new WaitUntilCommand(shooter::atSetpoint).withTimeout(1.5), // wait until it's set
             new InstantCommand(() -> setSafety(true)) // put safety back
             )
         .withInterruptBehavior(InterruptionBehavior.kCancelIncoming); // don't get interrupted
@@ -364,7 +382,8 @@ public class RobotContainer {
             new WaitUntilCommand(elevator::atSetpoint).withTimeout(2.0), // wait until it's set
             shooter.runOnce(
                 () ->
-                    shooter.setState(State.Shooter.REEF_INTAKE)), // move shooter to L1 intake angle
+                    shooter.setState(State.Shooter.REEF_L2_INTAKE)), // move shooter to L1 intake angle
+            new WaitUntilCommand(shooter::atSetpoint).withTimeout(1.5), // wait until it's set
             new InstantCommand(() -> setSafety(true)) // put safety back
             )
         .withInterruptBehavior(InterruptionBehavior.kCancelIncoming); // don't get interrupted
@@ -548,7 +567,9 @@ public class RobotContainer {
         0.0
       ), // move out
         new SequentialCommandGroup(
-          new WaitCommand(0.2), // wait
+          new WaitCommand(0.5), // wait
+          shooter.runOnce(() -> shooter.moveArmAngle(0.1)),
+          new WaitCommand(0.5),
           intakeOff() // intake off
         )
       )
@@ -613,14 +634,14 @@ public class RobotContainer {
 
     int closestTag = Vision.bargeAllianceMap.get(DriverStation.getAlliance().get());
     final Pose2d desiredTag2d = vision.getTagPose2d(closestTag).transformBy(Vision.bargeAlign);
-    final double poseY = desiredTag2d.getY() - drivetrain.getState().Pose.getY();
+    final double poseY = drivetrain.getState().Pose.getY() - desiredTag2d.getY();
     
     if (!vision.withinBarge(poseY)) return new Command() {}; // If out of barge length, do not align 
-    
-    final Pose2d desiredPosition = desiredTag2d.transformBy(new Transform2d(0, poseY, new Rotation2d())); // Transform so robot is along line
+
+    final Pose2d desiredPosition = desiredTag2d.transformBy(new Transform2d(0, poseY * (DriverStation.getAlliance().get() == Alliance.Red ? 1 : -1), new Rotation2d())); // Transform so robot is along line
 
     Command align = AutoBuilder.pathfindToPose(
-      desiredTag2d,
+      desiredPosition,
       new PathConstraints(
         Vision.bargeMaxVelocity,
         Vision.bargeMaxAcceleration,
@@ -641,6 +662,10 @@ public class RobotContainer {
 
   public void setSafety(boolean state) {
     Validator.safetyEnabled = state;
+  }
+
+  public void updateDrivetrainPose() {
+    fieldMap.setRobotPose(drivetrain.getState().Pose);
   }
 
   private double getSwerveSpeedFraction() {

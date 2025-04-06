@@ -5,15 +5,22 @@
     "data": {
       "commands": [
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "runL2"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 1.0
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "runL2"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "h1.5_L_intakeA_s5p_L2"
+                }
+              }
+            ]
           }
         },
         {
@@ -25,19 +32,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "h1.5_L_intakeA_s5_L2"
+            "pathName": "s5p_s5"
           }
         },
         {
           "type": "wait",
           "data": {
-            "waitTime": 2.0
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "stopIntake"
+            "waitTime": 0.5
           }
         },
         {
@@ -49,13 +50,19 @@
         {
           "type": "named",
           "data": {
-            "name": "runBarge"
+            "name": "stopIntake"
           }
         },
         {
           "type": "wait",
           "data": {
-            "waitTime": 1.0
+            "waitTime": 0.3
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "runBarge"
           }
         },
         {
@@ -67,19 +74,26 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 1.0
+            "waitTime": 0.3
           }
         },
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "runStowSubsystems"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "B1_back"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "runStowSubsystems"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "B1_back"
+                }
+              }
+            ]
           }
         }
       ]
